@@ -70,6 +70,7 @@ the publish step — tests are a real gate, not decoration. See
 | `wikipedia_ingest.py` | On This Day + random summaries → `data/raw/wikipedia.jsonl` + `facts` |
 | `music_ingest.py` | Deezer charts/artists/albums → `data/raw/deezer.jsonl` + `facts` |
 | `sports_ingest.py` | Sleeper players/trending, ESPN teams → `data/raw/sports.jsonl` + `facts` |
+| `geo_ingest.py` | restcountries → `data/raw/geography.jsonl` + `facts` (population, area, capital pins) |
 | `screen_ingest.py` | TMDB trending/top movies & TV → `data/raw/tmdb.jsonl` + `facts` |
 | `question_forge.py` | `facts` → `questions` (+ `daily_sets` board for today) |
 | `export_seed.py` | `questions` → `frontend/public/seed-questions.json` |

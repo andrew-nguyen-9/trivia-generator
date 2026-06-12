@@ -10,6 +10,7 @@ Recipes:
 - multiple_choice facts with meta.answer_field, distractors
                   sampled from category siblings             → THE WEDGES
 - clue            answer-phrased declarative from fact_text  → THE BOARD
+- where           any fact with lat/lng coordinates          → THE MAP
 
 Difficulty = popularity percentile within category (popular ⇒ easy).
 
@@ -150,6 +151,31 @@ def forge_multiple_choice(facts: list[dict], rng: random.Random) -> list[dict]:
     return out
 
 
+def forge_where(facts: list[dict]) -> list[dict]:
+    """THE MAP: the fact text says WHAT the place is; the skill is pinning it.
+    The text naming the answer is fine — coordinates are the hidden truth."""
+    out = []
+    for f in facts:
+        if f.get("lat") is None or f.get("lng") is None:
+            continue
+        answer = (f.get("meta") or {}).get("answer") or f["subject"]
+        out.append(
+            {
+                "content_hash": content_hash("where", f["content_hash"]),
+                "qtype": "where",
+                "category": f["category"],
+                "difficulty": f.get("_difficulty", 3),
+                "prompt": f"Pin it: {f['fact_text']}",
+                "correct": answer,
+                "lat": f["lat"],
+                "lng": f["lng"],
+                "image_url": f.get("image_url"),
+                "source_url": f.get("source_url"),
+            }
+        )
+    return out
+
+
 def forge_clues(facts: list[dict]) -> list[dict]:
     """Jeopardy-style: the fact sentence becomes the clue, the subject the answer.
     Only facts whose text doesn't leak the subject verbatim qualify."""
@@ -239,6 +265,7 @@ def forge_all(facts: list[dict], seed: int = 0) -> list[dict]:
         + forge_higher_lower(facts, rng)
         + forge_multiple_choice(facts, rng)
         + forge_clues(facts)
+        + forge_where(facts)
     )
     # attach fact provenance where the column exists
     return questions

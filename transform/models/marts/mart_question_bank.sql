@@ -24,6 +24,8 @@ select
     year,
     numeric_value,
     numeric_unit,
+    lat,
+    lng,
     image_url,
     source_url,
     popularity,
@@ -33,5 +35,8 @@ select
     end as fuels_year_guess,
     case
         when numeric_value is not null and numeric_unit is not null then true else false
-    end as fuels_higher_lower
+    end as fuels_higher_lower,
+    case
+        when lat is not null and lng is not null then true else false
+    end as fuels_where
 from scored

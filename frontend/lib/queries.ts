@@ -14,7 +14,7 @@ export async function getQuestionsByType(qtype: QType): Promise<Question[]> {
     const { data, error } = await sb
       .from("questions")
       .select(
-        "qtype, category, difficulty, prompt, correct, choices, year, value_a, value_b, subject_a, subject_b, unit, image_url, source_url",
+        "qtype, category, difficulty, prompt, correct, choices, year, value_a, value_b, subject_a, subject_b, unit, lat, lng, image_url, source_url",
       )
       .eq("qtype", qtype)
       .limit(500);

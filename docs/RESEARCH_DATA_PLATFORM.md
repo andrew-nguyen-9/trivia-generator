@@ -112,7 +112,7 @@ model demo extremely well).
 | Phase | Ship | Resume line it earns |
 |---|---|---|
 | **1 (now)** | EL scripts + dbt-DuckDB medallion + tests + Actions DAG + Supabase serving | "Built ELT pipeline with dbt (staging/marts, schema tests, docs) orchestrated via CI, serving a production app" |
-| **2** | Databricks Free Edition mirror: Delta tables + PySpark notebook + scheduled Workflow | "Implemented medallion architecture on Databricks Delta Lake" |
+| **2 (shipped — see `databricks/`)** | Databricks Free Edition mirror: Delta tables + PySpark notebook + scheduled Workflow | "Implemented medallion architecture on Databricks Delta Lake" |
 | **3** | Swap one mart to incremental materialization; add dbt snapshots (SCD2) on `facts` | "Incremental models & slowly-changing dimensions in dbt" |
 | **4** | Dagster (or Airflow) containerized version of the DAG | "Migrated CI cron to Dagster asset-based orchestration" |
 
@@ -128,5 +128,6 @@ claims, which is exactly the gap most career-switch resumes have.
    runs free in CI; transferable to Snowflake/Databricks/BigQuery interviews.
 3. **Bronze layer is files** (`data/raw/*.jsonl` as CI artifacts) — makes the
    medallion story real and makes Databricks/BigQuery mirrors trivial later.
-4. **Databricks Free Edition is the Phase-2 lab**, not the host.
+4. **Databricks Free Edition is the Phase-2 lab**, not the host — the mirror
+   notebook, runbook, and job spec live in `databricks/`.
 5. **BigQuery is the documented escape hatch** if Supabase limits ever bind.

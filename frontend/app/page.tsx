@@ -41,6 +41,20 @@ const ROOMS = [
     blurb:
       "Higher or lower? Populations, box offices, fan counts. One wrong call ends the run.",
   },
+  {
+    href: "/map",
+    name: "The Map",
+    accent: "geography" as const,
+    blurb:
+      "Drop a pin where it happened. Scored by the kilometer — no tile servers, no mercy.",
+  },
+  {
+    href: "/daily",
+    name: "The Daily",
+    accent: "wildcard" as const,
+    blurb:
+      "One round from every room, once a day, same gauntlet for everyone. Share your line of squares.",
+  },
 ];
 
 export default function Home() {

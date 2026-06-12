@@ -58,13 +58,28 @@ clue       year_guess multiple_choice higher_lower
   (localStorage). The pipeline pre-builds pairs with a minimum gap so answers are
   never coin-flips on data noise.
 
-## Phase 2 rooms (designed, not yet built)
+## Room 5 — THE MAP (GeoGuessr-ish) — `/map` ✦ Phase 2, built
+
+- 5 rounds: "Pin it" — a fact describes a place/event; click the world map.
+- Scored by great-circle distance: `100 · e^(−km/1500)` per round (100 at 0 km,
+  ~51 at 1,000 km), same 0-100 scale as The Clock.
+- The map is **offline**: Natural Earth land polygons from the `world-atlas`
+  npm package rendered as SVG (equirectangular) — no tile servers, keeping the
+  playable-from-clone rule. qtype `where` carries `lat`/`lng` truth coordinates;
+  fuel comes from restcountries capitals (`geo_ingest.py`) and curated landmarks.
+
+## Room 6 — THE DAILY — `/daily` ✦ Phase 2, built
+
+- One round from each room — 2 multiple choice, a year guess, a higher/lower,
+  a map pin — 100 pts each, 500 cap. Date-seeded: same gauntlet for everyone.
+- One play per day (localStorage); result renders as a shareable emoji line
+  (`🟩 ≥80 · 🟨 ≥40 · 🟥 <40`) copied to the clipboard — the Wordle loop.
+
+## Phase 3 rooms (designed, not yet built)
 
 | Room | Mechanic | Unblocked by |
 |---|---|---|
-| THE MAP (GeoGuessr-ish) | click a world map for "where did this happen", scored by km distance | a map widget (MapLibre + free OSM tiles) + Wikipedia coords already in `facts.meta` |
-| THE JUKEBOX | name-that-tune from Deezer 30s previews | audio player UI; data already flows |
-| THE DAILY | one cross-room gauntlet/day, shareable emoji results | seeded daily set already in schema (`daily_sets`) |
+| THE JUKEBOX | name-that-tune from Deezer 30s previews | audio player UI + preview ingestion in `music_ingest.py` |
 | THE LOBBY (multiplayer) | live buzzer rooms | Supabase Realtime channels |
 
 ## Scoring & persistence philosophy

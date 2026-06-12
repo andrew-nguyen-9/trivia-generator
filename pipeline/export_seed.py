@@ -26,7 +26,7 @@ PER_TYPE_CAP = 120  # keep the payload lean — the app samples client-side anyw
 FIELDS = [
     "qtype", "category", "difficulty", "prompt", "correct", "choices",
     "year", "value_a", "value_b", "subject_a", "subject_b", "unit",
-    "image_url", "source_url",
+    "lat", "lng", "image_url", "source_url",
 ]
 
 

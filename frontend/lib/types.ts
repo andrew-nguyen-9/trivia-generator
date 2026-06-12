@@ -6,7 +6,12 @@ export type Category =
   | "geography"
   | "wildcard";
 
-export type QType = "multiple_choice" | "year_guess" | "higher_lower" | "clue";
+export type QType =
+  | "multiple_choice"
+  | "year_guess"
+  | "higher_lower"
+  | "clue"
+  | "where";
 
 export interface Question {
   qtype: QType;
@@ -21,6 +26,8 @@ export interface Question {
   subject_a?: string;
   subject_b?: string;
   unit?: string;
+  lat?: number;
+  lng?: number;
   image_url?: string | null;
   source_url?: string | null;
 }

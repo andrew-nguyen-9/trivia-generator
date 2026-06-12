@@ -46,6 +46,13 @@ def synthetic_facts() -> list[dict]:
             popularity=8.0 * i, source_url="https://example.com",
             meta={"answer_field": "college", "answer": f"College {i}"},
         ))
+        facts.append(make_fact(
+            source="restcountries", category="geography", subject=f"Country {i}",
+            fact_text=f"Capital {i} is the capital of Country {i}.",
+            lat=float(-60 + i * 15), lng=float(-150 + i * 35),
+            popularity=9.0 * i, source_url="https://example.com",
+            meta={"answer_field": "capital", "answer": f"Capital {i}"},
+        ))
     return facts
 
 
@@ -58,6 +65,13 @@ def main() -> None:
     check("forge produces higher_lower", "higher_lower" in types)
     check("forge produces multiple_choice", "multiple_choice" in types)
     check("forge produces clue", "clue" in types)
+    check("forge produces where", "where" in types)
+
+    for q in qs:
+        if q["qtype"] == "where":
+            check("where carries coordinates",
+                  -90 <= q["lat"] <= 90 and -180 <= q["lng"] <= 180)
+            break
 
     for q in qs:
         if q["qtype"] == "multiple_choice":
@@ -91,6 +105,8 @@ def main() -> None:
                 ok = ok and isinstance(q.get("year"), int)
             if q["qtype"] == "higher_lower":
                 ok = ok and all(q.get(k) is not None for k in ("value_a", "value_b", "subject_a", "subject_b", "unit"))
+            if q["qtype"] == "where":
+                ok = ok and -90 <= q.get("lat", 999) <= 90 and -180 <= q.get("lng", 999) <= 180
             if not ok:
                 check("seed bank question shape", False, json.dumps(q)[:120])
                 break

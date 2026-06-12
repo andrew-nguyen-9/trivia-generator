@@ -7,6 +7,7 @@ select
     count(*)                                  as fact_count,
     count(*) filter (where fuels_year_guess)  as year_guess_fuel,
     count(*) filter (where fuels_higher_lower) as higher_lower_fuel,
+    count(*) filter (where fuels_where)       as where_fuel,
     count(distinct difficulty)                as difficulty_spread,
     max(popularity)                           as max_popularity
 from {{ ref('mart_question_bank') }}

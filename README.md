@@ -16,6 +16,8 @@ Next.js — plus a new **dbt Core + DuckDB** transform layer (see
 | The Clock | `/clock` | drag a year slider, score by distance | WhenTaken |
 | The Wedges | `/wedges` | fill six category wedges in 20 quickfire questions | Trivial Pursuit |
 | The Streak | `/streak` | higher/lower on real metrics, one miss ends the run | The Higher Lower Game |
+| The Map | `/map` | pin facts on an offline SVG world map, scored by the km | GeoGuessr |
+| The Daily | `/daily` | one round from every room, daily, shareable emoji result | Wordle's daily loop |
 
 ## Quick start (zero backend needed)
 
@@ -39,6 +41,7 @@ cp ../.env.example .env            # fill in keys
 python wikipedia_ingest.py         # On This Day + random sweeps → history/wildcard
 python music_ingest.py             # Deezer charts → music
 python sports_ingest.py            # Sleeper trending + ESPN teams → sports
+python geo_ingest.py               # restcountries → geography (incl. map pins)
 python screen_ingest.py            # TMDB movies → screen (needs TMDB_API_KEY)
 python question_forge.py           # facts → typed questions + today's board
 python export_seed.py              # refresh the offline seed bank
@@ -71,6 +74,7 @@ dbt build --profiles-dir .         # staging views + marts + tests on DuckDB
 | `docs/GAME_MODES.md` | room designs, scoring, Phase-2 rooms (map, jukebox, daily, multiplayer) |
 | `docs/ARCHITECTURE.md` | the full system picture |
 | `docs/UI_SPEC.md` | design tokens, signature components, motion rules |
+| `databricks/README.md` | Phase-2 lab: mirror the medallion onto Databricks Free Edition |
 
 Data credits: Wikipedia (CC BY-SA), Deezer API, Sleeper API, ESPN, TMDB
 (this product uses the TMDB API but is not endorsed or certified by TMDB).

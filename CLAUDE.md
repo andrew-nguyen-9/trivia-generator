@@ -4,9 +4,11 @@ This file instructs Claude Code on how to work in this repository.
 
 ## Project Overview
 
-PARLOR is a pipeline-driven trivia web app: four game rooms (Board/Jeopardy,
-Clock/WhenTaken, Wedges/Trivial-Pursuit, Streak/higher-lower) rendered over one
-question bank forged nightly from Wikipedia, Deezer, Sleeper/ESPN, and TMDB.
+PARLOR is a pipeline-driven trivia web app: six game rooms (Board/Jeopardy,
+Clock/WhenTaken, Wedges/Trivial-Pursuit, Streak/higher-lower, Map/GeoGuessr,
+Daily/Wordle-loop) rendered over one question bank forged nightly from
+Wikipedia, Deezer, Sleeper/ESPN, TMDB, and restcountries. `databricks/` holds
+the Phase-2 Delta Lake mirror lab (never the serving path).
 
 ## Stack Summary
 
@@ -44,6 +46,8 @@ question bank forged nightly from Wikipedia, Deezer, Sleeper/ESPN, and TMDB.
 - frontend NEVER writes to Supabase (scores live in localStorage)
 - daily/shared game setups must use `lib/rng.ts` date-seeded PRNG (SSR/client
   consistency); free shuffles only inside click handlers or effects
+- THE MAP renders offline via `world-atlas` land polygons (`components/WorldMap.tsx`)
+  — never add tile-server dependencies
 - category colors come from `lib/types.ts` `CATEGORY_HEX` + tailwind safelist
 
 ### Database

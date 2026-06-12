@@ -1,0 +1,18 @@
+{
+  "name": "parlor-daily-mirror",
+  "description": "Rebuilds the PARLOR medallion mirror (bronze/silver/gold Delta tables) daily. Reference spec for POST /api/2.1/jobs/create — adjust notebook_path to your workspace.",
+  "tasks": [
+    {
+      "task_key": "medallion_mirror",
+      "notebook_task": {
+        "notebook_path": "/Workspace/Users/<you>/medallion_mirror"
+      }
+    }
+  ],
+  "schedule": {
+    "quartz_cron_expression": "0 50 9 * * ?",
+    "timezone_id": "UTC",
+    "pause_status": "UNPAUSED"
+  },
+  "max_concurrent_runs": 1
+}

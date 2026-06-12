@@ -19,6 +19,8 @@ typed as (
         try_cast(year as integer)         as year,
         try_cast(numeric_value as double) as numeric_value,
         numeric_unit,
+        try_cast(lat as double)           as lat,
+        try_cast(lng as double)           as lng,
         image_url,
         source_url,
         try_cast(popularity as double)    as popularity,

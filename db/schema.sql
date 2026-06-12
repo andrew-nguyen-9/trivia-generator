@@ -14,6 +14,8 @@ create table if not exists facts (
   year          int,                            -- fuels year_guess
   numeric_value double precision,               -- fuels higher_lower
   numeric_unit  text,                           -- "Deezer fans", "TMDB rating", ...
+  lat           double precision,               -- fuels where (THE MAP)
+  lng           double precision,
   image_url     text,
   source_url    text,                           -- provenance, always kept
   popularity    double precision,               -- 0-100 source signal → difficulty engine
@@ -31,7 +33,7 @@ create table if not exists questions (
   id            uuid primary key default gen_random_uuid(),
   content_hash  text not null unique,
   fact_id       uuid references facts(id) on delete cascade,
-  qtype         text not null check (qtype in ('multiple_choice','year_guess','higher_lower','clue')),
+  qtype         text not null check (qtype in ('multiple_choice','year_guess','higher_lower','clue','where')),
   category      text not null check (category in ('history','music','sports','screen','geography','wildcard')),
   difficulty    int not null default 3 check (difficulty between 1 and 5),
   prompt        text not null,                  -- the clue / question / pair framing
@@ -43,6 +45,8 @@ create table if not exists questions (
   subject_a     text,                           -- higher_lower anchor label
   subject_b     text,                           -- higher_lower hidden label
   unit          text,                           -- higher_lower metric label
+  lat           double precision,               -- where (THE MAP) truth coordinates
+  lng           double precision,
   image_url     text,
   source_url    text,
   created_at    timestamptz default now()
@@ -54,7 +58,7 @@ create index if not exists questions_qtype_idx on questions (qtype, category, di
 create table if not exists daily_sets (
   id          uuid primary key default gen_random_uuid(),
   set_date    date not null,
-  mode        text not null check (mode in ('board','clock','wedges','streak')),
+  mode        text not null check (mode in ('board','clock','wedges','streak','map','daily')),
   payload     jsonb not null,                   -- ordered question ids + board layout
   created_at  timestamptz default now(),
   unique (set_date, mode)
