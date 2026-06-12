@@ -1,0 +1,20 @@
+version: 2
+
+models:
+  - name: mart_question_bank
+    description: Forge-ready facts with difficulty pre-scored (gold layer).
+    columns:
+      - name: content_hash
+        tests: [not_null, unique]
+      - name: difficulty
+        tests:
+          - not_null
+          - accepted_values:
+              values: [1, 2, 3, 4, 5]
+              quote: false
+
+  - name: mart_category_stats
+    description: Per-category fuel metrics, printed in CI for pipeline health.
+    columns:
+      - name: category
+        tests: [not_null, unique]

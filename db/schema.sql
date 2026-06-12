@@ -1,0 +1,87 @@
+-- PARLOR (trivia-generator) — full Supabase schema
+-- Run in the Supabase SQL editor. Conventions match fantasy-football-tool and
+-- music-festival-analyzer: RLS on every table, public read policy, writes via
+-- service role (pipeline) only.
+
+-- ── facts: the atomic unit. Questions are forged FROM facts, never stored alone. ──
+create table if not exists facts (
+  id            uuid primary key default gen_random_uuid(),
+  content_hash  text not null unique,           -- sha256 of (source, subject, fact_text) → idempotent upserts
+  source        text not null check (source in ('wikipedia','deezer','sleeper','espn','tmdb','restcountries','opentdb','manual')),
+  category      text not null check (category in ('history','music','sports','screen','geography','wildcard')),
+  subject       text not null,                  -- "Lollapalooza", "Patrick Mahomes", "Pulp Fiction"
+  fact_text     text not null,                  -- human-readable, citeable sentence
+  year          int,                            -- fuels year_guess
+  numeric_value double precision,               -- fuels higher_lower
+  numeric_unit  text,                           -- "Deezer fans", "TMDB rating", ...
+  image_url     text,
+  source_url    text,                           -- provenance, always kept
+  popularity    double precision,               -- 0-100 source signal → difficulty engine
+  meta          jsonb default '{}'::jsonb,      -- raw API payload slice
+  created_at    timestamptz default now(),
+  updated_at    timestamptz default now()
+);
+
+create index if not exists facts_category_idx on facts (category);
+create index if not exists facts_year_idx on facts (year) where year is not null;
+create index if not exists facts_numeric_idx on facts (numeric_unit, numeric_value) where numeric_value is not null;
+
+-- ── questions: typed, ready-to-render game fuel ──
+create table if not exists questions (
+  id            uuid primary key default gen_random_uuid(),
+  content_hash  text not null unique,
+  fact_id       uuid references facts(id) on delete cascade,
+  qtype         text not null check (qtype in ('multiple_choice','year_guess','higher_lower','clue')),
+  category      text not null check (category in ('history','music','sports','screen','geography','wildcard')),
+  difficulty    int not null default 3 check (difficulty between 1 and 5),
+  prompt        text not null,                  -- the clue / question / pair framing
+  correct       text not null,                  -- answer text, or the truth year/value as text
+  choices       jsonb,                          -- MC: ["a","b","c","d"] (correct included, shuffle client-side)
+  year          int,                            -- year_guess truth
+  value_a       double precision,               -- higher_lower anchor value
+  value_b       double precision,               -- higher_lower hidden value
+  subject_a     text,                           -- higher_lower anchor label
+  subject_b     text,                           -- higher_lower hidden label
+  unit          text,                           -- higher_lower metric label
+  image_url     text,
+  source_url    text,
+  created_at    timestamptz default now()
+);
+
+create index if not exists questions_qtype_idx on questions (qtype, category, difficulty);
+
+-- ── daily_sets: deterministic shared boards (Wordle-style "same board for everyone") ──
+create table if not exists daily_sets (
+  id          uuid primary key default gen_random_uuid(),
+  set_date    date not null,
+  mode        text not null check (mode in ('board','clock','wedges','streak')),
+  payload     jsonb not null,                   -- ordered question ids + board layout
+  created_at  timestamptz default now(),
+  unique (set_date, mode)
+);
+
+-- ── RLS: public read, service-role write (house convention) ──
+alter table facts enable row level security;
+alter table questions enable row level security;
+alter table daily_sets enable row level security;
+
+drop policy if exists "public read facts" on facts;
+create policy "public read facts" on facts for select using (true);
+
+drop policy if exists "public read questions" on questions;
+create policy "public read questions" on questions for select using (true);
+
+drop policy if exists "public read daily_sets" on daily_sets;
+create policy "public read daily_sets" on daily_sets for select using (true);
+
+-- updated_at trigger
+create or replace function set_updated_at() returns trigger as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$ language plpgsql;
+
+drop trigger if exists facts_updated_at on facts;
+create trigger facts_updated_at before update on facts
+  for each row execute function set_updated_at();

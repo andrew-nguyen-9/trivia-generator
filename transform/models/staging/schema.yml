@@ -1,0 +1,23 @@
+version: 2
+
+models:
+  - name: stg_facts
+    description: >
+      Silver layer — typed, deduped trivia facts read straight from the bronze
+      JSONL dumps in data/raw/. One row per content_hash (latest ingest wins).
+    columns:
+      - name: content_hash
+        description: Stable identity of a fact (sha256 slice of source+subject+text).
+        tests: [not_null, unique]
+      - name: source
+        tests:
+          - not_null
+          - accepted_values:
+              values: [wikipedia, deezer, sleeper, espn, tmdb, restcountries, opentdb, manual]
+      - name: category
+        tests:
+          - not_null
+          - accepted_values:
+              values: [history, music, sports, screen, geography, wildcard]
+      - name: fact_text
+        tests: [not_null]

@@ -1,0 +1,9 @@
+# Committed on purpose: DuckDB is file-based, there are no credentials here.
+# CI and local runs both use: dbt build --profiles-dir . (from transform/)
+parlor:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: ../data/parlor.duckdb
+      threads: 4

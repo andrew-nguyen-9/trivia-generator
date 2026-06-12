@@ -1,0 +1,107 @@
+# Daily ETL — written as an explicit DAG (extract → transform/test → publish)
+# so the shape maps 1:1 onto Airflow/Dagster later (see docs/RESEARCH_DATA_PLATFORM.md).
+name: etl_daily
+
+on:
+  schedule:
+    - cron: "20 9 * * *" # 09:20 UTC daily
+  workflow_dispatch: {}
+
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r pipeline/requirements.txt
+      - name: Selftest (offline gates first)
+        run: python pipeline/selftest.py
+      - name: Ingest Wikipedia
+        run: python pipeline/wikipedia_ingest.py
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      - name: Ingest Deezer
+        run: python pipeline/music_ingest.py
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      - name: Ingest Sleeper + ESPN
+        run: python pipeline/sports_ingest.py
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      - name: Ingest TMDB
+        run: python pipeline/screen_ingest.py
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
+      - name: Upload bronze layer
+        uses: actions/upload-artifact@v4
+        with:
+          name: bronze
+          path: data/raw/
+
+  transform:
+    needs: extract
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r pipeline/requirements.txt
+      - uses: actions/download-artifact@v4
+        with:
+          name: bronze
+          path: data/raw/
+      - name: dbt build (models + tests gate the publish)
+        working-directory: transform
+        run: |
+          dbt build --profiles-dir .
+          dbt docs generate --profiles-dir .
+      - name: Category health report
+        working-directory: transform
+        run: |
+          python - <<'EOF'
+          import duckdb
+          con = duckdb.connect("../data/parlor.duckdb")
+          print(con.sql("select * from mart_category_stats"))
+          EOF
+
+  publish:
+    needs: transform
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r pipeline/requirements.txt
+      - uses: actions/download-artifact@v4
+        with:
+          name: bronze
+          path: data/raw/
+      - name: Forge questions + daily board
+        run: python pipeline/question_forge.py
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      - name: Refresh committed seed bank
+        run: python pipeline/export_seed.py
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      - name: Commit refreshed seed bank
+        run: |
+          git config user.name "parlor-etl"
+          git config user.email "actions@users.noreply.github.com"
+          git add frontend/public/seed-questions.json
+          git diff --cached --quiet || git commit -m "chore: refresh seed question bank [skip ci]"
+          git push
