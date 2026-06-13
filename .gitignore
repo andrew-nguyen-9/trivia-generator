@@ -12,6 +12,7 @@ __pycache__/
 node_modules/
 .next/
 out/
+*.tsbuildinfo
 
 # data artifacts — bronze JSONL is COMMITTED on purpose (repo-as-database
 # mode: data/raw/*.jsonl is the accumulating fact store, compacted by
