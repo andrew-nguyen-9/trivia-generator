@@ -1,12 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { buildBoardColumns, type BoardColumn } from "@/lib/queries";
-import { CATEGORY_HEX, CATEGORY_LABEL, type Question } from "@/lib/types";
+import { CATEGORY_HEX, CATEGORY_LABEL, type Category, type Question } from "@/lib/types";
 import { liberalMatch } from "@/lib/fuzzy";
 import { usePractice } from "@/lib/usePractice";
 import PracticeBar from "@/components/PracticeBar";
+import { sfx } from "@/lib/sound";
+import { haptic } from "@/lib/haptics";
+import { useProfile, type Achievement } from "@/lib/profile";
+import Confetti from "@/components/Confetti";
+import AchievementToast from "@/components/AchievementToast";
+import LeaderboardPanel from "@/components/LeaderboardPanel";
 
 type CellState = "fresh" | "right" | "wrong";
 type GameMode = "easy" | "hard";
@@ -22,6 +28,11 @@ export default function BoardGame({
 }) {
   const reduced = useReducedMotion();
   const { practiceMode, togglePractice, saved, saveQ, removeQ, isSaved } = usePractice();
+  const { record } = useProfile();
+  const [toasts, setToasts] = useState<Achievement[]>([]);
+  const [burst, setBurst] = useState(0);
+  const recorded = useRef(false);
+  const stats = useRef<Partial<Record<Category, { correct: number; total: number }>>>({});
 
   // Board state
   const [mode, setMode] = useState<GameMode>("easy");
@@ -53,6 +64,26 @@ export default function BoardGame({
   const played = Object.keys(states).length;
   const total = columns.length * 5;
   const openQ = open ? columns[open[0]].cells[open[1]] : null;
+  const cleared = played === total && total > 0;
+
+  useEffect(() => {
+    if (!cleared || recorded.current) return;
+    recorded.current = true;
+    if (score > 0) {
+      sfx.win();
+      haptic.win();
+      setBurst((b) => b + 1);
+    } else {
+      sfx.lose();
+    }
+    const unlocked = record({
+      room: "board",
+      score: Math.max(0, score),
+      xp: Math.max(0, score) / 5,
+      perCategory: stats.current,
+    });
+    if (unlocked.length) setToasts(unlocked);
+  }, [cleared, score, record]);
 
   function openCell(c: number, r: number) {
     setOpen([c, r]);
@@ -73,9 +104,19 @@ export default function BoardGame({
   function judge(correct: boolean) {
     if (!open) return;
     const [c, r] = open;
+    const cat = columns[c].cells[r].category;
+    const st = stats.current[cat] ?? { correct: 0, total: 0 };
+    stats.current[cat] = { correct: st.correct + (correct ? 1 : 0), total: st.total + 1 };
     setStates((s) => ({ ...s, [cellKey(c, r)]: correct ? "right" : "wrong" }));
     setScore((s) => s + (correct ? cellValue(r, c) : -cellValue(r, c)));
     setJudgeResult(correct);
+    if (correct) {
+      sfx.correct();
+      haptic.correct();
+    } else {
+      sfx.wrong();
+      haptic.wrong();
+    }
   }
 
   function closeModal() {
@@ -100,10 +141,13 @@ export default function BoardGame({
     setStates({});
     setScore(0);
     closeModal();
+    recorded.current = false;
+    stats.current = {};
   }
 
   return (
     <div>
+      <AchievementToast queue={toasts} />
       {/* Header */}
       <div className="mb-5 flex flex-wrap items-start justify-between gap-4">
         <div>
@@ -190,10 +234,14 @@ export default function BoardGame({
         </div>
       )}
 
-      {played === total && total > 0 && (
-        <p className="display mt-6 text-2xl text-history">
-          Board cleared — final ${score.toLocaleString()}
-        </p>
+      {cleared && (
+        <div className="mt-6 flex flex-col items-center text-center">
+          <Confetti trigger={burst} />
+          <p className="display text-2xl text-history">
+            Board cleared — final ${score.toLocaleString()}
+          </p>
+          <LeaderboardPanel room="board" score={Math.max(0, score)} accent="history" />
+        </div>
       )}
 
       {/* Question modal */}

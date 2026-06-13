@@ -1,15 +1,17 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion, useAnimationControls } from "framer-motion";
 import { CATEGORY_HEX, CATEGORY_LABEL, type Question } from "@/lib/types";
 import { sfx } from "@/lib/sound";
 import { haptic } from "@/lib/haptics";
 import { useProfile, type Achievement } from "@/lib/profile";
 import { shuffled } from "@/lib/rng";
+import { filterByDeck, filterByDifficulty } from "@/lib/decks";
 import Confetti from "@/components/Confetti";
 import AchievementToast from "@/components/AchievementToast";
 import LeaderboardPanel from "@/components/LeaderboardPanel";
+import RoomFilters from "@/components/RoomFilters";
 
 const START_TIME = 60; // seconds
 const COMBO_BONUS = 5; // every N-in-a-row grants bonus time
@@ -33,11 +35,18 @@ export default function BlitzGame({ pool }: { pool: Question[] }) {
   const [flash, setFlash] = useState<"right" | "wrong" | null>(null);
   const [burst, setBurst] = useState(0);
   const [toasts, setToasts] = useState<Achievement[]>([]);
+  const [deckId, setDeckId] = useState("all");
+  const [diff, setDiff] = useState<"any" | "easy" | "medium" | "hard">("any");
   const locked = useRef(false);
 
+  const activePool = useMemo(
+    () => filterByDifficulty(filterByDeck(pool, deckId), diff),
+    [pool, deckId, diff],
+  );
+
   const reshuffle = useCallback(
-    (n: number) => shuffled(pool, () => Math.random()).slice(0, Math.max(n, 1)),
-    [pool],
+    (n: number) => shuffled(activePool, () => Math.random()).slice(0, Math.max(n, 1)),
+    [activePool],
   );
 
   const q = deck[idx];
@@ -83,6 +92,18 @@ export default function BlitzGame({ pool }: { pool: Question[] }) {
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [time, phase]);
+
+  // keyboard-first: number keys 1–4 pick an answer
+  useEffect(() => {
+    if (phase !== "playing") return;
+    const onKey = (e: KeyboardEvent) => {
+      const n = parseInt(e.key, 10);
+      if (n >= 1 && n <= order.length) answer(order[n - 1]);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase, order]);
 
   function answer(choice: string) {
     if (locked.current || !q || phase !== "playing") return;
@@ -141,12 +162,22 @@ export default function BlitzGame({ pool }: { pool: Question[] }) {
         <p className="mt-3 max-w-md text-muted">
           Sixty seconds. As many as you can. A wrong answer costs {PENALTY}s and breaks
           your combo — every {COMBO_BONUS} in a row buys you {BONUS_SECONDS}s back.
+          Use keys 1–4 to answer.
         </p>
+        <div className="mt-8">
+          <RoomFilters
+            deck={deckId}
+            setDeck={setDeckId}
+            diff={diff}
+            setDiff={setDiff}
+            accent="history"
+          />
+        </div>
         <button
           onClick={start}
           className="microlabel mt-8 rounded-full border border-history px-8 py-3 text-history transition hover:bg-history hover:text-bg"
         >
-          start the clock
+          start the clock ({activePool.length} in deck)
         </button>
       </div>
     );
@@ -225,12 +256,15 @@ export default function BlitzGame({ pool }: { pool: Question[] }) {
         <p className="display mt-3 text-2xl leading-tight sm:text-3xl">{q?.prompt}</p>
 
         <div className="mt-6 grid gap-3 sm:grid-cols-2">
-          {order.map((choice) => (
+          {order.map((choice, k) => (
             <button
               key={choice}
               onClick={() => answer(choice)}
-              className="rounded-xl border border-line p-4 text-left font-bold transition hover:border-ink active:scale-[0.98]"
+              className="flex items-center gap-3 rounded-xl border border-line p-4 text-left font-bold transition hover:border-ink active:scale-[0.98]"
             >
+              <span className="microlabel rounded border border-line px-2 py-0.5 text-muted">
+                {k + 1}
+              </span>
               {choice}
             </button>
           ))}

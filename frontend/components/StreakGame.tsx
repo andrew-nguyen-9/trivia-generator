@@ -1,10 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { CATEGORY_HEX, type Question } from "@/lib/types";
 import { usePractice } from "@/lib/usePractice";
 import PracticeBar from "@/components/PracticeBar";
+import { sfx } from "@/lib/sound";
+import { haptic } from "@/lib/haptics";
+import { useProfile, type Achievement } from "@/lib/profile";
+import AchievementToast from "@/components/AchievementToast";
+import LeaderboardPanel from "@/components/LeaderboardPanel";
 
 const BEST_KEY = "parlor:streak:best";
 
@@ -29,6 +34,7 @@ function CountUp({ to }: { to: number }) {
 
 export default function StreakGame({ pool }: { pool: Question[] }) {
   const { practiceMode, togglePractice, saved, saveQ, removeQ, isSaved } = usePractice();
+  const { record } = useProfile();
 
   const [deck, setDeck] = useState<Question[]>([]);
   const [streak, setStreak] = useState(0);
@@ -36,15 +42,26 @@ export default function StreakGame({ pool }: { pool: Question[] }) {
   const [phase, setPhase] = useState<"idle" | "guessing" | "reveal-win" | "reveal-loss">(
     "idle",
   );
+  const [toasts, setToasts] = useState<Achievement[]>([]);
+  const recorded = useRef(false);
 
   useEffect(() => {
     setBest(Number(localStorage.getItem(BEST_KEY) ?? 0));
   }, []);
 
+  // record the run when it ends (a wrong call)
+  useEffect(() => {
+    if (phase !== "reveal-loss" || recorded.current) return;
+    recorded.current = true;
+    const unlocked = record({ room: "streak", score: streak, xp: streak * 50 });
+    if (unlocked.length) setToasts(unlocked);
+  }, [phase, streak, record]);
+
   function start() {
     setDeck([...pool].sort(() => Math.random() - 0.5));
     setStreak(0);
     setPhase("guessing");
+    recorded.current = false;
   }
 
   const q = deck[0];
@@ -58,6 +75,11 @@ export default function StreakGame({ pool }: { pool: Question[] }) {
         setBest(s);
         localStorage.setItem(BEST_KEY, String(s));
       }
+      sfx.combo(Math.min(s, 8));
+      haptic.correct();
+    } else {
+      sfx.wrong();
+      haptic.wrong();
     }
     setPhase(win ? "reveal-win" : "reveal-loss");
   }
@@ -127,6 +149,7 @@ export default function StreakGame({ pool }: { pool: Question[] }) {
 
   return (
     <div>
+      <AchievementToast queue={toasts} />
       <div className="flex items-baseline justify-between">
         <h1 className="display text-4xl sm:text-5xl">The Streak</h1>
         <div className="text-right">
@@ -185,6 +208,9 @@ export default function StreakGame({ pool }: { pool: Question[] }) {
           {lost ? (
             <>
               <p className="display text-3xl text-music">Run over — streak {streak}</p>
+              <div className="flex justify-center">
+                <LeaderboardPanel room="streak" score={streak} accent="screen" />
+              </div>
               <button
                 onClick={start}
                 className="microlabel mt-5 rounded-full border border-ink px-8 py-3 transition hover:bg-ink hover:text-bg"

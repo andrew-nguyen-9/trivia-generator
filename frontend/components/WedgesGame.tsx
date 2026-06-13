@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import {
   CATEGORIES,
@@ -11,6 +11,12 @@ import {
 } from "@/lib/types";
 import { usePractice } from "@/lib/usePractice";
 import PracticeBar from "@/components/PracticeBar";
+import { sfx } from "@/lib/sound";
+import { haptic } from "@/lib/haptics";
+import { useProfile, type Achievement } from "@/lib/profile";
+import Confetti from "@/components/Confetti";
+import AchievementToast from "@/components/AchievementToast";
+import LeaderboardPanel from "@/components/LeaderboardPanel";
 
 const MAX_QUESTIONS = 20;
 
@@ -64,12 +70,17 @@ export default function WedgesGame({ pool }: { pool: Question[] }) {
     return m;
   }, [pool]);
 
+  const { record } = useProfile();
   const [started, setStarted] = useState(false);
   const [queue, setQueue] = useState<Question[]>([]);
   const [asked, setAsked] = useState(0);
   const [earned, setEarned] = useState<Set<Category>>(new Set());
   const [picked, setPicked] = useState<string | null>(null);
   const [order, setOrder] = useState<string[]>([]);
+  const [toasts, setToasts] = useState<Achievement[]>([]);
+  const [burst, setBurst] = useState(0);
+  const recorded = useRef(false);
+  const stats = useRef<Partial<Record<Category, { correct: number; total: number }>>>({});
 
   function start() {
     const qs = [...pool].sort(() => Math.random() - 0.5);
@@ -79,14 +90,24 @@ export default function WedgesGame({ pool }: { pool: Question[] }) {
     setPicked(null);
     setStarted(true);
     setOrder(qs.length ? [...(qs[0].choices ?? [])].sort(() => Math.random() - 0.5) : []);
+    recorded.current = false;
+    stats.current = {};
   }
 
   function answer(choice: string) {
     if (picked) return;
     setPicked(choice);
     const q = queue[0];
-    if (choice === q.correct) {
-      setEarned((s) => new Set(s).add(q.category));
+    const right = choice === q.correct;
+    const s = stats.current[q.category] ?? { correct: 0, total: 0 };
+    stats.current[q.category] = { correct: s.correct + (right ? 1 : 0), total: s.total + 1 };
+    if (right) {
+      setEarned((set) => new Set(set).add(q.category));
+      sfx.correct();
+      haptic.correct();
+    } else {
+      sfx.wrong();
+      haptic.wrong();
     }
   }
 
@@ -103,6 +124,25 @@ export default function WedgesGame({ pool }: { pool: Question[] }) {
   const q = queue[0];
   const won = earned.size === 6;
   const over = won || asked >= MAX_QUESTIONS || !q;
+
+  useEffect(() => {
+    if (!started || !over || recorded.current) return;
+    recorded.current = true;
+    if (won) {
+      sfx.win();
+      haptic.win();
+      setBurst((b) => b + 1);
+    } else {
+      sfx.lose();
+    }
+    const unlocked = record({
+      room: "wedges",
+      score: earned.size,
+      xp: earned.size * 150 + (won ? 300 : 0),
+      perCategory: stats.current,
+    });
+    if (unlocked.length) setToasts(unlocked);
+  }, [started, over, won, earned.size, record]);
 
   if (!started || pool.length === 0) {
     return (
@@ -137,12 +177,15 @@ export default function WedgesGame({ pool }: { pool: Question[] }) {
   if (over) {
     return (
       <>
+        <Confetti trigger={burst} />
+        <AchievementToast queue={toasts} />
         <div className="flex min-h-[60vh] flex-col items-center justify-center text-center">
           <WedgeRing earned={earned} />
           <p className="display mt-6 text-4xl">
             {won ? "Ring complete!" : `${earned.size} of 6 wedges`}
           </p>
           <p className="mt-2 text-muted">{asked} questions played</p>
+          <LeaderboardPanel room="wedges" score={earned.size} accent="sports" />
           <button
             onClick={start}
             className="microlabel mt-8 rounded-full border border-ink px-6 py-3 transition hover:bg-ink hover:text-bg"

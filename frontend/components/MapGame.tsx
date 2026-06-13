@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import WorldMap from "@/components/WorldMap";
 import GoogleMap from "@/components/GoogleMap";
@@ -9,6 +9,12 @@ import { CATEGORY_HEX, CATEGORY_LABEL, type Question } from "@/lib/types";
 import { usePractice } from "@/lib/usePractice";
 import PracticeBar from "@/components/PracticeBar";
 import { shuffled } from "@/lib/rng";
+import { sfx } from "@/lib/sound";
+import { haptic } from "@/lib/haptics";
+import { useProfile, type Achievement } from "@/lib/profile";
+import Confetti from "@/components/Confetti";
+import AchievementToast from "@/components/AchievementToast";
+import LeaderboardPanel from "@/components/LeaderboardPanel";
 
 // The Google Map component activates when this env var is present at build time.
 const USE_GOOGLE = Boolean(process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY);
@@ -21,6 +27,7 @@ export default function MapGame({
   pool?: Question[];
 }) {
   const { practiceMode, togglePractice, saved, saveQ, removeQ, isSaved } = usePractice();
+  const { record } = useProfile();
 
   const [rounds, setRounds] = useState(initialRounds);
   const [i, setI] = useState(0);
@@ -28,6 +35,24 @@ export default function MapGame({
   const [locked, setLocked] = useState(false);
   const [score, setScore] = useState(0);
   const [done, setDone] = useState(false);
+  const [burst, setBurst] = useState(0);
+  const [toasts, setToasts] = useState<Achievement[]>([]);
+  const recorded = useRef(false);
+
+  useEffect(() => {
+    if (!done || recorded.current) return;
+    recorded.current = true;
+    const win = score >= rounds.length * 55;
+    if (win) {
+      sfx.win();
+      haptic.win();
+      setBurst((b) => b + 1);
+    } else {
+      sfx.lose();
+    }
+    const unlocked = record({ room: "map", score, xp: score });
+    if (unlocked.length) setToasts(unlocked);
+  }, [done, score, rounds.length, record]);
 
   if (rounds.length === 0) {
     return (
@@ -45,6 +70,14 @@ export default function MapGame({
     if (!guess) return;
     setLocked(true);
     setScore((s) => s + pts);
+    if (pts >= 70) {
+      sfx.correct();
+      haptic.correct();
+    } else if (pts >= 35) {
+      sfx.select();
+    } else {
+      sfx.wrong();
+    }
   }
 
   function next() {
@@ -65,6 +98,7 @@ export default function MapGame({
     setLocked(false);
     setScore(0);
     setDone(false);
+    recorded.current = false;
   }
 
   const MapComponent = USE_GOOGLE ? GoogleMap : WorldMap;
@@ -72,10 +106,13 @@ export default function MapGame({
   if (done) {
     return (
       <>
+        <Confetti trigger={burst} />
+        <AchievementToast queue={toasts} />
         <div className="flex min-h-[60vh] flex-col items-center justify-center text-center">
           <p className="microlabel">final score</p>
           <p className="display tabular text-8xl text-geography">{score}</p>
           <p className="mt-2 text-muted">out of {rounds.length * 100}</p>
+          <LeaderboardPanel room="map" score={score} accent="geography" />
           <div className="mt-8 flex gap-3">
             <button
               onClick={() => restart()}
