@@ -69,6 +69,16 @@ def facts_for_country(c: dict) -> list[dict]:
                 meta={"answer_field": "capital", "answer": capital, "region": c.get("region")},
             )
         )
+    # THE GALLERY: name the country from its flag (image_guess fuel)
+    if flag:
+        out.append(
+            make_fact(
+                source="restcountries", category="geography", subject=name,
+                fact_text=f"The national flag of {name}.",
+                image_url=flag, source_url=url, popularity=pop_score,
+                meta={"answer_field": "flag", "answer": name, "region": c.get("region")},
+            )
+        )
     return out
 
 

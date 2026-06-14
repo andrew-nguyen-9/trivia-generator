@@ -11,7 +11,7 @@ export default async function ClockPage() {
 
   return (
     <RoomShell label="room 02 — the clock" accent="music">
-      <ClockGame rounds={rounds} />
+      <ClockGame rounds={rounds} pool={pool} />
     </RoomShell>
   );
 }

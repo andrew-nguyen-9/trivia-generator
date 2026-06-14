@@ -1,57 +1,204 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import type { BoardColumn } from "@/lib/queries";
-import { CATEGORY_HEX, CATEGORY_LABEL } from "@/lib/types";
+import { buildBoardColumns, type BoardColumn } from "@/lib/queries";
+import { CATEGORY_HEX, CATEGORY_LABEL, type Category, type Question } from "@/lib/types";
+import { liberalMatch } from "@/lib/fuzzy";
+import { usePractice } from "@/lib/usePractice";
+import PracticeBar from "@/components/PracticeBar";
+import { sfx } from "@/lib/sound";
+import { haptic } from "@/lib/haptics";
+import { useProfile, type Achievement } from "@/lib/profile";
+import Confetti from "@/components/Confetti";
+import AchievementToast from "@/components/AchievementToast";
+import LeaderboardPanel from "@/components/LeaderboardPanel";
 
 type CellState = "fresh" | "right" | "wrong";
+type GameMode = "easy" | "hard";
 
 export default function BoardGame({
-  columns,
-  dailyDouble,
+  columns: dailyColumns,
+  dailyDouble: dailyDD,
+  clues,
 }: {
   columns: BoardColumn[];
   dailyDouble: [number, number];
+  clues?: Question[];
 }) {
   const reduced = useReducedMotion();
+  const { practiceMode, togglePractice, saved, saveQ, removeQ, isSaved } = usePractice();
+  const { record } = useProfile();
+  const [toasts, setToasts] = useState<Achievement[]>([]);
+  const [burst, setBurst] = useState(0);
+  const recorded = useRef(false);
+  const stats = useRef<Partial<Record<Category, { correct: number; total: number }>>>({});
+
+  // Board state
+  const [mode, setMode] = useState<GameMode>("easy");
   const [score, setScore] = useState(0);
   const [open, setOpen] = useState<[number, number] | null>(null);
-  const [revealed, setRevealed] = useState(false);
   const [states, setStates] = useState<Record<string, CellState>>({});
 
-  const key = (c: number, r: number) => `${c}:${r}`;
+  // Easy-mode choices (generated fresh on each cell open, safe: click handler)
+  const [choices, setChoices] = useState<string[]>([]);
+  const [picked, setPicked] = useState<string | null>(null);
+
+  // Hard-mode text input
+  const [textAnswer, setTextAnswer] = useState("");
+
+  // Shared post-judge result (null = pre-judge; true/false = result)
+  const [judgeResult, setJudgeResult] = useState<boolean | null>(null);
+
+  // Practice: override today's board with a randomly generated one
+  const [practiceColumns, setPracticeColumns] = useState<BoardColumn[] | null>(null);
+  const [practiceDD, setPracticeDD] = useState<[number, number] | null>(null);
+
+  const columns = practiceColumns ?? dailyColumns;
+  const dailyDouble = practiceDD ?? dailyDD;
+
+  const cellKey = (c: number, r: number) => `${c}:${r}`;
   const isDD = (c: number, r: number) => dailyDouble[0] === c && dailyDouble[1] === r;
-  const value = (r: number, c: number) => (r + 1) * 200 * (isDD(c, r) ? 2 : 1);
+  const cellValue = (r: number, c: number) => (r + 1) * 200 * (isDD(c, r) ? 2 : 1);
 
   const played = Object.keys(states).length;
   const total = columns.length * 5;
+  const openQ = open ? columns[open[0]].cells[open[1]] : null;
+  const cleared = played === total && total > 0;
+
+  useEffect(() => {
+    if (!cleared || recorded.current) return;
+    recorded.current = true;
+    if (score > 0) {
+      sfx.win();
+      haptic.win();
+      setBurst((b) => b + 1);
+    } else {
+      sfx.lose();
+    }
+    const unlocked = record({
+      room: "board",
+      score: Math.max(0, score),
+      xp: Math.max(0, score) / 5,
+      perCategory: stats.current,
+    });
+    if (unlocked.length) setToasts(unlocked);
+  }, [cleared, score, record]);
+
+  function openCell(c: number, r: number) {
+    setOpen([c, r]);
+    setPicked(null);
+    setJudgeResult(null);
+    setTextAnswer("");
+
+    if (mode === "easy") {
+      const correct = columns[c].cells[r].correct;
+      const pool = columns
+        .flatMap((col) => col.cells.map((cell) => cell.correct))
+        .filter((x) => x !== correct);
+      const distractors = [...pool].sort(() => Math.random() - 0.5).slice(0, 3);
+      setChoices([...distractors, correct].sort(() => Math.random() - 0.5));
+    }
+  }
 
   function judge(correct: boolean) {
     if (!open) return;
     const [c, r] = open;
-    setStates((s) => ({ ...s, [key(c, r)]: correct ? "right" : "wrong" }));
-    setScore((s) => s + (correct ? value(r, c) : -value(r, c)));
-    setOpen(null);
-    setRevealed(false);
+    const cat = columns[c].cells[r].category;
+    const st = stats.current[cat] ?? { correct: 0, total: 0 };
+    stats.current[cat] = { correct: st.correct + (correct ? 1 : 0), total: st.total + 1 };
+    setStates((s) => ({ ...s, [cellKey(c, r)]: correct ? "right" : "wrong" }));
+    setScore((s) => s + (correct ? cellValue(r, c) : -cellValue(r, c)));
+    setJudgeResult(correct);
+    if (correct) {
+      sfx.correct();
+      haptic.correct();
+    } else {
+      sfx.wrong();
+      haptic.wrong();
+    }
   }
 
-  const openQ = open ? columns[open[0]].cells[open[1]] : null;
+  function closeModal() {
+    setOpen(null);
+    setPicked(null);
+    setJudgeResult(null);
+    setTextAnswer("");
+  }
+
+  function newPracticeBoard() {
+    if (!clues || clues.length === 0) return;
+    const cols = buildBoardColumns(
+      clues,
+      (arr) => arr[Math.floor(Math.random() * arr.length)],
+    );
+    const dd: [number, number] = [
+      Math.floor(Math.random() * Math.max(1, cols.length)),
+      Math.floor(Math.random() * 5),
+    ];
+    setPracticeColumns(cols);
+    setPracticeDD(dd);
+    setStates({});
+    setScore(0);
+    closeModal();
+    recorded.current = false;
+    stats.current = {};
+  }
 
   return (
     <div>
-      <div className="mb-5 flex items-baseline justify-between">
-        <h1 className="display text-4xl sm:text-5xl">The Board</h1>
+      <AchievementToast queue={toasts} />
+      {/* Header */}
+      <div className="mb-5 flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="display text-4xl sm:text-5xl">The Board</h1>
+          {practiceMode && clues && clues.length > 0 && (
+            <button
+              onClick={newPracticeBoard}
+              className="microlabel mt-2 rounded-full border border-wildcard px-4 py-1 text-wildcard transition hover:bg-wildcard hover:text-bg"
+            >
+              ↻ new board
+            </button>
+          )}
+        </div>
+
         <div className="text-right">
+          <div className="mb-2 flex gap-1">
+            <button
+              onClick={() => setMode("easy")}
+              className={`microlabel rounded-full border px-3 py-1 transition ${
+                mode === "easy"
+                  ? "border-sports text-sports"
+                  : "border-line text-muted hover:border-ink"
+              }`}
+            >
+              easy
+            </button>
+            <button
+              onClick={() => setMode("hard")}
+              className={`microlabel rounded-full border px-3 py-1 transition ${
+                mode === "hard"
+                  ? "border-music text-music"
+                  : "border-line text-muted hover:border-ink"
+              }`}
+            >
+              hard
+            </button>
+          </div>
           <div className="microlabel">score</div>
-          <div className={`tabular text-3xl font-black ${score < 0 ? "text-music" : "text-history"}`}>
+          <div
+            className={`tabular text-3xl font-black ${score < 0 ? "text-music" : "text-history"}`}
+          >
             {score < 0 ? "−" : ""}${Math.abs(score).toLocaleString()}
           </div>
         </div>
       </div>
 
+      {/* Grid */}
       {columns.length < 5 ? (
-        <p className="text-muted">The bank is still warming up — not enough clue categories yet.</p>
+        <p className="text-muted">
+          The bank is still warming up — not enough clue categories yet.
+        </p>
       ) : (
         <div className="grid grid-cols-5 gap-2">
           {columns.map((col) => (
@@ -65,12 +212,12 @@ export default function BoardGame({
           ))}
           {[0, 1, 2, 3, 4].map((r) =>
             columns.map((col, c) => {
-              const st = states[key(c, r)];
+              const st = states[cellKey(c, r)];
               return (
                 <button
-                  key={key(c, r)}
+                  key={cellKey(c, r)}
                   disabled={Boolean(st)}
-                  onClick={() => setOpen([c, r])}
+                  onClick={() => openCell(c, r)}
                   className={`tabular flex min-h-14 items-center justify-center rounded-lg border text-lg font-black transition sm:min-h-16 sm:text-2xl ${
                     st
                       ? st === "right"
@@ -87,12 +234,17 @@ export default function BoardGame({
         </div>
       )}
 
-      {played === total && total > 0 && (
-        <p className="display mt-6 text-2xl text-history">
-          Board cleared — final ${score.toLocaleString()}
-        </p>
+      {cleared && (
+        <div className="mt-6 flex flex-col items-center text-center">
+          <Confetti trigger={burst} />
+          <p className="display text-2xl text-history">
+            Board cleared — final ${score.toLocaleString()}
+          </p>
+          <LeaderboardPanel room="board" score={Math.max(0, score)} accent="history" />
+        </div>
       )}
 
+      {/* Question modal */}
       <AnimatePresence>
         {openQ && open && (
           <motion.div
@@ -109,40 +261,131 @@ export default function BoardGame({
               style={{ borderColor: CATEGORY_HEX[openQ.category] }}
             >
               <div className="flex items-baseline justify-between">
-                <span className="microlabel" style={{ color: CATEGORY_HEX[openQ.category] }}>
-                  {CATEGORY_LABEL[openQ.category]} · ${value(open[1], open[0])}
+                <span
+                  className="microlabel"
+                  style={{ color: CATEGORY_HEX[openQ.category] }}
+                >
+                  {CATEGORY_LABEL[openQ.category]} · ${cellValue(open[1], open[0])}
                 </span>
                 {isDD(open[0], open[1]) && (
-                  <span className="microlabel animate-pulse text-history">★ daily double — stakes doubled</span>
+                  <span className="microlabel animate-pulse text-history">
+                    ★ daily double — stakes doubled
+                  </span>
                 )}
               </div>
-              <p className="display mt-6 text-2xl leading-tight sm:text-3xl">{openQ.prompt}</p>
 
-              {!revealed ? (
-                <button
-                  onClick={() => setRevealed(true)}
-                  className="microlabel mt-8 rounded-full border border-ink px-6 py-3 transition hover:bg-ink hover:text-bg"
-                >
-                  reveal answer
-                </button>
-              ) : (
+              <p className="display mt-6 text-2xl leading-tight sm:text-3xl">
+                {openQ.prompt}
+              </p>
+
+              {/* Post-judge result panel */}
+              {judgeResult !== null ? (
                 <div className="mt-8">
-                  <p className="microlabel">the answer</p>
-                  <p className="mt-1 text-2xl font-black" style={{ color: CATEGORY_HEX[openQ.category] }}>
-                    What is {openQ.correct}?
+                  <p
+                    className={`text-2xl font-black ${judgeResult ? "text-sports" : "text-music"}`}
+                  >
+                    {judgeResult ? "✓ Correct!" : "✗ Missed it"}
                   </p>
-                  <div className="mt-6 flex gap-3">
-                    <button
-                      onClick={() => judge(true)}
-                      className="microlabel rounded-full border border-sports px-6 py-3 text-sports transition hover:bg-sports hover:text-bg"
+                  {!judgeResult && (
+                    <p className="mt-1 text-muted">
+                      The answer:{" "}
+                      <span className="font-black text-ink">
+                        What is {openQ.correct}?
+                      </span>
+                    </p>
+                  )}
+                  {openQ.source_url && (
+                    <a
+                      href={openQ.source_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="microlabel mt-2 block underline"
                     >
-                      ✓ I had it
+                      source
+                    </a>
+                  )}
+                  <div className="mt-4 flex gap-3">
+                    <button
+                      onClick={closeModal}
+                      className="microlabel rounded-full border border-ink px-6 py-3 transition hover:bg-ink hover:text-bg"
+                    >
+                      continue
                     </button>
+                    {practiceMode && (
+                      <button
+                        onClick={() =>
+                          isSaved(openQ) ? removeQ(openQ.prompt) : saveQ(openQ)
+                        }
+                        className={`microlabel rounded-full border px-6 py-3 transition ${
+                          isSaved(openQ)
+                            ? "border-history text-history"
+                            : "border-line text-muted hover:border-history hover:text-history"
+                        }`}
+                      >
+                        {isSaved(openQ) ? "★ saved" : "☆ save"}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ) : mode === "easy" ? (
+                /* Easy — multiple choice */
+                <div className="mt-8 grid gap-3 sm:grid-cols-2">
+                  {choices.map((choice) => {
+                    const isCorrect = choice === openQ.correct;
+                    const isPicked = choice === picked;
+                    const cls = picked
+                      ? isCorrect
+                        ? "border-sports bg-sports/15 text-sports"
+                        : isPicked
+                          ? "border-music bg-music/15 text-music"
+                          : "border-line text-muted"
+                      : "border-line hover:border-ink";
+                    return (
+                      <button
+                        key={choice}
+                        disabled={Boolean(picked)}
+                        onClick={() => {
+                          setPicked(choice);
+                          judge(choice === openQ.correct);
+                        }}
+                        className={`rounded-xl border p-4 text-left font-bold transition ${cls}`}
+                      >
+                        {choice}
+                        {picked && isCorrect && " ✓"}
+                        {picked && isPicked && !isCorrect && " ✗"}
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : (
+                /* Hard — free text with fuzzy matching */
+                <div className="mt-8">
+                  <p className="microlabel mb-3 text-muted">
+                    What is...? (spelling counts loosely)
+                  </p>
+                  <div className="flex gap-3">
+                    <input
+                      type="text"
+                      value={textAnswer}
+                      onChange={(e) => setTextAnswer(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && textAnswer.trim()) {
+                          judge(liberalMatch(textAnswer, openQ.correct));
+                        }
+                      }}
+                      placeholder="type your answer"
+                      autoFocus
+                      className="flex-1 rounded-xl border border-line bg-bg px-4 py-3 text-ink outline-none focus:border-music"
+                    />
                     <button
-                      onClick={() => judge(false)}
-                      className="microlabel rounded-full border border-music px-6 py-3 text-music transition hover:bg-music hover:text-bg"
+                      onClick={() => {
+                        if (textAnswer.trim())
+                          judge(liberalMatch(textAnswer, openQ.correct));
+                      }}
+                      disabled={!textAnswer.trim()}
+                      className="microlabel rounded-full border border-music px-6 py-3 text-music transition enabled:hover:bg-music enabled:hover:text-bg disabled:opacity-30"
                     >
-                      ✗ missed it
+                      submit
                     </button>
                   </div>
                 </div>
@@ -151,6 +394,13 @@ export default function BoardGame({
           </motion.div>
         )}
       </AnimatePresence>
+
+      <PracticeBar
+        practiceMode={practiceMode}
+        onToggle={togglePractice}
+        saved={saved}
+        onRemove={removeQ}
+      />
     </div>
   );
 }

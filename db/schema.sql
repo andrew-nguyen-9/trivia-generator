@@ -33,7 +33,7 @@ create table if not exists questions (
   id            uuid primary key default gen_random_uuid(),
   content_hash  text not null unique,
   fact_id       uuid references facts(id) on delete cascade,
-  qtype         text not null check (qtype in ('multiple_choice','year_guess','higher_lower','clue','where')),
+  qtype         text not null check (qtype in ('multiple_choice','year_guess','higher_lower','clue','where','audio_guess','image_guess','connections')),
   category      text not null check (category in ('history','music','sports','screen','geography','wildcard')),
   difficulty    int not null default 3 check (difficulty between 1 and 5),
   prompt        text not null,                  -- the clue / question / pair framing
@@ -49,6 +49,9 @@ create table if not exists questions (
   lng           double precision,
   image_url     text,
   source_url    text,
+  audio_url     text,                           -- audio_guess (THE JUKEBOX): streamed clip
+  melody        jsonb,                          -- audio_guess offline synth: [{n,d}]
+  groups        jsonb,                          -- connections: [{label,members,difficulty}]
   created_at    timestamptz default now()
 );
 
@@ -64,10 +67,40 @@ create table if not exists daily_sets (
   unique (set_date, mode)
 );
 
+-- ── scores: global leaderboard. Writes go through the submit-score Edge
+-- Function (service role), NEVER the anon client — so there is deliberately no
+-- public insert policy. Reads are public via the leaderboard view. ──
+create table if not exists scores (
+  id          uuid primary key default gen_random_uuid(),
+  room        text not null check (room in (
+                'board','clock','wedges','streak','map','daily',
+                'jukebox','gallery','blitz','connections')),
+  name        text not null check (char_length(name) between 1 and 12),
+  score       int not null check (score >= 0),
+  created_at  timestamptz default now()
+);
+create index if not exists scores_room_idx on scores (room, score desc);
+
+-- top-200 per room, exposed read-only to the anon key
+create or replace view leaderboard as
+  select room, name, score, created_at
+  from (
+    select room, name, score, created_at,
+           row_number() over (partition by room order by score desc, created_at asc) as rn
+    from scores
+  ) ranked
+  where rn <= 200;
+
 -- ── RLS: public read, service-role write (house convention) ──
 alter table facts enable row level security;
 alter table questions enable row level security;
 alter table daily_sets enable row level security;
+alter table scores enable row level security;
+
+drop policy if exists "public read scores" on scores;
+create policy "public read scores" on scores for select using (true);
+-- (no insert/update/delete policy: anon cannot write; the Edge Function uses the
+--  service role which bypasses RLS)
 
 drop policy if exists "public read facts" on facts;
 create policy "public read facts" on facts for select using (true);

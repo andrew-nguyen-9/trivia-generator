@@ -151,6 +151,125 @@ def forge_multiple_choice(facts: list[dict], rng: random.Random) -> list[dict]:
     return out
 
 
+def forge_audio_guess(facts: list[dict], rng: random.Random) -> list[dict]:
+    """THE JUKEBOX (live mode): facts carrying meta.preview_url (a Deezer 30s clip)
+    plus meta.answer become 'name this' questions; distractors are sibling answers."""
+    pool: dict[str, list[dict]] = {}
+    for f in facts:
+        m = f.get("meta") or {}
+        if m.get("preview_url") and m.get("answer"):
+            pool.setdefault(f["category"], []).append(f)
+
+    out = []
+    for category, rows in pool.items():
+        answers = list({r["meta"]["answer"] for r in rows})
+        if len(answers) < 4:
+            continue
+        for f in rows:
+            answer = f["meta"]["answer"]
+            distractors = rng.sample([a for a in answers if a != answer], 3)
+            choices = distractors + [answer]
+            rng.shuffle(choices)
+            out.append(
+                {
+                    "content_hash": content_hash("audio_guess", f["content_hash"]),
+                    "qtype": "audio_guess",
+                    "category": category,
+                    "difficulty": f.get("_difficulty", 3),
+                    "prompt": f.get("meta", {}).get("audio_prompt", "Name the artist of this track."),
+                    "correct": answer,
+                    "choices": choices,
+                    "audio_url": f["meta"]["preview_url"],
+                    "image_url": f.get("image_url"),
+                    "source_url": f.get("source_url"),
+                }
+            )
+    return out
+
+
+# prompt per image kind
+_IMAGE_PROMPT = {
+    "flag": "Which country does this flag belong to?",
+    "poster": "Name this film.",
+    "title": "Name this title.",
+}
+
+
+def forge_image_guess(facts: list[dict], rng: random.Random) -> list[dict]:
+    """THE GALLERY: facts with an image_url + meta.answer (+ answer_field naming the
+    kind) become blur-reveal 'name what you see' questions; sibling distractors."""
+    pool: dict[tuple[str, str], list[dict]] = {}
+    for f in facts:
+        m = f.get("meta") or {}
+        if f.get("image_url") and m.get("answer") and m.get("answer_field") in _IMAGE_PROMPT:
+            pool.setdefault((f["category"], m["answer_field"]), []).append(f)
+
+    out = []
+    for (category, field), rows in pool.items():
+        answers = list({r["meta"]["answer"] for r in rows})
+        if len(answers) < 4:
+            continue
+        for f in rows:
+            answer = f["meta"]["answer"]
+            distractors = rng.sample([a for a in answers if a != answer], 3)
+            choices = distractors + [answer]
+            rng.shuffle(choices)
+            out.append(
+                {
+                    "content_hash": content_hash("image_guess", f["content_hash"]),
+                    "qtype": "image_guess",
+                    "category": category,
+                    "difficulty": f.get("_difficulty", 3),
+                    "prompt": _IMAGE_PROMPT[field],
+                    "correct": answer,
+                    "choices": choices,
+                    "image_url": f["image_url"],
+                    "source_url": f.get("source_url"),
+                }
+            )
+    return out
+
+
+def forge_connections(facts: list[dict], rng: random.Random, max_puzzles: int = 3) -> list[dict]:
+    """THE CONNECTIONS: assemble 16-tile grids from four distinct answer clusters
+    (same category+answer_field), four members each. Best-effort — the curated
+    seed bank carries the polished daily puzzles."""
+    clusters: dict[tuple[str, str], set[str]] = {}
+    for f in facts:
+        m = f.get("meta") or {}
+        field, answer = m.get("answer_field"), m.get("answer")
+        if field and answer:
+            clusters.setdefault((f["category"], field), set()).add(answer)
+
+    usable = [(k, sorted(v)) for k, v in clusters.items() if len(v) >= 4]
+    out = []
+    for _ in range(max_puzzles):
+        if len(usable) < 4:
+            break
+        rng.shuffle(usable)
+        chosen = usable[:4]
+        groups = []
+        for tier, ((category, field), answers) in enumerate(chosen, start=1):
+            members = rng.sample(answers, 4)
+            groups.append(
+                {"label": f"{category} · {field}", "members": members, "difficulty": tier}
+            )
+        members_flat = [m for g in groups for m in g["members"]]
+        out.append(
+            {
+                "content_hash": content_hash("connections", *sorted(members_flat)),
+                "qtype": "connections",
+                "category": "wildcard",
+                "difficulty": 3,
+                "prompt": "Sort these sixteen into four groups of four.",
+                "correct": "",
+                "groups": groups,
+                "source_url": None,
+            }
+        )
+    return out
+
+
 def forge_where(facts: list[dict]) -> list[dict]:
     """THE MAP: the fact text says WHAT the place is; the skill is pinning it.
     The text naming the answer is fine — coordinates are the hidden truth."""
@@ -266,6 +385,9 @@ def forge_all(facts: list[dict], seed: int = 0) -> list[dict]:
         + forge_multiple_choice(facts, rng)
         + forge_clues(facts)
         + forge_where(facts)
+        + forge_audio_guess(facts, rng)
+        + forge_image_guess(facts, rng)
+        + forge_connections(facts, rng)
     )
     # attach fact provenance where the column exists
     return questions

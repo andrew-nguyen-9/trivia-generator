@@ -77,6 +77,16 @@ def movie_facts(m: dict, api_key: str) -> list[dict]:
                 meta={"answer_field": "director", "answer": director},
             )
         )
+    # THE GALLERY: name the film from its poster (image_guess fuel)
+    if poster:
+        out.append(
+            make_fact(
+                source="tmdb", category="screen", subject=title,
+                fact_text=f"A promotional poster for the film “{title}” ({year}).",
+                image_url=poster, source_url=url, popularity=pop,
+                meta={"answer_field": "poster", "answer": title},
+            )
+        )
     return out
 
 

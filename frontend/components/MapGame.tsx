@@ -1,20 +1,63 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import WorldMap from "@/components/WorldMap";
+import GoogleMap from "@/components/GoogleMap";
 import { haversineKm, mapPoints, type LatLng } from "@/lib/geo";
 import { CATEGORY_HEX, CATEGORY_LABEL, type Question } from "@/lib/types";
+import { usePractice } from "@/lib/usePractice";
+import PracticeBar from "@/components/PracticeBar";
+import { shuffled } from "@/lib/rng";
+import { sfx } from "@/lib/sound";
+import { haptic } from "@/lib/haptics";
+import { useProfile, type Achievement } from "@/lib/profile";
+import Confetti from "@/components/Confetti";
+import AchievementToast from "@/components/AchievementToast";
+import LeaderboardPanel from "@/components/LeaderboardPanel";
 
-export default function MapGame({ rounds }: { rounds: Question[] }) {
+// The Google Map component activates when this env var is present at build time.
+const USE_GOOGLE = Boolean(process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY);
+
+export default function MapGame({
+  rounds: initialRounds,
+  pool,
+}: {
+  rounds: Question[];
+  pool?: Question[];
+}) {
+  const { practiceMode, togglePractice, saved, saveQ, removeQ, isSaved } = usePractice();
+  const { record } = useProfile();
+
+  const [rounds, setRounds] = useState(initialRounds);
   const [i, setI] = useState(0);
   const [guess, setGuess] = useState<LatLng | null>(null);
   const [locked, setLocked] = useState(false);
   const [score, setScore] = useState(0);
   const [done, setDone] = useState(false);
+  const [burst, setBurst] = useState(0);
+  const [toasts, setToasts] = useState<Achievement[]>([]);
+  const recorded = useRef(false);
+
+  useEffect(() => {
+    if (!done || recorded.current) return;
+    recorded.current = true;
+    const win = score >= rounds.length * 55;
+    if (win) {
+      sfx.win();
+      haptic.win();
+      setBurst((b) => b + 1);
+    } else {
+      sfx.lose();
+    }
+    const unlocked = record({ room: "map", score, xp: score });
+    if (unlocked.length) setToasts(unlocked);
+  }, [done, score, rounds.length, record]);
 
   if (rounds.length === 0) {
-    return <p className="text-muted">The bank is still warming up — no pinnable facts yet.</p>;
+    return (
+      <p className="text-muted">The bank is still warming up — no pinnable facts yet.</p>
+    );
   }
 
   const q = rounds[i];
@@ -27,6 +70,14 @@ export default function MapGame({ rounds }: { rounds: Question[] }) {
     if (!guess) return;
     setLocked(true);
     setScore((s) => s + pts);
+    if (pts >= 70) {
+      sfx.correct();
+      haptic.correct();
+    } else if (pts >= 35) {
+      sfx.select();
+    } else {
+      sfx.wrong();
+    }
   }
 
   function next() {
@@ -39,25 +90,56 @@ export default function MapGame({ rounds }: { rounds: Question[] }) {
     setLocked(false);
   }
 
+  function restart(newRounds?: Question[]) {
+    const r = newRounds ?? rounds;
+    setRounds(r);
+    setI(0);
+    setGuess(null);
+    setLocked(false);
+    setScore(0);
+    setDone(false);
+    recorded.current = false;
+  }
+
+  const MapComponent = USE_GOOGLE ? GoogleMap : WorldMap;
+
   if (done) {
     return (
-      <div className="flex min-h-[60vh] flex-col items-center justify-center text-center">
-        <p className="microlabel">final score</p>
-        <p className="display tabular text-8xl text-geography">{score}</p>
-        <p className="mt-2 text-muted">out of {rounds.length * 100}</p>
-        <button
-          onClick={() => {
-            setI(0);
-            setGuess(null);
-            setLocked(false);
-            setScore(0);
-            setDone(false);
-          }}
-          className="microlabel mt-8 rounded-full border border-ink px-6 py-3 transition hover:bg-ink hover:text-bg"
-        >
-          new expedition
-        </button>
-      </div>
+      <>
+        <Confetti trigger={burst} />
+        <AchievementToast queue={toasts} />
+        <div className="flex min-h-[60vh] flex-col items-center justify-center text-center">
+          <p className="microlabel">final score</p>
+          <p className="display tabular text-8xl text-geography">{score}</p>
+          <p className="mt-2 text-muted">out of {rounds.length * 100}</p>
+          <LeaderboardPanel room="map" score={score} accent="geography" />
+          <div className="mt-8 flex gap-3">
+            <button
+              onClick={() => restart()}
+              className="microlabel rounded-full border border-ink px-6 py-3 transition hover:bg-ink hover:text-bg"
+            >
+              new expedition
+            </button>
+            {practiceMode && pool && pool.length > 5 && (
+              <button
+                onClick={() => {
+                  const fresh = shuffled([...pool], () => Math.random()).slice(0, 5);
+                  restart(fresh);
+                }}
+                className="microlabel rounded-full border border-wildcard px-6 py-3 text-wildcard transition hover:bg-wildcard hover:text-bg"
+              >
+                ↻ new round
+              </button>
+            )}
+          </div>
+        </div>
+        <PracticeBar
+          practiceMode={practiceMode}
+          onToggle={togglePractice}
+          saved={saved}
+          onRemove={removeQ}
+        />
+      </>
     );
   }
 
@@ -66,7 +148,9 @@ export default function MapGame({ rounds }: { rounds: Question[] }) {
       <div className="flex items-baseline justify-between">
         <h1 className="display text-4xl sm:text-5xl">The Map</h1>
         <div className="text-right">
-          <div className="microlabel">round {i + 1}/{rounds.length} · score</div>
+          <div className="microlabel">
+            round {i + 1}/{rounds.length} · score
+          </div>
           <div className="tabular text-3xl font-black text-geography">{score}</div>
         </div>
       </div>
@@ -79,7 +163,7 @@ export default function MapGame({ rounds }: { rounds: Question[] }) {
       </div>
 
       <div className="mt-4">
-        <WorldMap
+        <MapComponent
           guess={guess}
           truth={locked ? truth : null}
           onPick={setGuess}
@@ -90,7 +174,9 @@ export default function MapGame({ rounds }: { rounds: Question[] }) {
 
       {!locked ? (
         <div className="mt-5 flex items-center justify-center gap-4">
-          <p className="microlabel">{guess ? "pin placed — sure?" : "click the map to drop your pin"}</p>
+          <p className="microlabel">
+            {guess ? "pin placed — sure?" : "click the map to drop your pin"}
+          </p>
           <button
             onClick={lock}
             disabled={!guess}
@@ -107,13 +193,35 @@ export default function MapGame({ rounds }: { rounds: Question[] }) {
         >
           <p className="text-muted">
             <span className="font-black text-ink">{q.correct}</span> was{" "}
-            <span className="tabular font-black text-ink">{km.toLocaleString()} km</span> from your pin
+            <span className="tabular font-black text-ink">
+              {km.toLocaleString()} km
+            </span>{" "}
+            from your pin
           </p>
           <p className="mt-1 text-2xl font-black text-geography">+{pts} pts</p>
           {q.source_url && (
-            <a href={q.source_url} target="_blank" rel="noreferrer" className="microlabel underline">
+            <a
+              href={q.source_url}
+              target="_blank"
+              rel="noreferrer"
+              className="microlabel underline"
+            >
               source
             </a>
+          )}
+          {practiceMode && (
+            <div className="mt-3">
+              <button
+                onClick={() => (isSaved(q) ? removeQ(q.prompt) : saveQ(q))}
+                className={`microlabel rounded-full border px-4 py-2 transition ${
+                  isSaved(q)
+                    ? "border-history text-history"
+                    : "border-line text-muted hover:border-history hover:text-history"
+                }`}
+              >
+                {isSaved(q) ? "★ saved" : "☆ save question"}
+              </button>
+            </div>
           )}
           <div>
             <button
@@ -125,6 +233,13 @@ export default function MapGame({ rounds }: { rounds: Question[] }) {
           </div>
         </motion.div>
       )}
+
+      <PracticeBar
+        practiceMode={practiceMode}
+        onToggle={togglePractice}
+        saved={saved}
+        onRemove={removeQ}
+      />
     </div>
   );
 }

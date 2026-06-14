@@ -1,4 +1,5 @@
 import Link from "next/link";
+import SoundToggle from "@/components/SoundToggle";
 import { CATEGORY_HEX } from "@/lib/types";
 import type { Category } from "@/lib/types";
 
@@ -18,7 +19,7 @@ export default function RoomShell({
       <div className="glow" style={{ background: CATEGORY_HEX[accent] }} aria-hidden />
       <header className="relative z-10 flex items-center justify-between">
         <span className="microlabel">{label}</span>
-        <span className="microlabel">parlor</span>
+        <SoundToggle />
       </header>
       <div className="relative z-10 mx-auto mt-6 max-w-5xl">{children}</div>
       <Link

@@ -54,6 +54,30 @@ def synthetic_facts() -> list[dict]:
             popularity=9.0 * i, source_url="https://example.com",
             meta={"answer_field": "capital", "answer": f"Capital {i}"},
         ))
+        # audio (Jukebox): a music fact carrying a preview clip + answer
+        facts.append(make_fact(
+            source="deezer", category="music", subject=f"Track {i}",
+            fact_text=f"A 30-second clip of a song by Artist {i}.",
+            image_url=f"https://example.com/cover{i}.jpg",
+            popularity=11.0 * i, source_url="https://example.com",
+            meta={"answer_field": "artist", "answer": f"Artist {i}",
+                  "preview_url": f"https://example.com/p{i}.mp3"},
+        ))
+        # image (Gallery): a screen poster + a geography flag
+        facts.append(make_fact(
+            source="tmdb", category="screen", subject=f"Movie {i}",
+            fact_text=f"A film poster for Movie {i}.",
+            image_url=f"https://image.tmdb.org/poster{i}.jpg",
+            popularity=7.0 * i, source_url="https://example.com",
+            meta={"answer_field": "title", "answer": f"Movie {i}"},
+        ))
+        facts.append(make_fact(
+            source="restcountries", category="geography", subject=f"Flagland {i}",
+            fact_text=f"The national flag of Flagland {i}.",
+            image_url=f"https://flagcdn.com/w320/f{i}.png",
+            popularity=6.0 * i, source_url="https://example.com",
+            meta={"answer_field": "flag", "answer": f"Flagland {i}"},
+        ))
     return facts
 
 
@@ -67,6 +91,26 @@ def main() -> None:
     check("forge produces multiple_choice", "multiple_choice" in types)
     check("forge produces clue", "clue" in types)
     check("forge produces where", "where" in types)
+    check("forge produces audio_guess", "audio_guess" in types)
+    check("forge produces image_guess", "image_guess" in types)
+    check("forge produces connections", "connections" in types)
+
+    for q in qs:
+        if q["qtype"] == "audio_guess":
+            check("audio_guess carries a clip + 4 choices",
+                  bool(q.get("audio_url")) and len(q["choices"]) == 4 and q["correct"] in q["choices"])
+            break
+    for q in qs:
+        if q["qtype"] == "image_guess":
+            check("image_guess carries an image + 4 choices",
+                  bool(q.get("image_url")) and len(q["choices"]) == 4 and q["correct"] in q["choices"])
+            break
+    for q in qs:
+        if q["qtype"] == "connections":
+            g = q.get("groups") or []
+            check("connections has 4 groups of 4",
+                  len(g) == 4 and all(len(grp["members"]) == 4 for grp in g))
+            break
 
     for q in qs:
         if q["qtype"] == "where":
@@ -127,6 +171,15 @@ def main() -> None:
                 ok = ok and all(q.get(k) is not None for k in ("value_a", "value_b", "subject_a", "subject_b", "unit"))
             if q["qtype"] == "where":
                 ok = ok and -90 <= q.get("lat", 999) <= 90 and -180 <= q.get("lng", 999) <= 180
+            if q["qtype"] == "audio_guess":
+                ok = ok and isinstance(q.get("choices"), list) and q["correct"] in q["choices"]
+                ok = ok and (bool(q.get("audio_url")) or bool(q.get("melody")))
+            if q["qtype"] == "image_guess":
+                ok = ok and isinstance(q.get("choices"), list) and q["correct"] in q["choices"]
+                ok = ok and bool(q.get("image_url"))
+            if q["qtype"] == "connections":
+                g = q.get("groups") or []
+                ok = ok and len(g) == 4 and all(len(grp.get("members", [])) == 4 for grp in g)
             if not ok:
                 check("seed bank question shape", False, json.dumps(q)[:120])
                 break

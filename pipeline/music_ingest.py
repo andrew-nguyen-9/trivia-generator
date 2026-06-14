@@ -80,6 +80,30 @@ def facts_for_artist(artist: dict) -> list[dict]:
     return out
 
 
+def facts_for_track(track: dict) -> list[dict]:
+    """THE JUKEBOX: a chart track's 30-second preview clip → audio_guess fuel.
+    The answer is the artist (lots of sibling distractors from the same chart)."""
+    preview = track.get("preview")
+    artist = (track.get("artist") or {}).get("name")
+    title = track.get("title")
+    if not (preview and artist and title):
+        return []
+    cover = (track.get("album") or {}).get("cover_xl")
+    link = track.get("link") or f"https://www.deezer.com/track/{track['id']}"
+    return [
+        make_fact(
+            source="deezer", category="music", subject=title,
+            fact_text=f"A 30-second preview of “{title}” by {artist}.",
+            image_url=cover, source_url=link, popularity=50.0,
+            meta={
+                "answer_field": "artist", "answer": artist,
+                "preview_url": preview,
+                "audio_prompt": "Name the artist of this track.",
+            },
+        )
+    ]
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--limit", type=int, default=50)
@@ -102,6 +126,14 @@ def main() -> None:
             facts.extend(facts_for_artist(a))
         except Exception as e:  # one bad artist never kills the run
             console.print(f"[yellow]skip {a.get('name')}: {e}[/yellow]")
+
+    if not args.artist:  # chart tracks → Jukebox audio fuel
+        try:
+            tracks = get_json(f"{API}/chart/0/tracks", params={"limit": args.limit})
+            for t in tracks.get("data", []):
+                facts.extend(facts_for_track(t))
+        except Exception as e:
+            console.print(f"[yellow]skip chart tracks: {e}[/yellow]")
 
     dump_raw("deezer", facts)
     n = upsert_facts(get_supabase(), facts)

@@ -11,7 +11,23 @@ export type QType =
   | "year_guess"
   | "higher_lower"
   | "clue"
-  | "where";
+  | "where"
+  | "audio_guess"
+  | "image_guess"
+  | "connections";
+
+/** A single note in an offline synthesized melody (Jukebox, no audio files). */
+export interface Note {
+  n: string; // scientific pitch, e.g. "C4", "F#5", or "rest"
+  d: number; // duration in beats
+}
+
+/** One of the four hidden groups in a Connections puzzle. */
+export interface ConnectionGroup {
+  label: string;
+  members: string[]; // exactly 4
+  difficulty?: number; // 1 (easy/yellow) … 4 (tricky/purple)
+}
 
 export interface Question {
   qtype: QType;
@@ -30,6 +46,9 @@ export interface Question {
   lng?: number;
   image_url?: string | null;
   source_url?: string | null;
+  audio_url?: string | null; // Jukebox: streamed clip (Deezer preview)
+  melody?: Note[]; // Jukebox: offline synthesized tune (no audio file)
+  groups?: ConnectionGroup[]; // Connections puzzle
 }
 
 export const CATEGORIES: Category[] = [

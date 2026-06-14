@@ -11,7 +11,7 @@ export default async function MapPage() {
 
   return (
     <RoomShell label="room 05 — the map" accent="geography">
-      <MapGame rounds={rounds} />
+      <MapGame rounds={rounds} pool={pool} />
     </RoomShell>
   );
 }
