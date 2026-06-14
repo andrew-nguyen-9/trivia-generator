@@ -1,6 +1,6 @@
 # PARLOR — an after-dark house of trivia games
 
-Four trivia rooms over one question bank, forged nightly from **Wikipedia**,
+Ten trivia rooms over one question bank, forged nightly from **Wikipedia**,
 **Deezer**, **Sleeper/ESPN**, and **TMDB**. Third project in the family after
 [fantasy-football-tool](https://github.com/andrew-nguyen-9/fantasy-football-tool)
 and [music-festival-analyzer](https://github.com/andrew-nguyen-9/music-festival-analyzer),
@@ -8,15 +8,24 @@ sharing their architecture: Python ETL on GitHub Actions → Supabase → read-o
 Next.js — plus a new **dbt Core + DuckDB** transform layer (see
 `docs/RESEARCH_DATA_PLATFORM.md` for the why).
 
+Every room shares a dynamic layer: synthesized Web-Audio sound effects (no asset
+files — stays offline), confetti, haptics, an XP/achievements **profile** at
+`/profile`, and a global **leaderboard** (the sanctioned Supabase Edge Function
+write-path, with a local fallback so it works with no backend).
+
 ## The rooms
 
 | Room | Route | Game | Inspired by |
 |---|---|---|---|
-| The Board | `/board` | category board, $200–$1000 clues, daily double, same board for everyone each day | Jeopardy |
-| The Clock | `/clock` | drag a year slider, score by distance | WhenTaken |
+| The Board | `/board` | category board, $200–$1000 clues, daily double; easy (multiple-choice) or hard (free-text) | Jeopardy |
+| The Clock | `/clock` | drag a year slider, score by distance, optional decade hint | WhenTaken |
 | The Wedges | `/wedges` | fill six category wedges in 20 quickfire questions | Trivial Pursuit |
 | The Streak | `/streak` | higher/lower on real metrics, one miss ends the run | The Higher Lower Game |
-| The Map | `/map` | pin facts on an offline SVG world map, scored by the km | GeoGuessr |
+| The Map | `/map` | pin facts on a satellite Google map (or the offline SVG atlas), scored by the km | GeoGuessr |
+| The Jukebox | `/jukebox` | name that tune — offline synthesized melodies or Deezer previews | name-that-tune |
+| The Gallery | `/gallery` | name the flag/poster/place as it sharpens from a blur | visual quiz |
+| The Blitz | `/blitz` | 60-second multiple-choice sprint, combos buy time; keys 1–4; deck + difficulty | speed quiz |
+| The Connections | `/connections` | sort 16 tiles into 4 hidden groups, four mistakes | NYT Connections |
 | The Daily | `/daily` | one round from every room, daily, shareable emoji result | Wordle's daily loop |
 
 ## Quick start (zero backend needed)

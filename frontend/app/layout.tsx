@@ -4,7 +4,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "PARLOR — an after-dark house of trivia games",
   description:
-    "Four trivia rooms — The Board, The Clock, The Wedges, The Streak — forged nightly from Wikipedia, Deezer, Sleeper/ESPN and TMDB.",
+    "Ten trivia rooms — Board, Clock, Wedges, Streak, Map, Jukebox, Gallery, Blitz, Connections, Daily — forged nightly from Wikipedia, Deezer, Sleeper/ESPN and TMDB.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
