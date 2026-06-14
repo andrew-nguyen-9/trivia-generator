@@ -1,0 +1,457 @@
+{
+  "/Users/andrew/Documents/GitHub/trivia-generator/databricks/jobs/daily_mirror.json": {
+    "mtime": 1781295621.8369894,
+    "ast_hash": "22d8486ba41cc88c9d1d1ba9998db396",
+    "semantic_hash": "22d8486ba41cc88c9d1d1ba9998db396"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/databricks/notebooks/medallion_mirror.py": {
+    "mtime": 1781295621.8371253,
+    "ast_hash": "f7eea6e6b6e0befd35bbc9b0e7913f52",
+    "semantic_hash": "f7eea6e6b6e0befd35bbc9b0e7913f52"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/db/migrations/20260612_phase2_map_daily.sql": {
+    "mtime": 1781295621.8372877,
+    "ast_hash": "d3fc68fa8ae7dc32de509b1a8c298f22",
+    "semantic_hash": "d3fc68fa8ae7dc32de509b1a8c298f22"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/db/migrations/20260613_phase3_rooms_leaderboard.sql": {
+    "mtime": 1781409450.5702827,
+    "ast_hash": "1c35b33804632e85782a82235a846ae5",
+    "semantic_hash": "1c35b33804632e85782a82235a846ae5"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/db/schema.sql": {
+    "mtime": 1781409450.5705302,
+    "ast_hash": "f3f248b5e5a9d27639c13ddc7ed62887",
+    "semantic_hash": "f3f248b5e5a9d27639c13ddc7ed62887"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/frontend/app/blitz/page.tsx": {
+    "mtime": 1781409450.5711858,
+    "ast_hash": "02ad59e913b85782644dcb9e65a81b46",
+    "semantic_hash": "02ad59e913b85782644dcb9e65a81b46"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/frontend/app/board/page.tsx": {
+    "mtime": 1781409450.5713449,
+    "ast_hash": "3f4578193ad056b9de0d68c2f3409265",
+    "semantic_hash": "3f4578193ad056b9de0d68c2f3409265"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/frontend/app/clock/page.tsx": {
+    "mtime": 1781409450.571483,
+    "ast_hash": "e558889d34e633df6c74989025bd50c8",
+    "semantic_hash": "e558889d34e633df6c74989025bd50c8"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/frontend/app/connections/page.tsx": {
+    "mtime": 1781409450.571615,
+    "ast_hash": "e0252546ec7a5f81876d46162544ce01",
+    "semantic_hash": "e0252546ec7a5f81876d46162544ce01"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/frontend/app/daily/page.tsx": {
+    "mtime": 1781295621.838387,
+    "ast_hash": "149a5a578f3e2a2b77231de026bc701d",
+    "semantic_hash": "149a5a578f3e2a2b77231de026bc701d"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/frontend/app/gallery/page.tsx": {
+    "mtime": 1781409450.5717444,
+    "ast_hash": "aa2118233c9a1b886d7dd340595b649c",
+    "semantic_hash": "aa2118233c9a1b886d7dd340595b649c"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/frontend/app/jukebox/page.tsx": {
+    "mtime": 1781409450.5718634,
+    "ast_hash": "eb4fd72f13c89ea430c6a0fbcbfb289d",
+    "semantic_hash": "eb4fd72f13c89ea430c6a0fbcbfb289d"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/frontend/app/layout.tsx": {
+    "mtime": 1781409450.5720088,
+    "ast_hash": "5d424017bb2d584357e3fb58923bdcd8",
+    "semantic_hash": "5d424017bb2d584357e3fb58923bdcd8"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/frontend/app/lobby/page.tsx": {
+    "mtime": 1781409450.5721328,
+    "ast_hash": "f7420dde4747157aa92b1f1bc8cb1dd3",
+    "semantic_hash": "f7420dde4747157aa92b1f1bc8cb1dd3"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/frontend/app/map/page.tsx": {
+    "mtime": 1781409450.5722907,
+    "ast_hash": "b80c057146d8d0547a0369ebf18fdea0",
+    "semantic_hash": "b80c057146d8d0547a0369ebf18fdea0"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/frontend/app/page.tsx": {
+    "mtime": 1781409450.5724378,
+    "ast_hash": "9dd040c2f827c79484fdaf4ec1cc0e5d",
+    "semantic_hash": "9dd040c2f827c79484fdaf4ec1cc0e5d"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/frontend/app/profile/page.tsx": {
+    "mtime": 1781409450.572576,
+    "ast_hash": "76ddfdeb6f84969d80948f33f8eec6ea",
+    "semantic_hash": "76ddfdeb6f84969d80948f33f8eec6ea"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/frontend/app/streak/page.tsx": {
+    "mtime": 1781295621.8388722,
+    "ast_hash": "6b021ae3fb2707bf303e212dfd6813d3",
+    "semantic_hash": "6b021ae3fb2707bf303e212dfd6813d3"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/frontend/app/template.tsx": {
+    "mtime": 1781409450.572663,
+    "ast_hash": "e14c9d038ab9953d5f64154ff499cfcf",
+    "semantic_hash": "e14c9d038ab9953d5f64154ff499cfcf"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/frontend/app/wedges/page.tsx": {
+    "mtime": 1781295621.8389876,
+    "ast_hash": "f2d33b4631e1ae0324b25af8186b2071",
+    "semantic_hash": "f2d33b4631e1ae0324b25af8186b2071"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/frontend/components/AchievementToast.tsx": {
+    "mtime": 1781409450.5727744,
+    "ast_hash": "cfc807d75af483260e8d0576d0cae726",
+    "semantic_hash": "cfc807d75af483260e8d0576d0cae726"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/frontend/components/BlitzGame.tsx": {
+    "mtime": 1781409450.5729566,
+    "ast_hash": "1c5a319ae2948f813d822a8de2d6f86b",
+    "semantic_hash": "1c5a319ae2948f813d822a8de2d6f86b"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/frontend/components/BoardGame.tsx": {
+    "mtime": 1781409450.573161,
+    "ast_hash": "b61394de00466c64d3a9a99829671c05",
+    "semantic_hash": "b61394de00466c64d3a9a99829671c05"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/frontend/components/ClockGame.tsx": {
+    "mtime": 1781409450.573387,
+    "ast_hash": "38a16d8d1006f4a22588f4d4a3283c8a",
+    "semantic_hash": "38a16d8d1006f4a22588f4d4a3283c8a"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/frontend/components/Confetti.tsx": {
+    "mtime": 1781409450.5734706,
+    "ast_hash": "c76c228f98a54055d1923ce9c7269887",
+    "semantic_hash": "c76c228f98a54055d1923ce9c7269887"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/frontend/components/ConnectionsGame.tsx": {
+    "mtime": 1781409450.5736976,
+    "ast_hash": "73c51908acc2765a35c159ea9feef5c6",
+    "semantic_hash": "73c51908acc2765a35c159ea9feef5c6"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/frontend/components/DailyGame.tsx": {
+    "mtime": 1781295621.8393397,
+    "ast_hash": "e638d87ff49b0ff11a50d8ae2fe54b72",
+    "semantic_hash": "e638d87ff49b0ff11a50d8ae2fe54b72"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/frontend/components/GalleryGame.tsx": {
+    "mtime": 1781409450.5737972,
+    "ast_hash": "1c157e241dccff3ffa36dc49740ca95f",
+    "semantic_hash": "1c157e241dccff3ffa36dc49740ca95f"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/frontend/components/GoogleMap.tsx": {
+    "mtime": 1781409450.5738862,
+    "ast_hash": "93af57cb44cf1391834e4aebc81bda70",
+    "semantic_hash": "93af57cb44cf1391834e4aebc81bda70"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/frontend/components/JukeboxGame.tsx": {
+    "mtime": 1781409450.5739942,
+    "ast_hash": "2472c4168c7b081df3ab22d49ce94166",
+    "semantic_hash": "2472c4168c7b081df3ab22d49ce94166"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/frontend/components/LeaderboardPanel.tsx": {
+    "mtime": 1781409450.574081,
+    "ast_hash": "532fafb9a8c422c80dedb9212bb6163b",
+    "semantic_hash": "532fafb9a8c422c80dedb9212bb6163b"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/frontend/components/LobbyGame.tsx": {
+    "mtime": 1781409450.5742033,
+    "ast_hash": "c042fea6c7a233b1c654384a72259ac7",
+    "semantic_hash": "c042fea6c7a233b1c654384a72259ac7"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/frontend/components/MapGame.tsx": {
+    "mtime": 1781409450.5744162,
+    "ast_hash": "872cf4b60143b0ac9490edf469a14d2e",
+    "semantic_hash": "872cf4b60143b0ac9490edf469a14d2e"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/frontend/components/Marquee.tsx": {
+    "mtime": 1781295621.839526,
+    "ast_hash": "1cf1fc74352957f4afc6758ed72bd7bb",
+    "semantic_hash": "1cf1fc74352957f4afc6758ed72bd7bb"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/frontend/components/PracticeBar.tsx": {
+    "mtime": 1781409450.574508,
+    "ast_hash": "f97b378d519ae337fed607d2814b5fcf",
+    "semantic_hash": "f97b378d519ae337fed607d2814b5fcf"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/frontend/components/ProfileDashboard.tsx": {
+    "mtime": 1781409450.5745988,
+    "ast_hash": "7faab0171efcdaed0c13526198a42ce0",
+    "semantic_hash": "7faab0171efcdaed0c13526198a42ce0"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/frontend/components/RoomCard.tsx": {
+    "mtime": 1781295621.8396518,
+    "ast_hash": "ebcb59ca1cfa13a1c72b1eeb3ce412a4",
+    "semantic_hash": "ebcb59ca1cfa13a1c72b1eeb3ce412a4"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/frontend/components/RoomFilters.tsx": {
+    "mtime": 1781409450.5746887,
+    "ast_hash": "34a3c0418b8e77493c6f0a0f6c6831c6",
+    "semantic_hash": "34a3c0418b8e77493c6f0a0f6c6831c6"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/frontend/components/RoomShell.tsx": {
+    "mtime": 1781409450.5748181,
+    "ast_hash": "1d3cf74b0b235a4dc05a288b26af066d",
+    "semantic_hash": "1d3cf74b0b235a4dc05a288b26af066d"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/frontend/components/SoundToggle.tsx": {
+    "mtime": 1781409450.5748985,
+    "ast_hash": "f450dbfe1050fcdf40e9f38ba453fe66",
+    "semantic_hash": "f450dbfe1050fcdf40e9f38ba453fe66"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/frontend/components/StreakGame.tsx": {
+    "mtime": 1781409450.5751178,
+    "ast_hash": "9d638940842fa7f5a227d38240f9a5d0",
+    "semantic_hash": "9d638940842fa7f5a227d38240f9a5d0"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/frontend/components/WedgesGame.tsx": {
+    "mtime": 1781409450.5754685,
+    "ast_hash": "947c2a29337eba867fb51dc19cfb001b",
+    "semantic_hash": "947c2a29337eba867fb51dc19cfb001b"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/frontend/components/WorldMap.tsx": {
+    "mtime": 1781295621.840028,
+    "ast_hash": "896dad09c334bbaa9c30d4ab1753f2eb",
+    "semantic_hash": "896dad09c334bbaa9c30d4ab1753f2eb"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/frontend/lib/decks.ts": {
+    "mtime": 1781409450.5755615,
+    "ast_hash": "b891d449c56670bc0fba20c8b626a995",
+    "semantic_hash": "b891d449c56670bc0fba20c8b626a995"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/frontend/lib/fuzzy.ts": {
+    "mtime": 1781409450.5756426,
+    "ast_hash": "0d70b0139bdf29d5f8b42b1f7d5b6b55",
+    "semantic_hash": "0d70b0139bdf29d5f8b42b1f7d5b6b55"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/frontend/lib/geo.ts": {
+    "mtime": 1781295621.840157,
+    "ast_hash": "db873befed6eceb008ee183e70a82133",
+    "semantic_hash": "db873befed6eceb008ee183e70a82133"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/frontend/lib/haptics.ts": {
+    "mtime": 1781409450.5757236,
+    "ast_hash": "cbd92c79f7c2d1400c3f7822047ae875",
+    "semantic_hash": "cbd92c79f7c2d1400c3f7822047ae875"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/frontend/lib/leaderboard.ts": {
+    "mtime": 1781409450.5758145,
+    "ast_hash": "dcd43c03e71fdeb709edb551db8a2bfb",
+    "semantic_hash": "dcd43c03e71fdeb709edb551db8a2bfb"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/frontend/lib/lobby.ts": {
+    "mtime": 1781409450.5758946,
+    "ast_hash": "36e2cc66466418651fcc12b21018975d",
+    "semantic_hash": "36e2cc66466418651fcc12b21018975d"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/frontend/lib/profile.ts": {
+    "mtime": 1781409450.5759902,
+    "ast_hash": "649dc16c3f12c02f663874cb906e95b2",
+    "semantic_hash": "649dc16c3f12c02f663874cb906e95b2"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/frontend/lib/queries.ts": {
+    "mtime": 1781409450.5761235,
+    "ast_hash": "1d1222a420961cfcde566a50511f3698",
+    "semantic_hash": "1d1222a420961cfcde566a50511f3698"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/frontend/lib/rng.ts": {
+    "mtime": 1781295621.8403087,
+    "ast_hash": "3fcc94317a217cbc6c16bf06435c62af",
+    "semantic_hash": "3fcc94317a217cbc6c16bf06435c62af"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/frontend/lib/sound.ts": {
+    "mtime": 1781409450.5762148,
+    "ast_hash": "62755df5cb100fb397e326e628579f1b",
+    "semantic_hash": "62755df5cb100fb397e326e628579f1b"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/frontend/lib/supabase.ts": {
+    "mtime": 1781295621.840384,
+    "ast_hash": "ad093302a1ccff4346e349c81e903332",
+    "semantic_hash": "ad093302a1ccff4346e349c81e903332"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/frontend/lib/types.ts": {
+    "mtime": 1781409450.5763493,
+    "ast_hash": "42485e1920d3726242b7048940ecf7e5",
+    "semantic_hash": "42485e1920d3726242b7048940ecf7e5"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/frontend/lib/usePractice.ts": {
+    "mtime": 1781409450.5765553,
+    "ast_hash": "cdc8cfe8dccd5d358f5059e34c2029a6",
+    "semantic_hash": "cdc8cfe8dccd5d358f5059e34c2029a6"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/frontend/next-env.d.ts": {
+    "mtime": 1781295621.8405387,
+    "ast_hash": "b5ed9dd8b4c5ba8e5ab8e6a379c15838",
+    "semantic_hash": "b5ed9dd8b4c5ba8e5ab8e6a379c15838"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/frontend/next.config.mjs": {
+    "mtime": 1781295621.8406203,
+    "ast_hash": "4cf34b6ed280f6437eec39f91ab11a93",
+    "semantic_hash": "4cf34b6ed280f6437eec39f91ab11a93"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/frontend/package.json": {
+    "mtime": 1781409450.577159,
+    "ast_hash": "293e10381256986809a589477f2d9c98",
+    "semantic_hash": "293e10381256986809a589477f2d9c98"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/frontend/postcss.config.mjs": {
+    "mtime": 1781295621.841017,
+    "ast_hash": "c735540bb63936a123bc867d950c9f69",
+    "semantic_hash": "c735540bb63936a123bc867d950c9f69"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/frontend/public/seed-questions.json": {
+    "mtime": 1781409450.5775683,
+    "ast_hash": "c0dc3c0a17b66b000380834061c335eb",
+    "semantic_hash": "c0dc3c0a17b66b000380834061c335eb"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/frontend/tailwind.config.ts": {
+    "mtime": 1781295621.8412957,
+    "ast_hash": "2766efec93c92bdec065634228066777",
+    "semantic_hash": "2766efec93c92bdec065634228066777"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/frontend/tsconfig.json": {
+    "mtime": 1781295621.8413918,
+    "ast_hash": "5f6fee9dd4e02643c6c51a291a579ae4",
+    "semantic_hash": "5f6fee9dd4e02643c6c51a291a579ae4"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/pipeline/common.py": {
+    "mtime": 1781297068.6537068,
+    "ast_hash": "761e97f4eace93d1318b17fc1d61e922",
+    "semantic_hash": "761e97f4eace93d1318b17fc1d61e922"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/pipeline/export_seed.py": {
+    "mtime": 1781409450.5777223,
+    "ast_hash": "4d35e9d9c2886266fbaa6553dda9708f",
+    "semantic_hash": "4d35e9d9c2886266fbaa6553dda9708f"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/pipeline/geo_ingest.py": {
+    "mtime": 1781409450.577851,
+    "ast_hash": "826bb53643251134120bc653e8c53fdc",
+    "semantic_hash": "826bb53643251134120bc653e8c53fdc"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/pipeline/music_ingest.py": {
+    "mtime": 1781409450.578,
+    "ast_hash": "519c727ad31eeaeadf47498200408e48",
+    "semantic_hash": "519c727ad31eeaeadf47498200408e48"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/pipeline/question_forge.py": {
+    "mtime": 1781409450.5782526,
+    "ast_hash": "fd7cc8f9d2596eef67a7b628cad52140",
+    "semantic_hash": "fd7cc8f9d2596eef67a7b628cad52140"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/pipeline/screen_ingest.py": {
+    "mtime": 1781409450.5784185,
+    "ast_hash": "ce8821a56d2a37b9fed496e4f3727aef",
+    "semantic_hash": "ce8821a56d2a37b9fed496e4f3727aef"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/pipeline/selftest.py": {
+    "mtime": 1781409450.5787237,
+    "ast_hash": "bab472679869f4d72068e17d2480965d",
+    "semantic_hash": "bab472679869f4d72068e17d2480965d"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/pipeline/sports_ingest.py": {
+    "mtime": 1781295621.8422668,
+    "ast_hash": "3abc82f447b48f7a48ae7621dac53e5a",
+    "semantic_hash": "3abc82f447b48f7a48ae7621dac53e5a"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/pipeline/wikipedia_ingest.py": {
+    "mtime": 1781295621.8423452,
+    "ast_hash": "f0a60760622ce4f664e33900de954132",
+    "semantic_hash": "f0a60760622ce4f664e33900de954132"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/supabase/functions/submit-score/index.ts": {
+    "mtime": 1781409450.5789711,
+    "ast_hash": "8563856b7f4fd19a549f42e8cef1237d",
+    "semantic_hash": "8563856b7f4fd19a549f42e8cef1237d"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/transform/models/marts/mart_category_stats.sql": {
+    "mtime": 1781295621.8426516,
+    "ast_hash": "4d1ee2b16e5d5eb30fe71e5f20afeed4",
+    "semantic_hash": "4d1ee2b16e5d5eb30fe71e5f20afeed4"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/transform/models/marts/mart_question_bank.sql": {
+    "mtime": 1781295621.842729,
+    "ast_hash": "4caf2499a3b91cb8532d3ac245867759",
+    "semantic_hash": "4caf2499a3b91cb8532d3ac245867759"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/transform/models/staging/stg_facts.sql": {
+    "mtime": 1781295621.8430045,
+    "ast_hash": "5da5258e287f954d6c7d36813a948e7a",
+    "semantic_hash": "5da5258e287f954d6c7d36813a948e7a"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/.github/workflows/etl_daily.yml": {
+    "mtime": 1781297068.6514142,
+    "ast_hash": "9c4753c1037248d104c40e39efdd9c8a",
+    "semantic_hash": "9c4753c1037248d104c40e39efdd9c8a"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/CLAUDE.md": {
+    "mtime": 1781297068.651879,
+    "ast_hash": "5050f3f02c7d6b5226ffda595c39f13f",
+    "semantic_hash": "5050f3f02c7d6b5226ffda595c39f13f"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/README.md": {
+    "mtime": 1781409450.570182,
+    "ast_hash": "d832fd2e6bd7f0a49d4d8b3b114d8e01",
+    "semantic_hash": "d832fd2e6bd7f0a49d4d8b3b114d8e01"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/databricks/README.md": {
+    "mtime": 1781297068.6526232,
+    "ast_hash": "cab389f69fd2f6a932ce2dacc02f25ce",
+    "semantic_hash": "cab389f69fd2f6a932ce2dacc02f25ce"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/docs/ARCHITECTURE.md": {
+    "mtime": 1781297068.6529984,
+    "ast_hash": "857295dd3f294f3e6d80301af3d236bb",
+    "semantic_hash": "857295dd3f294f3e6d80301af3d236bb"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/docs/GAME_MODES.md": {
+    "mtime": 1781409450.5707998,
+    "ast_hash": "aaa32476d05c1be0feeb34d69247fb04",
+    "semantic_hash": "aaa32476d05c1be0feeb34d69247fb04"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/docs/PHASE3_PLAN.md": {
+    "mtime": 1781409450.5710073,
+    "ast_hash": "e39f3c8239c7a67e829973334f41948a",
+    "semantic_hash": "e39f3c8239c7a67e829973334f41948a"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/docs/RESEARCH_DATA_PLATFORM.md": {
+    "mtime": 1781297068.6532516,
+    "ast_hash": "2555c860215591a6d86c6c79c91ecee8",
+    "semantic_hash": "2555c860215591a6d86c6c79c91ecee8"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/docs/RESEARCH_TRIVIA_SOURCES.md": {
+    "mtime": 1781295621.8378375,
+    "ast_hash": "aae62bd920f9458b70c312e7cda49bab",
+    "semantic_hash": "aae62bd920f9458b70c312e7cda49bab"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/docs/UI_SPEC.md": {
+    "mtime": 1781295621.8379323,
+    "ast_hash": "66fdce02b99afa43f65f692fa89a039f",
+    "semantic_hash": "66fdce02b99afa43f65f692fa89a039f"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/pipeline/requirements.txt": {
+    "mtime": 1781295621.8420072,
+    "ast_hash": "dd6fcae341b2d2499cf56a5558b69445",
+    "semantic_hash": "dd6fcae341b2d2499cf56a5558b69445"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/transform/dbt_project.yml": {
+    "mtime": 1781295621.84248,
+    "ast_hash": "0a06dfe9d2aa4a442c7480f9292f65be",
+    "semantic_hash": "0a06dfe9d2aa4a442c7480f9292f65be"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/transform/models/marts/schema.yml": {
+    "mtime": 1781295621.8428085,
+    "ast_hash": "d87f97ce2c52c2ce3c772e80c8115590",
+    "semantic_hash": "d87f97ce2c52c2ce3c772e80c8115590"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/transform/models/staging/schema.yml": {
+    "mtime": 1781295621.8429275,
+    "ast_hash": "6a900f1af3c27dcf15ccc9afbf72bf45",
+    "semantic_hash": "6a900f1af3c27dcf15ccc9afbf72bf45"
+  },
+  "/Users/andrew/Documents/GitHub/trivia-generator/transform/profiles.yml": {
+    "mtime": 1781295621.8430738,
+    "ast_hash": "eb0fe573ea6c18aba09a0c4badccfbfd",
+    "semantic_hash": "eb0fe573ea6c18aba09a0c4badccfbfd"
+  }
+}
