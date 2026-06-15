@@ -1,8 +1,8 @@
-requests==2.32.3
+requests==2.33.0
 supabase==2.15.0
 tenacity==9.0.0
 rich==13.9.4
-python-dotenv==1.0.1
+python-dotenv==1.2.2
 python-slugify==8.0.4
 dbt-core==1.9.4
 dbt-duckdb==1.9.2
