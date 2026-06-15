@@ -8,6 +8,11 @@ Facts produced:
 - Sleeper trending players → topical higher_lower ("waiver adds in 24h") + MC (college)
 - ESPN teams              → MC fuel (venue, location)
 
+API efficiency (Phase 6): the full player dict (/v1/players/nfl, ~50-100 MB) is
+now cached to data/cache/sleeper_players.json and refreshed at most once per week.
+The trending call is always fresh (it drives the questions). This cuts ~300 MB/week
+of redundant transfer.
+
 Run:
     python sports_ingest.py
     python sports_ingest.py --trending-limit 40
@@ -19,14 +24,41 @@ from __future__ import annotations
 
 import argparse
 
-from common import console, dump_raw, get_json, get_supabase, make_fact, upsert_facts
+from common import (
+    CACHE_DIR,
+    console,
+    dump_raw,
+    get_json,
+    get_db,
+    load_json_cache,
+    make_fact,
+    save_json_cache,
+    upsert_facts,
+)
 
 SLEEPER = "https://api.sleeper.app/v1"
 ESPN = "https://site.api.espn.com/apis/site/v2/sports/football/nfl"
 
+_PLAYERS_CACHE = CACHE_DIR / "sleeper_players.json"
+_PLAYERS_MAX_AGE = 7 * 86400  # refresh player dict at most once a week
+
+
+def _load_players() -> dict:
+    """Return the Sleeper player dict, using a weekly on-disk cache to avoid
+    re-downloading ~50-100 MB every day."""
+    cached = load_json_cache(_PLAYERS_CACHE, max_age_seconds=_PLAYERS_MAX_AGE)
+    if cached is not None:
+        console.print(f"[dim]sleeper players: using cached dict ({len(cached)} players)[/dim]")
+        return cached
+    console.print("[dim]sleeper players: refreshing full dict...[/dim]")
+    players = get_json(f"{SLEEPER}/players/nfl")
+    save_json_cache(_PLAYERS_CACHE, players)
+    console.print(f"[dim]sleeper players: cached {len(players)} players → {_PLAYERS_CACHE.name}[/dim]")
+    return players
+
 
 def fetch_trending_facts(limit: int) -> list[dict]:
-    players = get_json(f"{SLEEPER}/players/nfl")  # one big dict, same as player_ingest.py
+    players = _load_players()
     trending = get_json(f"{SLEEPER}/players/nfl/trending/add", params={"lookback_hours": 24, "limit": limit})
 
     facts = []
@@ -46,7 +78,7 @@ def fetch_trending_facts(limit: int) -> list[dict]:
                 fact_text=f"{name} ({pos}, {team}) was added in {adds:,} fantasy leagues in the last 24 hours.",
                 numeric_value=float(adds), numeric_unit="fantasy adds (24h)",
                 source_url="https://sleeper.com", popularity=pop,
-                meta={"position": pos, "team": team},
+                meta={},  # pos/team are in fact_text; not read by forge
             )
         )
         if college:
@@ -55,7 +87,7 @@ def fetch_trending_facts(limit: int) -> list[dict]:
                     source="sleeper", category="sports", subject=name,
                     fact_text=f"{name} ({pos}, {team}) played college football at {college}.",
                     source_url="https://sleeper.com", popularity=pop,
-                    meta={"answer_field": "college", "answer": college, "position": pos, "team": team},
+                    meta={"answer_field": "college", "answer": college},
                 )
             )
     return facts
@@ -81,7 +113,7 @@ def fetch_espn_team_facts() -> list[dict]:
                     fact_text=f"The {name} play their home games at {venue}.",
                     image_url=logo, source_url="https://www.espn.com/nfl/",
                     popularity=75.0,
-                    meta={"answer_field": "venue", "answer": venue, "location": t.get("location")},
+                    meta={"answer_field": "venue", "answer": venue},
                 )
             )
     return facts
@@ -95,7 +127,7 @@ def main() -> None:
     console.rule("[bold]Sports ingest — Sleeper + ESPN")
     facts = fetch_trending_facts(args.trending_limit) + fetch_espn_team_facts()
     dump_raw("sports", facts)
-    n = upsert_facts(get_supabase(), facts)
+    n = upsert_facts(get_db(), facts)
     console.print(f"[green]✓ {len(facts)} facts collected, {n} upserted[/green]")
 
 

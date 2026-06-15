@@ -1,0 +1,61 @@
+# wiki_hard — continuous obscure-Wikipedia scraping for EXTREMELY HARD questions.
+#
+# Runs every 6 hours. Each pass mines low-pageview ("obscure") Wikipedia articles
+# via `wikipedia_ingest.py --hard`, whose tiny popularity scores make the forge's
+# percentile engine rank them difficulty 5. Facts accumulate idempotently (bronze
+# is compacted by content_hash; the DB upserts on content_hash), so the hard bank
+# grows over time without duplicating. The seed bank is re-exported and committed
+# so the live site keeps getting harder even in DB-less mode.
+#
+# Two modes, zero config: with a DATABASE_URL secret it also upserts to Neon;
+# without one it runs bronze-only (the repo is the database).
+name: wiki_hard
+
+on:
+  schedule:
+    - cron: "0 */6 * * *" # every 6 hours
+  workflow_dispatch:
+    inputs:
+      count:
+        description: "number of hard facts to mine this run"
+        default: "40"
+
+# never let two scrapes race on the same branch (both push the seed bank)
+concurrency:
+  group: bank-refresh
+  cancel-in-progress: false
+
+jobs:
+  scrape-hard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r pipeline/requirements.txt
+      - name: Selftest (offline gates first)
+        run: python pipeline/selftest.py
+      - name: Mine obscure Wikipedia facts
+        continue-on-error: true
+        run: python pipeline/wikipedia_ingest.py --hard ${{ github.event.inputs.count || '40' }} --random 0
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      - name: Re-forge questions + daily board
+        run: python pipeline/question_forge.py
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      - name: Refresh committed seed bank
+        run: python pipeline/export_seed.py
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      - name: Commit bronze layer + refreshed seed bank
+        run: |
+          git config user.name "parlor-etl"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/raw frontend/public/seed-questions.json
+          git diff --cached --quiet && echo "no changes" && exit 0
+          git commit -m "chore: hard-question sweep [skip ci]"
+          git pull --rebase --autostash origin "${GITHUB_REF_NAME}" || true
+          git push

@@ -126,6 +126,31 @@ clue       year_guess multiple_choice higher_lower
   Host drives the state machine; players mirror host broadcasts. Presence tracks
   connected player names for the lobby screen.
 
+## Room 12 — THE THREAD — `/thread` ✦ Phase 5, built
+
+- 7 daily-seeded `clue` questions presented as a visual chain of linked nodes.
+- Text input with fuzzy matching; correct answers "lock in" as chain links.
+- Reveals previous link's answer as context for the next node.
+- Zero pipeline changes — reuses existing `clue` qtype.
+
+## Room 13 — THE SÉANCE — `/seance` ✦ Phase 6, built
+
+- 5 rounds. Each round: a subject with up to 5 clues ordered vague→specific.
+- Reveal clues one at a time; earlier correct guesses earn more points (4→3→2→1).
+- New qtype `seance` with a `clues` jsonb array. `forge_seance` groups facts by
+  (category, subject), needs ≥3 clean clues per subject, masks the answer.
+- Candle animation dressing; works offline via curated seed entries.
+
+## Room 14 — THE LADDER — `/ladder` ✦ Phase 7, built
+
+- 5 rounds. Each round: a target subject and a candidate pool of comparable facts.
+- Pick the candidate whose numeric attribute (fans, population, area) is closest to
+  the target. Wrong guesses reveal attribute-level hints: same/different category,
+  region, and magnitude closeness.
+- Max 3 guesses per round. New qtype `ladder` with a `candidates` jsonb array.
+  Distance function is entirely client-side.
+- Gold-dust/suit particle Confetti on high scores; curated seed entries for offline.
+
 ## Scoring & persistence philosophy
 
 - v1: all progress in `localStorage` — frontend stays read-only against the DB

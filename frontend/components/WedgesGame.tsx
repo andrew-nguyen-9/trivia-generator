@@ -37,8 +37,8 @@ function WedgeRing({ earned }: { earned: Set<Category> }) {
           <motion.path
             key={cat}
             d={`M ${C} ${C} L ${x0} ${y0} A ${R} ${R} 0 0 1 ${x1} ${y1} Z`}
-            fill={has ? CATEGORY_HEX[cat] : "#141420"}
-            stroke="#26263a"
+            fill={has ? CATEGORY_HEX[cat] : "#0d0d18"}
+            stroke="#1a1a2e"
             strokeWidth="1.5"
             animate={has ? { scale: [1, 1.12, 1] } : {}}
             transition={{ duration: 0.4 }}
@@ -46,12 +46,12 @@ function WedgeRing({ earned }: { earned: Set<Category> }) {
           />
         );
       })}
-      <circle cx={C} cy={C} r={20} fill="#0a0a0f" stroke="#26263a" />
+      <circle cx={C} cy={C} r={20} fill="#06060a" stroke="#1a1a2e" />
       <text
         x={C}
         y={C + 4}
         textAnchor="middle"
-        fill="#f5f3ee"
+        fill="#f0ede6"
         fontSize="11"
         fontWeight="900"
       >

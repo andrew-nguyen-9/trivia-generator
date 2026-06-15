@@ -144,3 +144,94 @@ export function playMelody(
     stop: () => stops.forEach((o) => { try { o.stop(); } catch {} }),
   };
 }
+
+// ── speakeasy ceremony SFX (Phase 5–7 redesign) ──────────────────────────────
+// Richer, themed one-shots used by The Thread, The Séance, and The Ladder. They
+// share the module's AudioContext and respect the same mute flag as everything
+// above.
+
+/** Door latch/creak: sawtooth frequency sweep down with a metallic tail. */
+export function sfxDoorLatch(): void {
+  const a = ac();
+  if (!a || muted) return;
+  const osc = a.createOscillator();
+  const g = a.createGain();
+  osc.connect(g).connect(a.destination);
+  osc.type = "sawtooth";
+  osc.frequency.setValueAtTime(600, a.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(80, a.currentTime + 0.18);
+  g.gain.setValueAtTime(0.12, a.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001, a.currentTime + 0.22);
+  osc.start();
+  osc.stop(a.currentTime + 0.22);
+}
+
+/** Glass clink: high sine ping with quick decay. */
+export function sfxGlassClink(): void {
+  const a = ac();
+  if (!a || muted) return;
+  const osc = a.createOscillator();
+  const g = a.createGain();
+  osc.connect(g).connect(a.destination);
+  osc.type = "sine";
+  osc.frequency.setValueAtTime(1400, a.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(900, a.currentTime + 0.04);
+  g.gain.setValueAtTime(0.18, a.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001, a.currentTime + 0.5);
+  osc.start();
+  osc.stop(a.currentTime + 0.5);
+}
+
+/** Soft piano chord (C–E–G): three stacked sine oscillators, gentle attack. */
+export function sfxPianoChord(): void {
+  const a = ac();
+  if (!a || muted) return;
+  for (const freq of [261.63, 329.63, 392.0]) {
+    const osc = a.createOscillator();
+    const g = a.createGain();
+    osc.connect(g).connect(a.destination);
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(freq, a.currentTime);
+    g.gain.setValueAtTime(0, a.currentTime);
+    g.gain.linearRampToValueAtTime(0.07, a.currentTime + 0.04);
+    g.gain.exponentialRampToValueAtTime(0.001, a.currentTime + 1.2);
+    osc.start();
+    osc.stop(a.currentTime + 1.2);
+  }
+}
+
+/** Correct answer: ascending two-note chime. */
+export function sfxCorrect(): void {
+  const a = ac();
+  if (!a || muted) return;
+  for (const { freq, t } of [
+    { freq: 523.25, t: 0 },
+    { freq: 783.99, t: 0.12 },
+  ]) {
+    const osc = a.createOscillator();
+    const g = a.createGain();
+    osc.connect(g).connect(a.destination);
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(freq, a.currentTime + t);
+    g.gain.setValueAtTime(0.14, a.currentTime + t);
+    g.gain.exponentialRampToValueAtTime(0.001, a.currentTime + t + 0.5);
+    osc.start(a.currentTime + t);
+    osc.stop(a.currentTime + t + 0.5);
+  }
+}
+
+/** Wrong answer: descending minor-second buzz. */
+export function sfxWrong(): void {
+  const a = ac();
+  if (!a || muted) return;
+  const osc = a.createOscillator();
+  const g = a.createGain();
+  osc.connect(g).connect(a.destination);
+  osc.type = "square";
+  osc.frequency.setValueAtTime(220, a.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(180, a.currentTime + 0.15);
+  g.gain.setValueAtTime(0.08, a.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001, a.currentTime + 0.2);
+  osc.start();
+  osc.stop(a.currentTime + 0.2);
+}

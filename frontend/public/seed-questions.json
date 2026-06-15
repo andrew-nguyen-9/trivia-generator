@@ -1,106 +1,4136 @@
 {
  "questions": [
-  { "qtype": "clue", "category": "history", "difficulty": 1, "prompt": "Billed as 'unsinkable,' this ship struck an iceberg and sank on its maiden voyage in April 1912.", "correct": "The Titanic", "source_url": "https://en.wikipedia.org/wiki/Titanic" },
-  { "qtype": "clue", "category": "history", "difficulty": 2, "prompt": "Erected in 1961, this concrete barrier divided a European capital until it fell in 1989.", "correct": "The Berlin Wall", "source_url": "https://en.wikipedia.org/wiki/Berlin_Wall" },
-  { "qtype": "clue", "category": "history", "difficulty": 3, "prompt": "This 1969 NASA mission put the first humans on the Moon.", "correct": "Apollo 11", "source_url": "https://en.wikipedia.org/wiki/Apollo_11" },
-  { "qtype": "clue", "category": "history", "difficulty": 4, "prompt": "This 1803 land deal with France roughly doubled the size of the United States.", "correct": "The Louisiana Purchase", "source_url": "https://en.wikipedia.org/wiki/Louisiana_Purchase" },
-  { "qtype": "clue", "category": "history", "difficulty": 5, "prompt": "This Carthaginian general crossed the Alps with war elephants to invade Italy.", "correct": "Hannibal", "source_url": "https://en.wikipedia.org/wiki/Hannibal" },
-
-  { "qtype": "clue", "category": "music", "difficulty": 1, "prompt": "This King of Pop released 'Thriller,' the best-selling album of all time.", "correct": "Michael Jackson", "source_url": "https://en.wikipedia.org/wiki/Michael_Jackson" },
-  { "qtype": "clue", "category": "music", "difficulty": 2, "prompt": "This British band recorded the six-minute epic 'Bohemian Rhapsody' in 1975.", "correct": "Queen", "source_url": "https://en.wikipedia.org/wiki/Queen_(band)" },
-  { "qtype": "clue", "category": "music", "difficulty": 3, "prompt": "This rapper's 2017 album 'DAMN.' won the Pulitzer Prize for Music.", "correct": "Kendrick Lamar", "source_url": "https://en.wikipedia.org/wiki/Kendrick_Lamar" },
-  { "qtype": "clue", "category": "music", "difficulty": 4, "prompt": "Berry Gordy founded this Detroit record label in 1959.", "correct": "Motown", "source_url": "https://en.wikipedia.org/wiki/Motown" },
-  { "qtype": "clue", "category": "music", "difficulty": 5, "prompt": "This composer's 'The Rite of Spring' caused a near-riot at its 1913 Paris premiere.", "correct": "Igor Stravinsky", "source_url": "https://en.wikipedia.org/wiki/The_Rite_of_Spring" },
-
-  { "qtype": "clue", "category": "sports", "difficulty": 1, "prompt": "Tom Brady won six Super Bowls with this NFL team.", "correct": "The New England Patriots", "source_url": "https://en.wikipedia.org/wiki/New_England_Patriots" },
-  { "qtype": "clue", "category": "sports", "difficulty": 2, "prompt": "The Stanley Cup is the championship trophy of this sport.", "correct": "Hockey", "source_url": "https://en.wikipedia.org/wiki/Stanley_Cup" },
-  { "qtype": "clue", "category": "sports", "difficulty": 3, "prompt": "This Jamaican sprinter set the 100m world record of 9.58 seconds in 2009.", "correct": "Usain Bolt", "source_url": "https://en.wikipedia.org/wiki/Usain_Bolt" },
-  { "qtype": "clue", "category": "sports", "difficulty": 4, "prompt": "This golfer won the 1997 Masters by a record 12 strokes at age 21.", "correct": "Tiger Woods", "source_url": "https://en.wikipedia.org/wiki/Tiger_Woods" },
-  { "qtype": "clue", "category": "sports", "difficulty": 5, "prompt": "Coached by Vince Lombardi, this franchise won the first two Super Bowls.", "correct": "The Green Bay Packers", "source_url": "https://en.wikipedia.org/wiki/Green_Bay_Packers" },
-
-  { "qtype": "clue", "category": "screen", "difficulty": 1, "prompt": "This 1975 Spielberg shark thriller made audiences afraid of the water.", "correct": "Jaws", "source_url": "https://en.wikipedia.org/wiki/Jaws_(film)" },
-  { "qtype": "clue", "category": "screen", "difficulty": 2, "prompt": "This sitcom about six pals in Manhattan ran for ten seasons starting in 1994.", "correct": "Friends", "source_url": "https://en.wikipedia.org/wiki/Friends" },
-  { "qtype": "clue", "category": "screen", "difficulty": 3, "prompt": "This 1994 Tarantino film won the Palme d'Or at Cannes.", "correct": "Pulp Fiction", "source_url": "https://en.wikipedia.org/wiki/Pulp_Fiction" },
-  { "qtype": "clue", "category": "screen", "difficulty": 4, "prompt": "In 2020 this South Korean film became the first non-English-language Best Picture winner.", "correct": "Parasite", "source_url": "https://en.wikipedia.org/wiki/Parasite_(2019_film)" },
-  { "qtype": "clue", "category": "screen", "difficulty": 5, "prompt": "This 1941 Orson Welles debut is famous for the dying word 'Rosebud.'", "correct": "Citizen Kane", "source_url": "https://en.wikipedia.org/wiki/Citizen_Kane" },
-
-  { "qtype": "clue", "category": "geography", "difficulty": 1, "prompt": "This river, the largest by discharge in the world, drains most of northern South America.", "correct": "The Amazon", "source_url": "https://en.wikipedia.org/wiki/Amazon_River" },
-  { "qtype": "clue", "category": "geography", "difficulty": 2, "prompt": "This US state is nicknamed 'The Last Frontier.'", "correct": "Alaska", "source_url": "https://en.wikipedia.org/wiki/Alaska" },
-  { "qtype": "clue", "category": "geography", "difficulty": 3, "prompt": "This African country is home to the ancient trading city of Timbuktu.", "correct": "Mali", "source_url": "https://en.wikipedia.org/wiki/Timbuktu" },
-  { "qtype": "clue", "category": "geography", "difficulty": 4, "prompt": "This African nation has three capital cities: Pretoria, Cape Town, and Bloemfontein.", "correct": "South Africa", "source_url": "https://en.wikipedia.org/wiki/South_Africa" },
-  { "qtype": "clue", "category": "geography", "difficulty": 5, "prompt": "This landlocked Asian country's capital is Ulaanbaatar.", "correct": "Mongolia", "source_url": "https://en.wikipedia.org/wiki/Mongolia" },
-
-  { "qtype": "year_guess", "category": "history", "difficulty": 1, "prompt": "The Berlin Wall fell, reuniting East and West Berlin.", "correct": "1989", "year": 1989, "source_url": "https://en.wikipedia.org/wiki/Berlin_Wall" },
-  { "qtype": "year_guess", "category": "history", "difficulty": 2, "prompt": "The RMS Titanic sank in the North Atlantic.", "correct": "1912", "year": 1912, "source_url": "https://en.wikipedia.org/wiki/Titanic" },
-  { "qtype": "year_guess", "category": "history", "difficulty": 3, "prompt": "The first iPhone went on sale.", "correct": "2007", "year": 2007, "source_url": "https://en.wikipedia.org/wiki/IPhone_(1st_generation)" },
-  { "qtype": "year_guess", "category": "music", "difficulty": 1, "prompt": "The Woodstock music festival took place on a dairy farm in upstate New York.", "correct": "1969", "year": 1969, "source_url": "https://en.wikipedia.org/wiki/Woodstock" },
-  { "qtype": "year_guess", "category": "music", "difficulty": 2, "prompt": "Michael Jackson released 'Thriller.'", "correct": "1982", "year": 1982, "source_url": "https://en.wikipedia.org/wiki/Thriller_(album)" },
-  { "qtype": "year_guess", "category": "music", "difficulty": 3, "prompt": "Nirvana released 'Nevermind.'", "correct": "1991", "year": 1991, "source_url": "https://en.wikipedia.org/wiki/Nevermind" },
-  { "qtype": "year_guess", "category": "music", "difficulty": 4, "prompt": "Daft Punk released 'Random Access Memories.'", "correct": "2013", "year": 2013, "source_url": "https://en.wikipedia.org/wiki/Random_Access_Memories" },
-  { "qtype": "year_guess", "category": "sports", "difficulty": 2, "prompt": "The first Super Bowl was played in Los Angeles.", "correct": "1967", "year": 1967, "source_url": "https://en.wikipedia.org/wiki/Super_Bowl_I" },
-  { "qtype": "year_guess", "category": "sports", "difficulty": 3, "prompt": "Jackie Robinson broke Major League Baseball's color barrier.", "correct": "1947", "year": 1947, "source_url": "https://en.wikipedia.org/wiki/Jackie_Robinson" },
-  { "qtype": "year_guess", "category": "screen", "difficulty": 2, "prompt": "'Star Wars' (later subtitled 'A New Hope') hit theaters.", "correct": "1977", "year": 1977, "source_url": "https://en.wikipedia.org/wiki/Star_Wars_(film)" },
-  { "qtype": "year_guess", "category": "screen", "difficulty": 3, "prompt": "'The Godfather' premiered in theaters.", "correct": "1972", "year": 1972, "source_url": "https://en.wikipedia.org/wiki/The_Godfather" },
-  { "qtype": "year_guess", "category": "screen", "difficulty": 4, "prompt": "'Toy Story,' the first fully computer-animated feature film, premiered.", "correct": "1995", "year": 1995, "source_url": "https://en.wikipedia.org/wiki/Toy_Story" },
-
-  { "qtype": "multiple_choice", "category": "history", "difficulty": 2, "prompt": "Which empire built Machu Picchu?", "correct": "The Inca", "choices": ["The Inca", "The Aztec", "The Maya", "The Olmec"], "source_url": "https://en.wikipedia.org/wiki/Machu_Picchu" },
-  { "qtype": "multiple_choice", "category": "history", "difficulty": 1, "prompt": "Who was the first President of the United States?", "correct": "George Washington", "choices": ["George Washington", "John Adams", "Thomas Jefferson", "Benjamin Franklin"], "source_url": "https://en.wikipedia.org/wiki/George_Washington" },
-  { "qtype": "multiple_choice", "category": "history", "difficulty": 4, "prompt": "The Hundred Years' War was fought primarily between England and which country?", "correct": "France", "choices": ["France", "Spain", "Portugal", "The Netherlands"], "source_url": "https://en.wikipedia.org/wiki/Hundred_Years%27_War" },
-  { "qtype": "multiple_choice", "category": "music", "difficulty": 1, "prompt": "Which band's members included John, Paul, George, and Ringo?", "correct": "The Beatles", "choices": ["The Beatles", "The Rolling Stones", "The Who", "The Kinks"], "source_url": "https://en.wikipedia.org/wiki/The_Beatles" },
-  { "qtype": "multiple_choice", "category": "music", "difficulty": 2, "prompt": "Which artist released the album 'Lemonade' in 2016?", "correct": "Beyoncé", "choices": ["Beyoncé", "Rihanna", "Adele", "Taylor Swift"], "source_url": "https://en.wikipedia.org/wiki/Lemonade_(album)" },
-  { "qtype": "multiple_choice", "category": "music", "difficulty": 3, "prompt": "The electronic duo Daft Punk formed in which country?", "correct": "France", "choices": ["France", "Germany", "Belgium", "Italy"], "source_url": "https://en.wikipedia.org/wiki/Daft_Punk" },
-  { "qtype": "multiple_choice", "category": "sports", "difficulty": 1, "prompt": "Patrick Mahomes of the Kansas City Chiefs plays which position?", "correct": "Quarterback", "choices": ["Quarterback", "Running back", "Wide receiver", "Tight end"], "source_url": "https://en.wikipedia.org/wiki/Patrick_Mahomes" },
-  { "qtype": "multiple_choice", "category": "sports", "difficulty": 2, "prompt": "How many players from one team are on a basketball court at once?", "correct": "5", "choices": ["5", "6", "7", "4"], "source_url": "https://en.wikipedia.org/wiki/Basketball" },
-  { "qtype": "multiple_choice", "category": "sports", "difficulty": 3, "prompt": "Which country has won the most FIFA World Cups?", "correct": "Brazil", "choices": ["Brazil", "Germany", "Italy", "Argentina"], "source_url": "https://en.wikipedia.org/wiki/FIFA_World_Cup" },
-  { "qtype": "multiple_choice", "category": "screen", "difficulty": 1, "prompt": "Who directed 'Jurassic Park'?", "correct": "Steven Spielberg", "choices": ["Steven Spielberg", "James Cameron", "George Lucas", "Ridley Scott"], "source_url": "https://en.wikipedia.org/wiki/Jurassic_Park_(film)" },
-  { "qtype": "multiple_choice", "category": "screen", "difficulty": 2, "prompt": "In 'Breaking Bad,' what is Walter White's drug-world alias?", "correct": "Heisenberg", "choices": ["Heisenberg", "Capone", "Escobar", "Fring"], "source_url": "https://en.wikipedia.org/wiki/Walter_White_(Breaking_Bad)" },
-  { "qtype": "multiple_choice", "category": "screen", "difficulty": 3, "prompt": "Which studio created 'Spirited Away'?", "correct": "Studio Ghibli", "choices": ["Studio Ghibli", "Pixar", "DreamWorks", "Toei Animation"], "source_url": "https://en.wikipedia.org/wiki/Spirited_Away" },
-  { "qtype": "multiple_choice", "category": "geography", "difficulty": 2, "prompt": "What is the capital of Australia?", "correct": "Canberra", "choices": ["Canberra", "Sydney", "Melbourne", "Perth"], "source_url": "https://en.wikipedia.org/wiki/Canberra" },
-  { "qtype": "multiple_choice", "category": "geography", "difficulty": 1, "prompt": "Which is the largest country in the world by area?", "correct": "Russia", "choices": ["Russia", "Canada", "China", "United States"], "source_url": "https://en.wikipedia.org/wiki/Russia" },
-  { "qtype": "multiple_choice", "category": "geography", "difficulty": 3, "prompt": "Mount Kilimanjaro, Africa's highest peak, is in which country?", "correct": "Tanzania", "choices": ["Tanzania", "Kenya", "Ethiopia", "Uganda"], "source_url": "https://en.wikipedia.org/wiki/Mount_Kilimanjaro" },
-  { "qtype": "multiple_choice", "category": "wildcard", "difficulty": 1, "prompt": "What is the only mammal capable of true sustained flight?", "correct": "The bat", "choices": ["The bat", "The flying squirrel", "The sugar glider", "The colugo"], "source_url": "https://en.wikipedia.org/wiki/Bat" },
-  { "qtype": "multiple_choice", "category": "wildcard", "difficulty": 3, "prompt": "Which planet has the most confirmed moons?", "correct": "Saturn", "choices": ["Saturn", "Jupiter", "Uranus", "Neptune"], "source_url": "https://en.wikipedia.org/wiki/Moons_of_Saturn" },
-  { "qtype": "multiple_choice", "category": "wildcard", "difficulty": 2, "prompt": "What does 'HTTP' stand for?", "correct": "HyperText Transfer Protocol", "choices": ["HyperText Transfer Protocol", "HyperText Translation Process", "High Throughput Transfer Protocol", "Hyperlink Text Transport Program"], "source_url": "https://en.wikipedia.org/wiki/HTTP" },
-
-  { "qtype": "higher_lower", "category": "geography", "difficulty": 2, "prompt": "Which has the larger population?", "correct": "higher", "value_a": 216000000, "value_b": 277000000, "subject_a": "Brazil", "subject_b": "Indonesia", "unit": "population", "source_url": "https://en.wikipedia.org/wiki/List_of_countries_by_population" },
-  { "qtype": "higher_lower", "category": "geography", "difficulty": 3, "prompt": "Which has the larger population?", "correct": "higher", "value_a": 124000000, "value_b": 223000000, "subject_a": "Japan", "subject_b": "Nigeria", "unit": "population", "source_url": "https://en.wikipedia.org/wiki/List_of_countries_by_population" },
-  { "qtype": "higher_lower", "category": "geography", "difficulty": 2, "prompt": "Which covers more area?", "correct": "higher", "value_a": 3287000, "value_b": 7692000, "subject_a": "India", "subject_b": "Australia", "unit": "area (km²)", "source_url": "https://en.wikipedia.org/wiki/List_of_countries_and_dependencies_by_area" },
-  { "qtype": "higher_lower", "category": "geography", "difficulty": 3, "prompt": "Which covers more area?", "correct": "lower", "value_a": 9985000, "value_b": 3287000, "subject_a": "Canada", "subject_b": "India", "unit": "area (km²)", "source_url": "https://en.wikipedia.org/wiki/List_of_countries_and_dependencies_by_area" },
-  { "qtype": "higher_lower", "category": "geography", "difficulty": 4, "prompt": "Which river is longer?", "correct": "higher", "value_a": 3766, "value_b": 6650, "subject_a": "Mississippi", "subject_b": "Nile", "unit": "length (km)", "source_url": "https://en.wikipedia.org/wiki/List_of_rivers_by_length" },
-  { "qtype": "higher_lower", "category": "screen", "difficulty": 2, "prompt": "Which grossed more at the worldwide box office?", "correct": "higher", "value_a": 1450000000, "value_b": 2920000000, "subject_a": "Frozen", "subject_b": "Avatar", "unit": "box office ($)", "source_url": "https://en.wikipedia.org/wiki/List_of_highest-grossing_films" },
-  { "qtype": "higher_lower", "category": "screen", "difficulty": 3, "prompt": "Which grossed more at the worldwide box office?", "correct": "higher", "value_a": 1074000000, "value_b": 2260000000, "subject_a": "Joker", "subject_b": "Titanic", "unit": "box office ($)", "source_url": "https://en.wikipedia.org/wiki/List_of_highest-grossing_films" },
-  { "qtype": "higher_lower", "category": "screen", "difficulty": 1, "prompt": "Which is rated higher by audiences?", "correct": "higher", "value_a": 6.2, "value_b": 8.7, "subject_a": "Morbius", "subject_b": "The Shawshank Redemption", "unit": "rating /10", "source_url": "https://www.themoviedb.org" },
-  { "qtype": "higher_lower", "category": "music", "difficulty": 3, "prompt": "Which album has sold more copies worldwide?", "correct": "higher", "value_a": 50000000, "value_b": 70000000, "subject_a": "AC/DC — Back in Black", "subject_b": "Michael Jackson — Thriller", "unit": "albums sold", "source_url": "https://en.wikipedia.org/wiki/List_of_best-selling_albums" },
-  { "qtype": "higher_lower", "category": "sports", "difficulty": 4, "prompt": "Which stadium holds more fans?", "correct": "higher", "value_a": 81441, "value_b": 107601, "subject_a": "Lambeau Field", "subject_b": "Michigan Stadium", "unit": "capacity", "source_url": "https://en.wikipedia.org/wiki/List_of_American_football_stadiums_by_capacity" },
-
-  { "qtype": "where", "category": "geography", "difficulty": 1, "prompt": "Pin it: the Eiffel Tower, finished in 1889 for the World's Fair.", "correct": "The Eiffel Tower, Paris", "lat": 48.858, "lng": 2.294, "source_url": "https://en.wikipedia.org/wiki/Eiffel_Tower" },
-  { "qtype": "where", "category": "history", "difficulty": 2, "prompt": "Pin it: the Great Pyramid, the last surviving Wonder of the Ancient World.", "correct": "The Great Pyramid of Giza", "lat": 29.979, "lng": 31.134, "source_url": "https://en.wikipedia.org/wiki/Great_Pyramid_of_Giza" },
-  { "qtype": "where", "category": "history", "difficulty": 3, "prompt": "Pin it: Machu Picchu, the 15th-century Inca citadel in the clouds.", "correct": "Machu Picchu, Peru", "lat": -13.163, "lng": -72.545, "source_url": "https://en.wikipedia.org/wiki/Machu_Picchu" },
-  { "qtype": "where", "category": "geography", "difficulty": 2, "prompt": "Pin it: the Sydney Opera House and its famous sails.", "correct": "Sydney Opera House", "lat": -33.857, "lng": 151.215, "source_url": "https://en.wikipedia.org/wiki/Sydney_Opera_House" },
-  { "qtype": "where", "category": "history", "difficulty": 1, "prompt": "Pin it: the Statue of Liberty, France's 1886 gift to America.", "correct": "The Statue of Liberty, New York", "lat": 40.689, "lng": -74.045, "source_url": "https://en.wikipedia.org/wiki/Statue_of_Liberty" },
-  { "qtype": "where", "category": "geography", "difficulty": 3, "prompt": "Pin it: Mount Kilimanjaro, the highest peak in Africa.", "correct": "Mount Kilimanjaro, Tanzania", "lat": -3.076, "lng": 37.353, "source_url": "https://en.wikipedia.org/wiki/Mount_Kilimanjaro" },
-  { "qtype": "where", "category": "history", "difficulty": 3, "prompt": "Pin it: Red Square, where Soviet parades rolled past the Kremlin.", "correct": "Red Square, Moscow", "lat": 55.754, "lng": 37.620, "source_url": "https://en.wikipedia.org/wiki/Red_Square" },
-  { "qtype": "where", "category": "geography", "difficulty": 2, "prompt": "Pin it: Christ the Redeemer, arms wide over a famous bay.", "correct": "Christ the Redeemer, Rio de Janeiro", "lat": -22.952, "lng": -43.211, "source_url": "https://en.wikipedia.org/wiki/Christ_the_Redeemer_(statue)" },
-  { "qtype": "where", "category": "history", "difficulty": 4, "prompt": "Pin it: Stonehenge, standing since roughly 2500 BC.", "correct": "Stonehenge, England", "lat": 51.179, "lng": -1.826, "source_url": "https://en.wikipedia.org/wiki/Stonehenge" },
-  { "qtype": "where", "category": "screen", "difficulty": 2, "prompt": "Pin it: the Golden Gate Bridge, Hollywood's favorite landmark to destroy.", "correct": "The Golden Gate Bridge, San Francisco", "lat": 37.820, "lng": -122.478, "source_url": "https://en.wikipedia.org/wiki/Golden_Gate_Bridge" },
-  { "qtype": "where", "category": "history", "difficulty": 2, "prompt": "Pin it: the Taj Mahal, a marble mausoleum completed in 1653.", "correct": "The Taj Mahal, Agra", "lat": 27.175, "lng": 78.042, "source_url": "https://en.wikipedia.org/wiki/Taj_Mahal" },
-  { "qtype": "where", "category": "history", "difficulty": 4, "prompt": "Pin it: the wall fell here in 1989 and a city was whole again.", "correct": "Berlin, Germany", "lat": 52.520, "lng": 13.405, "source_url": "https://en.wikipedia.org/wiki/Berlin_Wall" },
-
-  { "qtype": "audio_guess", "category": "music", "difficulty": 1, "prompt": "Name this tune.", "correct": "Twinkle, Twinkle, Little Star", "choices": ["Twinkle, Twinkle, Little Star", "Row, Row, Row Your Boat", "Old MacDonald", "London Bridge"], "melody": [{"n":"C4","d":1},{"n":"C4","d":1},{"n":"G4","d":1},{"n":"G4","d":1},{"n":"A4","d":1},{"n":"A4","d":1},{"n":"G4","d":2},{"n":"F4","d":1},{"n":"F4","d":1},{"n":"E4","d":1},{"n":"E4","d":1},{"n":"D4","d":1},{"n":"D4","d":1},{"n":"C4","d":2}], "source_url": "https://en.wikipedia.org/wiki/Twinkle,_Twinkle,_Little_Star" },
-  { "qtype": "audio_guess", "category": "music", "difficulty": 1, "prompt": "Name this tune.", "correct": "Mary Had a Little Lamb", "choices": ["Mary Had a Little Lamb", "Hot Cross Buns", "Three Blind Mice", "Baa Baa Black Sheep"], "melody": [{"n":"E4","d":1},{"n":"D4","d":1},{"n":"C4","d":1},{"n":"D4","d":1},{"n":"E4","d":1},{"n":"E4","d":1},{"n":"E4","d":2},{"n":"D4","d":1},{"n":"D4","d":1},{"n":"D4","d":2},{"n":"E4","d":1},{"n":"G4","d":1},{"n":"G4","d":2}], "source_url": "https://en.wikipedia.org/wiki/Mary_Had_a_Little_Lamb" },
-  { "qtype": "audio_guess", "category": "music", "difficulty": 1, "prompt": "Name this tune.", "correct": "Jingle Bells", "choices": ["Jingle Bells", "Deck the Halls", "Silent Night", "Frosty the Snowman"], "melody": [{"n":"E4","d":1},{"n":"E4","d":1},{"n":"E4","d":2},{"n":"E4","d":1},{"n":"E4","d":1},{"n":"E4","d":2},{"n":"E4","d":1},{"n":"G4","d":1},{"n":"C4","d":1},{"n":"D4","d":1},{"n":"E4","d":2}], "source_url": "https://en.wikipedia.org/wiki/Jingle_Bells" },
-  { "qtype": "audio_guess", "category": "music", "difficulty": 2, "prompt": "Name this classical theme.", "correct": "Ode to Joy", "choices": ["Ode to Joy", "Canon in D", "Clair de Lune", "The Blue Danube"], "melody": [{"n":"E4","d":1},{"n":"E4","d":1},{"n":"F4","d":1},{"n":"G4","d":1},{"n":"G4","d":1},{"n":"F4","d":1},{"n":"E4","d":1},{"n":"D4","d":1},{"n":"C4","d":1},{"n":"C4","d":1},{"n":"D4","d":1},{"n":"E4","d":1},{"n":"E4","d":1.5},{"n":"D4","d":0.5},{"n":"D4","d":2}], "source_url": "https://en.wikipedia.org/wiki/Ode_to_Joy" },
-  { "qtype": "audio_guess", "category": "music", "difficulty": 2, "prompt": "Name this classical theme.", "correct": "Beethoven's 5th Symphony", "choices": ["Beethoven's 5th Symphony", "Eine kleine Nachtmusik", "The Four Seasons", "Ride of the Valkyries"], "melody": [{"n":"G4","d":0.5},{"n":"G4","d":0.5},{"n":"G4","d":0.5},{"n":"D#4","d":2},{"n":"rest","d":0.5},{"n":"F4","d":0.5},{"n":"F4","d":0.5},{"n":"F4","d":0.5},{"n":"D4","d":2}], "source_url": "https://en.wikipedia.org/wiki/Symphony_No._5_(Beethoven)" },
-  { "qtype": "audio_guess", "category": "music", "difficulty": 3, "prompt": "Name this classical theme.", "correct": "Für Elise", "choices": ["Für Elise", "Moonlight Sonata", "Turkish March", "Nocturne in E-flat"], "melody": [{"n":"E5","d":0.5},{"n":"D#5","d":0.5},{"n":"E5","d":0.5},{"n":"D#5","d":0.5},{"n":"E5","d":0.5},{"n":"B4","d":0.5},{"n":"D5","d":0.5},{"n":"C5","d":0.5},{"n":"A4","d":1.5}], "source_url": "https://en.wikipedia.org/wiki/F%C3%BCr_Elise" },
-
-  { "qtype": "image_guess", "category": "geography", "difficulty": 1, "prompt": "Which country does this flag belong to?", "correct": "Japan", "choices": ["Japan", "Bangladesh", "Palau", "Indonesia"], "image_url": "https://flagcdn.com/w320/jp.png", "source_url": "https://en.wikipedia.org/wiki/Flag_of_Japan" },
-  { "qtype": "image_guess", "category": "geography", "difficulty": 1, "prompt": "Which country does this flag belong to?", "correct": "Brazil", "choices": ["Brazil", "Australia", "Portugal", "Colombia"], "image_url": "https://flagcdn.com/w320/br.png", "source_url": "https://en.wikipedia.org/wiki/Flag_of_Brazil" },
-  { "qtype": "image_guess", "category": "geography", "difficulty": 1, "prompt": "Which country does this flag belong to?", "correct": "Canada", "choices": ["Canada", "Peru", "Lebanon", "Austria"], "image_url": "https://flagcdn.com/w320/ca.png", "source_url": "https://en.wikipedia.org/wiki/Flag_of_Canada" },
-  { "qtype": "image_guess", "category": "geography", "difficulty": 2, "prompt": "Which country does this flag belong to?", "correct": "Italy", "choices": ["Italy", "Mexico", "Ireland", "Hungary"], "image_url": "https://flagcdn.com/w320/it.png", "source_url": "https://en.wikipedia.org/wiki/Flag_of_Italy" },
-  { "qtype": "image_guess", "category": "geography", "difficulty": 3, "prompt": "Which country does this flag belong to?", "correct": "Greece", "choices": ["Greece", "Uruguay", "Finland", "Israel"], "image_url": "https://flagcdn.com/w320/gr.png", "source_url": "https://en.wikipedia.org/wiki/Flag_of_Greece" },
-  { "qtype": "image_guess", "category": "geography", "difficulty": 3, "prompt": "Which country does this flag belong to?", "correct": "South Korea", "choices": ["South Korea", "Taiwan", "Mongolia", "Cambodia"], "image_url": "https://flagcdn.com/w320/kr.png", "source_url": "https://en.wikipedia.org/wiki/Flag_of_South_Korea" },
-
-  { "qtype": "connections", "category": "wildcard", "difficulty": 3, "prompt": "Sort these sixteen into four groups of four.", "correct": "", "groups": [{"label": "Beatles members", "members": ["John", "Paul", "George", "Ringo"], "difficulty": 1}, {"label": "Chess pieces", "members": ["King", "Queen", "Bishop", "Knight"], "difficulty": 2}, {"label": "Planets", "members": ["Mars", "Venus", "Mercury", "Jupiter"], "difficulty": 3}, {"label": "___ Spice (Spice Girls)", "members": ["Scary", "Sporty", "Posh", "Baby"], "difficulty": 4}], "source_url": "https://en.wikipedia.org/wiki/Connections_(game)" },
-  { "qtype": "connections", "category": "wildcard", "difficulty": 3, "prompt": "Sort these sixteen into four groups of four.", "correct": "", "groups": [{"label": "Oceans", "members": ["Pacific", "Atlantic", "Indian", "Arctic"], "difficulty": 1}, {"label": "Card suits", "members": ["Hearts", "Spades", "Clubs", "Diamonds"], "difficulty": 2}, {"label": "Great Lakes", "members": ["Superior", "Michigan", "Huron", "Erie"], "difficulty": 3}, {"label": "Tom Hanks films", "members": ["Big", "Splash", "Cast Away", "Philadelphia"], "difficulty": 4}], "source_url": "https://en.wikipedia.org/wiki/Connections_(game)" }
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 1,
+   "prompt": "Billed as 'unsinkable,' this ship struck an iceberg and sank on its maiden voyage in April 1912.",
+   "correct": "The Titanic",
+   "source_url": "https://en.wikipedia.org/wiki/Titanic"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 2,
+   "prompt": "Erected in 1961, this concrete barrier divided a European capital until it fell in 1989.",
+   "correct": "The Berlin Wall",
+   "source_url": "https://en.wikipedia.org/wiki/Berlin_Wall"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 3,
+   "prompt": "This 1969 NASA mission put the first humans on the Moon.",
+   "correct": "Apollo 11",
+   "source_url": "https://en.wikipedia.org/wiki/Apollo_11"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 4,
+   "prompt": "This 1803 land deal with France roughly doubled the size of the United States.",
+   "correct": "The Louisiana Purchase",
+   "source_url": "https://en.wikipedia.org/wiki/Louisiana_Purchase"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 5,
+   "prompt": "This Carthaginian general crossed the Alps with war elephants to invade Italy.",
+   "correct": "Hannibal",
+   "source_url": "https://en.wikipedia.org/wiki/Hannibal"
+  },
+  {
+   "qtype": "clue",
+   "category": "music",
+   "difficulty": 1,
+   "prompt": "This King of Pop released 'Thriller,' the best-selling album of all time.",
+   "correct": "Michael Jackson",
+   "source_url": "https://en.wikipedia.org/wiki/Michael_Jackson"
+  },
+  {
+   "qtype": "clue",
+   "category": "music",
+   "difficulty": 2,
+   "prompt": "This British band recorded the six-minute epic 'Bohemian Rhapsody' in 1975.",
+   "correct": "Queen",
+   "source_url": "https://en.wikipedia.org/wiki/Queen_(band)"
+  },
+  {
+   "qtype": "clue",
+   "category": "music",
+   "difficulty": 3,
+   "prompt": "This rapper's 2017 album 'DAMN.' won the Pulitzer Prize for Music.",
+   "correct": "Kendrick Lamar",
+   "source_url": "https://en.wikipedia.org/wiki/Kendrick_Lamar"
+  },
+  {
+   "qtype": "clue",
+   "category": "music",
+   "difficulty": 4,
+   "prompt": "Berry Gordy founded this Detroit record label in 1959.",
+   "correct": "Motown",
+   "source_url": "https://en.wikipedia.org/wiki/Motown"
+  },
+  {
+   "qtype": "clue",
+   "category": "music",
+   "difficulty": 5,
+   "prompt": "This composer's 'The Rite of Spring' caused a near-riot at its 1913 Paris premiere.",
+   "correct": "Igor Stravinsky",
+   "source_url": "https://en.wikipedia.org/wiki/The_Rite_of_Spring"
+  },
+  {
+   "qtype": "clue",
+   "category": "sports",
+   "difficulty": 1,
+   "prompt": "Tom Brady won six Super Bowls with this NFL team.",
+   "correct": "The New England Patriots",
+   "source_url": "https://en.wikipedia.org/wiki/New_England_Patriots"
+  },
+  {
+   "qtype": "clue",
+   "category": "sports",
+   "difficulty": 2,
+   "prompt": "The Stanley Cup is the championship trophy of this sport.",
+   "correct": "Hockey",
+   "source_url": "https://en.wikipedia.org/wiki/Stanley_Cup"
+  },
+  {
+   "qtype": "clue",
+   "category": "sports",
+   "difficulty": 3,
+   "prompt": "This Jamaican sprinter set the 100m world record of 9.58 seconds in 2009.",
+   "correct": "Usain Bolt",
+   "source_url": "https://en.wikipedia.org/wiki/Usain_Bolt"
+  },
+  {
+   "qtype": "clue",
+   "category": "sports",
+   "difficulty": 4,
+   "prompt": "This golfer won the 1997 Masters by a record 12 strokes at age 21.",
+   "correct": "Tiger Woods",
+   "source_url": "https://en.wikipedia.org/wiki/Tiger_Woods"
+  },
+  {
+   "qtype": "clue",
+   "category": "sports",
+   "difficulty": 5,
+   "prompt": "Coached by Vince Lombardi, this franchise won the first two Super Bowls.",
+   "correct": "The Green Bay Packers",
+   "source_url": "https://en.wikipedia.org/wiki/Green_Bay_Packers"
+  },
+  {
+   "qtype": "clue",
+   "category": "screen",
+   "difficulty": 1,
+   "prompt": "This 1975 Spielberg shark thriller made audiences afraid of the water.",
+   "correct": "Jaws",
+   "source_url": "https://en.wikipedia.org/wiki/Jaws_(film)"
+  },
+  {
+   "qtype": "clue",
+   "category": "screen",
+   "difficulty": 2,
+   "prompt": "This sitcom about six pals in Manhattan ran for ten seasons starting in 1994.",
+   "correct": "Friends",
+   "source_url": "https://en.wikipedia.org/wiki/Friends"
+  },
+  {
+   "qtype": "clue",
+   "category": "screen",
+   "difficulty": 3,
+   "prompt": "This 1994 Tarantino film won the Palme d'Or at Cannes.",
+   "correct": "Pulp Fiction",
+   "source_url": "https://en.wikipedia.org/wiki/Pulp_Fiction"
+  },
+  {
+   "qtype": "clue",
+   "category": "screen",
+   "difficulty": 4,
+   "prompt": "In 2020 this South Korean film became the first non-English-language Best Picture winner.",
+   "correct": "Parasite",
+   "source_url": "https://en.wikipedia.org/wiki/Parasite_(2019_film)"
+  },
+  {
+   "qtype": "clue",
+   "category": "screen",
+   "difficulty": 5,
+   "prompt": "This 1941 Orson Welles debut is famous for the dying word 'Rosebud.'",
+   "correct": "Citizen Kane",
+   "source_url": "https://en.wikipedia.org/wiki/Citizen_Kane"
+  },
+  {
+   "qtype": "clue",
+   "category": "geography",
+   "difficulty": 1,
+   "prompt": "This river, the largest by discharge in the world, drains most of northern South America.",
+   "correct": "The Amazon",
+   "source_url": "https://en.wikipedia.org/wiki/Amazon_River"
+  },
+  {
+   "qtype": "clue",
+   "category": "geography",
+   "difficulty": 2,
+   "prompt": "This US state is nicknamed 'The Last Frontier.'",
+   "correct": "Alaska",
+   "source_url": "https://en.wikipedia.org/wiki/Alaska"
+  },
+  {
+   "qtype": "clue",
+   "category": "geography",
+   "difficulty": 3,
+   "prompt": "This African country is home to the ancient trading city of Timbuktu.",
+   "correct": "Mali",
+   "source_url": "https://en.wikipedia.org/wiki/Timbuktu"
+  },
+  {
+   "qtype": "clue",
+   "category": "geography",
+   "difficulty": 4,
+   "prompt": "This African nation has three capital cities: Pretoria, Cape Town, and Bloemfontein.",
+   "correct": "South Africa",
+   "source_url": "https://en.wikipedia.org/wiki/South_Africa"
+  },
+  {
+   "qtype": "clue",
+   "category": "geography",
+   "difficulty": 5,
+   "prompt": "This landlocked Asian country's capital is Ulaanbaatar.",
+   "correct": "Mongolia",
+   "source_url": "https://en.wikipedia.org/wiki/Mongolia"
+  },
+  {
+   "qtype": "year_guess",
+   "category": "history",
+   "difficulty": 1,
+   "prompt": "The Berlin Wall fell, reuniting East and West Berlin.",
+   "correct": "1989",
+   "year": 1989,
+   "source_url": "https://en.wikipedia.org/wiki/Berlin_Wall"
+  },
+  {
+   "qtype": "year_guess",
+   "category": "history",
+   "difficulty": 2,
+   "prompt": "The RMS Titanic sank in the North Atlantic.",
+   "correct": "1912",
+   "year": 1912,
+   "source_url": "https://en.wikipedia.org/wiki/Titanic"
+  },
+  {
+   "qtype": "year_guess",
+   "category": "history",
+   "difficulty": 3,
+   "prompt": "The first iPhone went on sale.",
+   "correct": "2007",
+   "year": 2007,
+   "source_url": "https://en.wikipedia.org/wiki/IPhone_(1st_generation)"
+  },
+  {
+   "qtype": "year_guess",
+   "category": "music",
+   "difficulty": 1,
+   "prompt": "The Woodstock music festival took place on a dairy farm in upstate New York.",
+   "correct": "1969",
+   "year": 1969,
+   "source_url": "https://en.wikipedia.org/wiki/Woodstock"
+  },
+  {
+   "qtype": "year_guess",
+   "category": "music",
+   "difficulty": 2,
+   "prompt": "Michael Jackson released 'Thriller.'",
+   "correct": "1982",
+   "year": 1982,
+   "source_url": "https://en.wikipedia.org/wiki/Thriller_(album)"
+  },
+  {
+   "qtype": "year_guess",
+   "category": "music",
+   "difficulty": 3,
+   "prompt": "Nirvana released 'Nevermind.'",
+   "correct": "1991",
+   "year": 1991,
+   "source_url": "https://en.wikipedia.org/wiki/Nevermind"
+  },
+  {
+   "qtype": "year_guess",
+   "category": "music",
+   "difficulty": 4,
+   "prompt": "Daft Punk released 'Random Access Memories.'",
+   "correct": "2013",
+   "year": 2013,
+   "source_url": "https://en.wikipedia.org/wiki/Random_Access_Memories"
+  },
+  {
+   "qtype": "year_guess",
+   "category": "sports",
+   "difficulty": 2,
+   "prompt": "The first Super Bowl was played in Los Angeles.",
+   "correct": "1967",
+   "year": 1967,
+   "source_url": "https://en.wikipedia.org/wiki/Super_Bowl_I"
+  },
+  {
+   "qtype": "year_guess",
+   "category": "sports",
+   "difficulty": 3,
+   "prompt": "Jackie Robinson broke Major League Baseball's color barrier.",
+   "correct": "1947",
+   "year": 1947,
+   "source_url": "https://en.wikipedia.org/wiki/Jackie_Robinson"
+  },
+  {
+   "qtype": "year_guess",
+   "category": "screen",
+   "difficulty": 2,
+   "prompt": "'Star Wars' (later subtitled 'A New Hope') hit theaters.",
+   "correct": "1977",
+   "year": 1977,
+   "source_url": "https://en.wikipedia.org/wiki/Star_Wars_(film)"
+  },
+  {
+   "qtype": "year_guess",
+   "category": "screen",
+   "difficulty": 3,
+   "prompt": "'The Godfather' premiered in theaters.",
+   "correct": "1972",
+   "year": 1972,
+   "source_url": "https://en.wikipedia.org/wiki/The_Godfather"
+  },
+  {
+   "qtype": "year_guess",
+   "category": "screen",
+   "difficulty": 4,
+   "prompt": "'Toy Story,' the first fully computer-animated feature film, premiered.",
+   "correct": "1995",
+   "year": 1995,
+   "source_url": "https://en.wikipedia.org/wiki/Toy_Story"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "history",
+   "difficulty": 2,
+   "prompt": "Which empire built Machu Picchu?",
+   "correct": "The Inca",
+   "choices": [
+    "The Inca",
+    "The Aztec",
+    "The Maya",
+    "The Olmec"
+   ],
+   "source_url": "https://en.wikipedia.org/wiki/Machu_Picchu"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "history",
+   "difficulty": 1,
+   "prompt": "Who was the first President of the United States?",
+   "correct": "George Washington",
+   "choices": [
+    "George Washington",
+    "John Adams",
+    "Thomas Jefferson",
+    "Benjamin Franklin"
+   ],
+   "source_url": "https://en.wikipedia.org/wiki/George_Washington"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "history",
+   "difficulty": 4,
+   "prompt": "The Hundred Years' War was fought primarily between England and which country?",
+   "correct": "France",
+   "choices": [
+    "France",
+    "Spain",
+    "Portugal",
+    "The Netherlands"
+   ],
+   "source_url": "https://en.wikipedia.org/wiki/Hundred_Years%27_War"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "music",
+   "difficulty": 1,
+   "prompt": "Which band's members included John, Paul, George, and Ringo?",
+   "correct": "The Beatles",
+   "choices": [
+    "The Beatles",
+    "The Rolling Stones",
+    "The Who",
+    "The Kinks"
+   ],
+   "source_url": "https://en.wikipedia.org/wiki/The_Beatles"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "music",
+   "difficulty": 2,
+   "prompt": "Which artist released the album 'Lemonade' in 2016?",
+   "correct": "Beyoncé",
+   "choices": [
+    "Beyoncé",
+    "Rihanna",
+    "Adele",
+    "Taylor Swift"
+   ],
+   "source_url": "https://en.wikipedia.org/wiki/Lemonade_(album)"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "music",
+   "difficulty": 3,
+   "prompt": "The electronic duo Daft Punk formed in which country?",
+   "correct": "France",
+   "choices": [
+    "France",
+    "Germany",
+    "Belgium",
+    "Italy"
+   ],
+   "source_url": "https://en.wikipedia.org/wiki/Daft_Punk"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "sports",
+   "difficulty": 1,
+   "prompt": "Patrick Mahomes of the Kansas City Chiefs plays which position?",
+   "correct": "Quarterback",
+   "choices": [
+    "Quarterback",
+    "Running back",
+    "Wide receiver",
+    "Tight end"
+   ],
+   "source_url": "https://en.wikipedia.org/wiki/Patrick_Mahomes"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "sports",
+   "difficulty": 2,
+   "prompt": "How many players from one team are on a basketball court at once?",
+   "correct": "5",
+   "choices": [
+    "5",
+    "6",
+    "7",
+    "4"
+   ],
+   "source_url": "https://en.wikipedia.org/wiki/Basketball"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "sports",
+   "difficulty": 3,
+   "prompt": "Which country has won the most FIFA World Cups?",
+   "correct": "Brazil",
+   "choices": [
+    "Brazil",
+    "Germany",
+    "Italy",
+    "Argentina"
+   ],
+   "source_url": "https://en.wikipedia.org/wiki/FIFA_World_Cup"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "screen",
+   "difficulty": 1,
+   "prompt": "Who directed 'Jurassic Park'?",
+   "correct": "Steven Spielberg",
+   "choices": [
+    "Steven Spielberg",
+    "James Cameron",
+    "George Lucas",
+    "Ridley Scott"
+   ],
+   "source_url": "https://en.wikipedia.org/wiki/Jurassic_Park_(film)"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "screen",
+   "difficulty": 2,
+   "prompt": "In 'Breaking Bad,' what is Walter White's drug-world alias?",
+   "correct": "Heisenberg",
+   "choices": [
+    "Heisenberg",
+    "Capone",
+    "Escobar",
+    "Fring"
+   ],
+   "source_url": "https://en.wikipedia.org/wiki/Walter_White_(Breaking_Bad)"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "screen",
+   "difficulty": 3,
+   "prompt": "Which studio created 'Spirited Away'?",
+   "correct": "Studio Ghibli",
+   "choices": [
+    "Studio Ghibli",
+    "Pixar",
+    "DreamWorks",
+    "Toei Animation"
+   ],
+   "source_url": "https://en.wikipedia.org/wiki/Spirited_Away"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "geography",
+   "difficulty": 2,
+   "prompt": "What is the capital of Australia?",
+   "correct": "Canberra",
+   "choices": [
+    "Canberra",
+    "Sydney",
+    "Melbourne",
+    "Perth"
+   ],
+   "source_url": "https://en.wikipedia.org/wiki/Canberra"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "geography",
+   "difficulty": 1,
+   "prompt": "Which is the largest country in the world by area?",
+   "correct": "Russia",
+   "choices": [
+    "Russia",
+    "Canada",
+    "China",
+    "United States"
+   ],
+   "source_url": "https://en.wikipedia.org/wiki/Russia"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "geography",
+   "difficulty": 3,
+   "prompt": "Mount Kilimanjaro, Africa's highest peak, is in which country?",
+   "correct": "Tanzania",
+   "choices": [
+    "Tanzania",
+    "Kenya",
+    "Ethiopia",
+    "Uganda"
+   ],
+   "source_url": "https://en.wikipedia.org/wiki/Mount_Kilimanjaro"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "wildcard",
+   "difficulty": 1,
+   "prompt": "What is the only mammal capable of true sustained flight?",
+   "correct": "The bat",
+   "choices": [
+    "The bat",
+    "The flying squirrel",
+    "The sugar glider",
+    "The colugo"
+   ],
+   "source_url": "https://en.wikipedia.org/wiki/Bat"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "wildcard",
+   "difficulty": 3,
+   "prompt": "Which planet has the most confirmed moons?",
+   "correct": "Saturn",
+   "choices": [
+    "Saturn",
+    "Jupiter",
+    "Uranus",
+    "Neptune"
+   ],
+   "source_url": "https://en.wikipedia.org/wiki/Moons_of_Saturn"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "wildcard",
+   "difficulty": 2,
+   "prompt": "What does 'HTTP' stand for?",
+   "correct": "HyperText Transfer Protocol",
+   "choices": [
+    "HyperText Transfer Protocol",
+    "HyperText Translation Process",
+    "High Throughput Transfer Protocol",
+    "Hyperlink Text Transport Program"
+   ],
+   "source_url": "https://en.wikipedia.org/wiki/HTTP"
+  },
+  {
+   "qtype": "higher_lower",
+   "category": "geography",
+   "difficulty": 2,
+   "prompt": "Which has the larger population?",
+   "correct": "higher",
+   "value_a": 216000000,
+   "value_b": 277000000,
+   "subject_a": "Brazil",
+   "subject_b": "Indonesia",
+   "unit": "population",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_countries_by_population"
+  },
+  {
+   "qtype": "higher_lower",
+   "category": "geography",
+   "difficulty": 3,
+   "prompt": "Which has the larger population?",
+   "correct": "higher",
+   "value_a": 124000000,
+   "value_b": 223000000,
+   "subject_a": "Japan",
+   "subject_b": "Nigeria",
+   "unit": "population",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_countries_by_population"
+  },
+  {
+   "qtype": "higher_lower",
+   "category": "geography",
+   "difficulty": 2,
+   "prompt": "Which covers more area?",
+   "correct": "higher",
+   "value_a": 3287000,
+   "value_b": 7692000,
+   "subject_a": "India",
+   "subject_b": "Australia",
+   "unit": "area (km²)",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_countries_and_dependencies_by_area"
+  },
+  {
+   "qtype": "higher_lower",
+   "category": "geography",
+   "difficulty": 3,
+   "prompt": "Which covers more area?",
+   "correct": "lower",
+   "value_a": 9985000,
+   "value_b": 3287000,
+   "subject_a": "Canada",
+   "subject_b": "India",
+   "unit": "area (km²)",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_countries_and_dependencies_by_area"
+  },
+  {
+   "qtype": "higher_lower",
+   "category": "geography",
+   "difficulty": 4,
+   "prompt": "Which river is longer?",
+   "correct": "higher",
+   "value_a": 3766,
+   "value_b": 6650,
+   "subject_a": "Mississippi",
+   "subject_b": "Nile",
+   "unit": "length (km)",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_rivers_by_length"
+  },
+  {
+   "qtype": "higher_lower",
+   "category": "screen",
+   "difficulty": 2,
+   "prompt": "Which grossed more at the worldwide box office?",
+   "correct": "higher",
+   "value_a": 1450000000,
+   "value_b": 2920000000,
+   "subject_a": "Frozen",
+   "subject_b": "Avatar",
+   "unit": "box office ($)",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_highest-grossing_films"
+  },
+  {
+   "qtype": "higher_lower",
+   "category": "screen",
+   "difficulty": 3,
+   "prompt": "Which grossed more at the worldwide box office?",
+   "correct": "higher",
+   "value_a": 1074000000,
+   "value_b": 2260000000,
+   "subject_a": "Joker",
+   "subject_b": "Titanic",
+   "unit": "box office ($)",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_highest-grossing_films"
+  },
+  {
+   "qtype": "higher_lower",
+   "category": "screen",
+   "difficulty": 1,
+   "prompt": "Which is rated higher by audiences?",
+   "correct": "higher",
+   "value_a": 6.2,
+   "value_b": 8.7,
+   "subject_a": "Morbius",
+   "subject_b": "The Shawshank Redemption",
+   "unit": "rating /10",
+   "source_url": "https://www.themoviedb.org"
+  },
+  {
+   "qtype": "higher_lower",
+   "category": "music",
+   "difficulty": 3,
+   "prompt": "Which album has sold more copies worldwide?",
+   "correct": "higher",
+   "value_a": 50000000,
+   "value_b": 70000000,
+   "subject_a": "AC/DC — Back in Black",
+   "subject_b": "Michael Jackson — Thriller",
+   "unit": "albums sold",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_best-selling_albums"
+  },
+  {
+   "qtype": "higher_lower",
+   "category": "sports",
+   "difficulty": 4,
+   "prompt": "Which stadium holds more fans?",
+   "correct": "higher",
+   "value_a": 81441,
+   "value_b": 107601,
+   "subject_a": "Lambeau Field",
+   "subject_b": "Michigan Stadium",
+   "unit": "capacity",
+   "source_url": "https://en.wikipedia.org/wiki/List_of_American_football_stadiums_by_capacity"
+  },
+  {
+   "qtype": "where",
+   "category": "geography",
+   "difficulty": 1,
+   "prompt": "Pin it: the Eiffel Tower, finished in 1889 for the World's Fair.",
+   "correct": "The Eiffel Tower, Paris",
+   "lat": 48.858,
+   "lng": 2.294,
+   "source_url": "https://en.wikipedia.org/wiki/Eiffel_Tower"
+  },
+  {
+   "qtype": "where",
+   "category": "history",
+   "difficulty": 2,
+   "prompt": "Pin it: the Great Pyramid, the last surviving Wonder of the Ancient World.",
+   "correct": "The Great Pyramid of Giza",
+   "lat": 29.979,
+   "lng": 31.134,
+   "source_url": "https://en.wikipedia.org/wiki/Great_Pyramid_of_Giza"
+  },
+  {
+   "qtype": "where",
+   "category": "history",
+   "difficulty": 3,
+   "prompt": "Pin it: Machu Picchu, the 15th-century Inca citadel in the clouds.",
+   "correct": "Machu Picchu, Peru",
+   "lat": -13.163,
+   "lng": -72.545,
+   "source_url": "https://en.wikipedia.org/wiki/Machu_Picchu"
+  },
+  {
+   "qtype": "where",
+   "category": "geography",
+   "difficulty": 2,
+   "prompt": "Pin it: the Sydney Opera House and its famous sails.",
+   "correct": "Sydney Opera House",
+   "lat": -33.857,
+   "lng": 151.215,
+   "source_url": "https://en.wikipedia.org/wiki/Sydney_Opera_House"
+  },
+  {
+   "qtype": "where",
+   "category": "history",
+   "difficulty": 1,
+   "prompt": "Pin it: the Statue of Liberty, France's 1886 gift to America.",
+   "correct": "The Statue of Liberty, New York",
+   "lat": 40.689,
+   "lng": -74.045,
+   "source_url": "https://en.wikipedia.org/wiki/Statue_of_Liberty"
+  },
+  {
+   "qtype": "where",
+   "category": "geography",
+   "difficulty": 3,
+   "prompt": "Pin it: Mount Kilimanjaro, the highest peak in Africa.",
+   "correct": "Mount Kilimanjaro, Tanzania",
+   "lat": -3.076,
+   "lng": 37.353,
+   "source_url": "https://en.wikipedia.org/wiki/Mount_Kilimanjaro"
+  },
+  {
+   "qtype": "where",
+   "category": "history",
+   "difficulty": 3,
+   "prompt": "Pin it: Red Square, where Soviet parades rolled past the Kremlin.",
+   "correct": "Red Square, Moscow",
+   "lat": 55.754,
+   "lng": 37.62,
+   "source_url": "https://en.wikipedia.org/wiki/Red_Square"
+  },
+  {
+   "qtype": "where",
+   "category": "geography",
+   "difficulty": 2,
+   "prompt": "Pin it: Christ the Redeemer, arms wide over a famous bay.",
+   "correct": "Christ the Redeemer, Rio de Janeiro",
+   "lat": -22.952,
+   "lng": -43.211,
+   "source_url": "https://en.wikipedia.org/wiki/Christ_the_Redeemer_(statue)"
+  },
+  {
+   "qtype": "where",
+   "category": "history",
+   "difficulty": 4,
+   "prompt": "Pin it: Stonehenge, standing since roughly 2500 BC.",
+   "correct": "Stonehenge, England",
+   "lat": 51.179,
+   "lng": -1.826,
+   "source_url": "https://en.wikipedia.org/wiki/Stonehenge"
+  },
+  {
+   "qtype": "where",
+   "category": "screen",
+   "difficulty": 2,
+   "prompt": "Pin it: the Golden Gate Bridge, Hollywood's favorite landmark to destroy.",
+   "correct": "The Golden Gate Bridge, San Francisco",
+   "lat": 37.82,
+   "lng": -122.478,
+   "source_url": "https://en.wikipedia.org/wiki/Golden_Gate_Bridge"
+  },
+  {
+   "qtype": "where",
+   "category": "history",
+   "difficulty": 2,
+   "prompt": "Pin it: the Taj Mahal, a marble mausoleum completed in 1653.",
+   "correct": "The Taj Mahal, Agra",
+   "lat": 27.175,
+   "lng": 78.042,
+   "source_url": "https://en.wikipedia.org/wiki/Taj_Mahal"
+  },
+  {
+   "qtype": "where",
+   "category": "history",
+   "difficulty": 4,
+   "prompt": "Pin it: the wall fell here in 1989 and a city was whole again.",
+   "correct": "Berlin, Germany",
+   "lat": 52.52,
+   "lng": 13.405,
+   "source_url": "https://en.wikipedia.org/wiki/Berlin_Wall"
+  },
+  {
+   "qtype": "audio_guess",
+   "category": "music",
+   "difficulty": 1,
+   "prompt": "Name this tune.",
+   "correct": "Twinkle, Twinkle, Little Star",
+   "choices": [
+    "Twinkle, Twinkle, Little Star",
+    "Row, Row, Row Your Boat",
+    "Old MacDonald",
+    "London Bridge"
+   ],
+   "melody": [
+    {
+     "n": "C4",
+     "d": 1
+    },
+    {
+     "n": "C4",
+     "d": 1
+    },
+    {
+     "n": "G4",
+     "d": 1
+    },
+    {
+     "n": "G4",
+     "d": 1
+    },
+    {
+     "n": "A4",
+     "d": 1
+    },
+    {
+     "n": "A4",
+     "d": 1
+    },
+    {
+     "n": "G4",
+     "d": 2
+    },
+    {
+     "n": "F4",
+     "d": 1
+    },
+    {
+     "n": "F4",
+     "d": 1
+    },
+    {
+     "n": "E4",
+     "d": 1
+    },
+    {
+     "n": "E4",
+     "d": 1
+    },
+    {
+     "n": "D4",
+     "d": 1
+    },
+    {
+     "n": "D4",
+     "d": 1
+    },
+    {
+     "n": "C4",
+     "d": 2
+    }
+   ],
+   "source_url": "https://en.wikipedia.org/wiki/Twinkle,_Twinkle,_Little_Star"
+  },
+  {
+   "qtype": "audio_guess",
+   "category": "music",
+   "difficulty": 1,
+   "prompt": "Name this tune.",
+   "correct": "Mary Had a Little Lamb",
+   "choices": [
+    "Mary Had a Little Lamb",
+    "Hot Cross Buns",
+    "Three Blind Mice",
+    "Baa Baa Black Sheep"
+   ],
+   "melody": [
+    {
+     "n": "E4",
+     "d": 1
+    },
+    {
+     "n": "D4",
+     "d": 1
+    },
+    {
+     "n": "C4",
+     "d": 1
+    },
+    {
+     "n": "D4",
+     "d": 1
+    },
+    {
+     "n": "E4",
+     "d": 1
+    },
+    {
+     "n": "E4",
+     "d": 1
+    },
+    {
+     "n": "E4",
+     "d": 2
+    },
+    {
+     "n": "D4",
+     "d": 1
+    },
+    {
+     "n": "D4",
+     "d": 1
+    },
+    {
+     "n": "D4",
+     "d": 2
+    },
+    {
+     "n": "E4",
+     "d": 1
+    },
+    {
+     "n": "G4",
+     "d": 1
+    },
+    {
+     "n": "G4",
+     "d": 2
+    }
+   ],
+   "source_url": "https://en.wikipedia.org/wiki/Mary_Had_a_Little_Lamb"
+  },
+  {
+   "qtype": "audio_guess",
+   "category": "music",
+   "difficulty": 1,
+   "prompt": "Name this tune.",
+   "correct": "Jingle Bells",
+   "choices": [
+    "Jingle Bells",
+    "Deck the Halls",
+    "Silent Night",
+    "Frosty the Snowman"
+   ],
+   "melody": [
+    {
+     "n": "E4",
+     "d": 1
+    },
+    {
+     "n": "E4",
+     "d": 1
+    },
+    {
+     "n": "E4",
+     "d": 2
+    },
+    {
+     "n": "E4",
+     "d": 1
+    },
+    {
+     "n": "E4",
+     "d": 1
+    },
+    {
+     "n": "E4",
+     "d": 2
+    },
+    {
+     "n": "E4",
+     "d": 1
+    },
+    {
+     "n": "G4",
+     "d": 1
+    },
+    {
+     "n": "C4",
+     "d": 1
+    },
+    {
+     "n": "D4",
+     "d": 1
+    },
+    {
+     "n": "E4",
+     "d": 2
+    }
+   ],
+   "source_url": "https://en.wikipedia.org/wiki/Jingle_Bells"
+  },
+  {
+   "qtype": "audio_guess",
+   "category": "music",
+   "difficulty": 2,
+   "prompt": "Name this classical theme.",
+   "correct": "Ode to Joy",
+   "choices": [
+    "Ode to Joy",
+    "Canon in D",
+    "Clair de Lune",
+    "The Blue Danube"
+   ],
+   "melody": [
+    {
+     "n": "E4",
+     "d": 1
+    },
+    {
+     "n": "E4",
+     "d": 1
+    },
+    {
+     "n": "F4",
+     "d": 1
+    },
+    {
+     "n": "G4",
+     "d": 1
+    },
+    {
+     "n": "G4",
+     "d": 1
+    },
+    {
+     "n": "F4",
+     "d": 1
+    },
+    {
+     "n": "E4",
+     "d": 1
+    },
+    {
+     "n": "D4",
+     "d": 1
+    },
+    {
+     "n": "C4",
+     "d": 1
+    },
+    {
+     "n": "C4",
+     "d": 1
+    },
+    {
+     "n": "D4",
+     "d": 1
+    },
+    {
+     "n": "E4",
+     "d": 1
+    },
+    {
+     "n": "E4",
+     "d": 1.5
+    },
+    {
+     "n": "D4",
+     "d": 0.5
+    },
+    {
+     "n": "D4",
+     "d": 2
+    }
+   ],
+   "source_url": "https://en.wikipedia.org/wiki/Ode_to_Joy"
+  },
+  {
+   "qtype": "audio_guess",
+   "category": "music",
+   "difficulty": 2,
+   "prompt": "Name this classical theme.",
+   "correct": "Beethoven's 5th Symphony",
+   "choices": [
+    "Beethoven's 5th Symphony",
+    "Eine kleine Nachtmusik",
+    "The Four Seasons",
+    "Ride of the Valkyries"
+   ],
+   "melody": [
+    {
+     "n": "G4",
+     "d": 0.5
+    },
+    {
+     "n": "G4",
+     "d": 0.5
+    },
+    {
+     "n": "G4",
+     "d": 0.5
+    },
+    {
+     "n": "D#4",
+     "d": 2
+    },
+    {
+     "n": "rest",
+     "d": 0.5
+    },
+    {
+     "n": "F4",
+     "d": 0.5
+    },
+    {
+     "n": "F4",
+     "d": 0.5
+    },
+    {
+     "n": "F4",
+     "d": 0.5
+    },
+    {
+     "n": "D4",
+     "d": 2
+    }
+   ],
+   "source_url": "https://en.wikipedia.org/wiki/Symphony_No._5_(Beethoven)"
+  },
+  {
+   "qtype": "audio_guess",
+   "category": "music",
+   "difficulty": 3,
+   "prompt": "Name this classical theme.",
+   "correct": "Für Elise",
+   "choices": [
+    "Für Elise",
+    "Moonlight Sonata",
+    "Turkish March",
+    "Nocturne in E-flat"
+   ],
+   "melody": [
+    {
+     "n": "E5",
+     "d": 0.5
+    },
+    {
+     "n": "D#5",
+     "d": 0.5
+    },
+    {
+     "n": "E5",
+     "d": 0.5
+    },
+    {
+     "n": "D#5",
+     "d": 0.5
+    },
+    {
+     "n": "E5",
+     "d": 0.5
+    },
+    {
+     "n": "B4",
+     "d": 0.5
+    },
+    {
+     "n": "D5",
+     "d": 0.5
+    },
+    {
+     "n": "C5",
+     "d": 0.5
+    },
+    {
+     "n": "A4",
+     "d": 1.5
+    }
+   ],
+   "source_url": "https://en.wikipedia.org/wiki/F%C3%BCr_Elise"
+  },
+  {
+   "qtype": "image_guess",
+   "category": "geography",
+   "difficulty": 1,
+   "prompt": "Which country does this flag belong to?",
+   "correct": "Japan",
+   "choices": [
+    "Japan",
+    "Bangladesh",
+    "Palau",
+    "Indonesia"
+   ],
+   "image_url": "https://flagcdn.com/w320/jp.png",
+   "source_url": "https://en.wikipedia.org/wiki/Flag_of_Japan"
+  },
+  {
+   "qtype": "image_guess",
+   "category": "geography",
+   "difficulty": 1,
+   "prompt": "Which country does this flag belong to?",
+   "correct": "Brazil",
+   "choices": [
+    "Brazil",
+    "Australia",
+    "Portugal",
+    "Colombia"
+   ],
+   "image_url": "https://flagcdn.com/w320/br.png",
+   "source_url": "https://en.wikipedia.org/wiki/Flag_of_Brazil"
+  },
+  {
+   "qtype": "image_guess",
+   "category": "geography",
+   "difficulty": 1,
+   "prompt": "Which country does this flag belong to?",
+   "correct": "Canada",
+   "choices": [
+    "Canada",
+    "Peru",
+    "Lebanon",
+    "Austria"
+   ],
+   "image_url": "https://flagcdn.com/w320/ca.png",
+   "source_url": "https://en.wikipedia.org/wiki/Flag_of_Canada"
+  },
+  {
+   "qtype": "image_guess",
+   "category": "geography",
+   "difficulty": 2,
+   "prompt": "Which country does this flag belong to?",
+   "correct": "Italy",
+   "choices": [
+    "Italy",
+    "Mexico",
+    "Ireland",
+    "Hungary"
+   ],
+   "image_url": "https://flagcdn.com/w320/it.png",
+   "source_url": "https://en.wikipedia.org/wiki/Flag_of_Italy"
+  },
+  {
+   "qtype": "image_guess",
+   "category": "geography",
+   "difficulty": 3,
+   "prompt": "Which country does this flag belong to?",
+   "correct": "Greece",
+   "choices": [
+    "Greece",
+    "Uruguay",
+    "Finland",
+    "Israel"
+   ],
+   "image_url": "https://flagcdn.com/w320/gr.png",
+   "source_url": "https://en.wikipedia.org/wiki/Flag_of_Greece"
+  },
+  {
+   "qtype": "image_guess",
+   "category": "geography",
+   "difficulty": 3,
+   "prompt": "Which country does this flag belong to?",
+   "correct": "South Korea",
+   "choices": [
+    "South Korea",
+    "Taiwan",
+    "Mongolia",
+    "Cambodia"
+   ],
+   "image_url": "https://flagcdn.com/w320/kr.png",
+   "source_url": "https://en.wikipedia.org/wiki/Flag_of_South_Korea"
+  },
+  {
+   "qtype": "connections",
+   "category": "wildcard",
+   "difficulty": 3,
+   "prompt": "Sort these sixteen into four groups of four.",
+   "correct": "",
+   "groups": [
+    {
+     "label": "Beatles members",
+     "members": [
+      "John",
+      "Paul",
+      "George",
+      "Ringo"
+     ],
+     "difficulty": 1
+    },
+    {
+     "label": "Chess pieces",
+     "members": [
+      "King",
+      "Queen",
+      "Bishop",
+      "Knight"
+     ],
+     "difficulty": 2
+    },
+    {
+     "label": "Planets",
+     "members": [
+      "Mars",
+      "Venus",
+      "Mercury",
+      "Jupiter"
+     ],
+     "difficulty": 3
+    },
+    {
+     "label": "___ Spice (Spice Girls)",
+     "members": [
+      "Scary",
+      "Sporty",
+      "Posh",
+      "Baby"
+     ],
+     "difficulty": 4
+    }
+   ],
+   "source_url": "https://en.wikipedia.org/wiki/Connections_(game)"
+  },
+  {
+   "qtype": "connections",
+   "category": "wildcard",
+   "difficulty": 3,
+   "prompt": "Sort these sixteen into four groups of four.",
+   "correct": "",
+   "groups": [
+    {
+     "label": "Oceans",
+     "members": [
+      "Pacific",
+      "Atlantic",
+      "Indian",
+      "Arctic"
+     ],
+     "difficulty": 1
+    },
+    {
+     "label": "Card suits",
+     "members": [
+      "Hearts",
+      "Spades",
+      "Clubs",
+      "Diamonds"
+     ],
+     "difficulty": 2
+    },
+    {
+     "label": "Great Lakes",
+     "members": [
+      "Superior",
+      "Michigan",
+      "Huron",
+      "Erie"
+     ],
+     "difficulty": 3
+    },
+    {
+     "label": "Tom Hanks films",
+     "members": [
+      "Big",
+      "Splash",
+      "Cast Away",
+      "Philadelphia"
+     ],
+     "difficulty": 4
+    }
+   ],
+   "source_url": "https://en.wikipedia.org/wiki/Connections_(game)"
+  },
+  {
+   "qtype": "seance",
+   "category": "music",
+   "difficulty": 1,
+   "prompt": "Who or what am I? Reveal clues one at a time.",
+   "correct": "The Beatles",
+   "clues": [
+    "This artist has more than 100 million fans worldwide.",
+    "This artist formed in Liverpool, England in 1960.",
+    "This artist released the album Abbey Road in 1969.",
+    "This artist broke up in 1970 and featured John, Paul, George, and Ringo."
+   ],
+   "source_url": "https://en.wikipedia.org/wiki/The_Beatles"
+  },
+  {
+   "qtype": "seance",
+   "category": "geography",
+   "difficulty": 2,
+   "prompt": "Who or what am I? Reveal clues one at a time.",
+   "correct": "Japan",
+   "clues": [
+    "This place has a population of over 125 million people.",
+    "This place covers approximately 377,975 km².",
+    "This place is an island nation in East Asia.",
+    "This place's capital is Tokyo."
+   ],
+   "source_url": "https://restcountries.com"
+  },
+  {
+   "qtype": "seance",
+   "category": "screen",
+   "difficulty": 2,
+   "prompt": "Who or what am I? Reveal clues one at a time.",
+   "correct": "Titanic",
+   "clues": [
+    "This title earned over 2 billion dollars at the global box office.",
+    "This title was released in 1997.",
+    "This title starred Leonardo DiCaprio and Kate Winslet.",
+    "This title is named after a ship that sank in the North Atlantic."
+   ],
+   "source_url": "https://www.themoviedb.org"
+  },
+  {
+   "qtype": "seance",
+   "category": "history",
+   "difficulty": 2,
+   "prompt": "Who or what am I? Reveal clues one at a time.",
+   "correct": "The Moon Landing",
+   "clues": [
+    "This event was broadcast live to hundreds of millions of television viewers.",
+    "This event took place in July 1969.",
+    "This event was achieved by NASA's Apollo 11 mission.",
+    "This event placed the first humans on a natural satellite of Earth."
+   ],
+   "source_url": "https://en.wikipedia.org/wiki/Apollo_11"
+  },
+  {
+   "qtype": "seance",
+   "category": "sports",
+   "difficulty": 3,
+   "prompt": "Who or what am I? Reveal clues one at a time.",
+   "correct": "Michael Jordan",
+   "clues": [
+    "This player is one of the most recognized athletes in the world.",
+    "This player won six NBA championships.",
+    "This player played for the Chicago Bulls during their 1990s dynasty.",
+    "This player wore the number 23."
+   ],
+   "source_url": "https://en.wikipedia.org/wiki/Michael_Jordan"
+  },
+  {
+   "qtype": "ladder",
+   "category": "geography",
+   "difficulty": 2,
+   "prompt": "Which country's population is closest to France (67 million)?",
+   "correct": "United Kingdom",
+   "candidates": [
+    {
+     "label": "United Kingdom",
+     "category": "geography",
+     "region": "Europe",
+     "magnitude": 7.83
+    },
+    {
+     "label": "Germany",
+     "category": "geography",
+     "region": "Europe",
+     "magnitude": 7.92
+    },
+    {
+     "label": "Brazil",
+     "category": "geography",
+     "region": "Americas",
+     "magnitude": 8.36
+    },
+    {
+     "label": "Egypt",
+     "category": "geography",
+     "region": "Africa",
+     "magnitude": 8.0
+    },
+    {
+     "label": "Thailand",
+     "category": "geography",
+     "region": "Asia",
+     "magnitude": 7.88
+    }
+   ],
+   "source_url": "https://restcountries.com"
+  },
+  {
+   "qtype": "ladder",
+   "category": "music",
+   "difficulty": 3,
+   "prompt": "Which artist's Deezer fan count is closest to Taylor Swift (~35 million)?",
+   "correct": "Adele",
+   "candidates": [
+    {
+     "label": "Adele",
+     "category": "music",
+     "region": null,
+     "magnitude": 7.48
+    },
+    {
+     "label": "Ed Sheeran",
+     "category": "music",
+     "region": null,
+     "magnitude": 7.82
+    },
+    {
+     "label": "Drake",
+     "category": "music",
+     "region": null,
+     "magnitude": 7.7
+    },
+    {
+     "label": "Coldplay",
+     "category": "music",
+     "region": null,
+     "magnitude": 7.51
+    },
+    {
+     "label": "Beyoncé",
+     "category": "music",
+     "region": null,
+     "magnitude": 7.52
+    }
+   ],
+   "source_url": "https://www.deezer.com"
+  },
+  {
+   "qtype": "ladder",
+   "category": "geography",
+   "difficulty": 3,
+   "prompt": "Which country's area is closest to Argentina (2.78 million km²)?",
+   "correct": "Kazakhstan",
+   "candidates": [
+    {
+     "label": "Kazakhstan",
+     "category": "geography",
+     "region": "Asia",
+     "magnitude": 6.44
+    },
+    {
+     "label": "India",
+     "category": "geography",
+     "region": "Asia",
+     "magnitude": 6.48
+    },
+    {
+     "label": "Australia",
+     "category": "geography",
+     "region": "Oceania",
+     "magnitude": 6.92
+    },
+    {
+     "label": "Saudi Arabia",
+     "category": "geography",
+     "region": "Asia",
+     "magnitude": 6.31
+    },
+    {
+     "label": "Mexico",
+     "category": "geography",
+     "region": "Americas",
+     "magnitude": 6.19
+    }
+   ],
+   "source_url": "https://restcountries.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "history",
+   "difficulty": 5,
+   "prompt": "Which of these positions did the astronomer and physicist Isaac Newton not hold?",
+   "correct": "Surveyor to the City of London",
+   "choices": [
+    "Professor of Mathematics",
+    "Warden of the Royal Mint",
+    "Surveyor to the City of London",
+    "Member of Parliament"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "What is isobutylphenylpropanoic acid more commonly known as?",
+   "correct": "Ibuprofen",
+   "choices": [
+    "Aspirin",
+    "Ketamine",
+    "Morphine",
+    "Ibuprofen"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "What is the name of the process that sends one qubit of information using two bits of classical information?",
+   "correct": "Quantum Teleportation",
+   "choices": [
+    "Quantum Teleportation",
+    "Quantum Entanglement",
+    "Quantum Programming",
+    "Super Dense Coding"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "What is the scientific name for the Bald Eagle?",
+   "correct": "Haliaeetus Leucocephalus",
+   "choices": [
+    "Tyto Alba",
+    "Cyanocitta Cristata",
+    "Aquila Chrysaetos",
+    "Haliaeetus Leucocephalus"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "What was the name of the first Bulgarian personal computer?",
+   "correct": "IMKO-1",
+   "choices": [
+    "Pravetz 82",
+    "IZOT 1030",
+    "Pravetz 8D",
+    "IMKO-1"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "What is the scientific name of the cheetah?",
+   "correct": "Acinonyx jubatus",
+   "choices": [
+    "Acinonyx jubatus",
+    "Lynx rufus",
+    "Felis catus",
+    "Panthera onca"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "geography",
+   "difficulty": 5,
+   "prompt": "Where is Timbuktu located?",
+   "correct": "Mali, Africa",
+   "choices": [
+    "Mali, Africa",
+    "Azerbaijan, Asia",
+    "Bangladesh, Asia",
+    "Mauritania, Africa"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "screen",
+   "difficulty": 5,
+   "prompt": "In order to cut costs, what were most of the extras of Mad Max (1979) paid with?",
+   "correct": "Beer",
+   "choices": [
+    "Beer",
+    "They weren't paid",
+    "Fast food",
+    "Food stamps"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "music",
+   "difficulty": 5,
+   "prompt": "What was the name of the hip hop group Kanye West was a member of in the late 90s?",
+   "correct": "The Go-Getters",
+   "choices": [
+    "The Go-Getters",
+    "The Kickstarters",
+    "The Beat-Busters",
+    "The Jumpers"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "geography",
+   "difficulty": 5,
+   "prompt": "The Suez Canal is located in which African country?",
+   "correct": "Egypt",
+   "choices": [
+    "Ghana",
+    "Nigeria",
+    "Egypt",
+    "Libya"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "According to Bram Stoker's novel, in which British coastal town did Dracula come ashore?",
+   "correct": "Whitby",
+   "choices": [
+    "Whitby",
+    "Scarborough",
+    "Portsmouth",
+    "Brighton"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "music",
+   "difficulty": 5,
+   "prompt": "Who recorded the 1975 album 'Captain Fantastic and the Brown Dirt Cowboy'?",
+   "correct": "Elton John",
+   "choices": [
+    "John Denver",
+    "Joe Cocker",
+    "Billy Joel",
+    "Elton John"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "sports",
+   "difficulty": 5,
+   "prompt": "Which year was the third Super Bowl held?",
+   "correct": "1969",
+   "choices": [
+    "1971",
+    "1969",
+    "1968",
+    "1970"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "What car manufacturer gave away their patent for the seat-belt in the interest of saving lives?",
+   "correct": "Volvo",
+   "choices": [
+    "Renault",
+    "Volvo",
+    "Ferrari",
+    "Ford"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "Which art movement was Pablo Picasso known for co-founding?",
+   "correct": "Cubism",
+   "choices": [
+    "Impressionism",
+    "Cubism",
+    "Futurism",
+    "Expressionism"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "music",
+   "difficulty": 5,
+   "prompt": "Which Manchester nightclub was considered central to the 'Madchester' music scene in the late 80's?",
+   "correct": "The Hacienda",
+   "choices": [
+    "The Hacienda",
+    "The Liar's Club",
+    "The Warehouse Project",
+    "LIV"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "history",
+   "difficulty": 5,
+   "prompt": "In Norse mythology, what is the name of the serpent which eats the roots of the ash tree Yggdrasil?",
+   "correct": "Nidhogg",
+   "choices": [
+    "Bragi",
+    "Odin",
+    "Ymir",
+    "Nidhogg"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "Australia, Japan, and Southeast Asia are in which ITU Region?",
+   "correct": "Region 3",
+   "choices": [
+    "Region 2",
+    "Region 4",
+    "Region 1",
+    "Region 3"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "history",
+   "difficulty": 5,
+   "prompt": "After the 1516 Battle of Marj Dabiq, the Ottoman Empire took control of Jerusalem from which sultanate?",
+   "correct": "Mamluk",
+   "choices": [
+    "Ayyubid",
+    "Mamluk",
+    "Ummayyad",
+    "Seljuq"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "history",
+   "difficulty": 5,
+   "prompt": "What was the last colony the UK ceded marking the end of the British Empire?",
+   "correct": "Hong Kong",
+   "choices": [
+    "Ireland",
+    "India",
+    "Australia",
+    "Hong Kong"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "screen",
+   "difficulty": 5,
+   "prompt": "Who played Stan's dog in the South Park episode \"Big Gay Al's Big Gay Boat Ride\"?",
+   "correct": "George Clooney",
+   "choices": [
+    "Robert Smith",
+    "Matt Stone",
+    "George Clooney",
+    "Jay Leno"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "geography",
+   "difficulty": 5,
+   "prompt": "What North American tourist attraction is served by the \"Maid of the Mist\" tour company?",
+   "correct": "Niagara Falls",
+   "choices": [
+    "Yosemite National Park",
+    "Whistler, British Columbia",
+    "Disney World",
+    "Niagara Falls"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "sports",
+   "difficulty": 5,
+   "prompt": "Which of these Russian cities did NOT contain a stadium that was used in the 2018 FIFA World Cup?",
+   "correct": "Vladivostok",
+   "choices": [
+    "Yekaterinburg",
+    "Vladivostok",
+    "Rostov-on-Don",
+    "Kaliningrad"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "Which of these anatomical terms refers to the tail end of the creature?",
+   "correct": "Caudal",
+   "choices": [
+    "Proximal",
+    "Coronal",
+    "Caudal",
+    "Ventral"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "sports",
+   "difficulty": 5,
+   "prompt": "What is the full name of the footballer \"Cristiano Ronaldo\"?",
+   "correct": "Cristiano Ronaldo dos Santos Aveiro",
+   "choices": [
+    "Cristiano Armando Diego Ronaldo",
+    "Cristiano Luis Armando Ronaldo",
+    "Cristiano Ronaldo dos Santos Aveiro",
+    "Cristiano Ronaldo los Santos Diego"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "Which school in Surrey, England did Steve Backshall attend?",
+   "correct": "Collingwood College",
+   "choices": [
+    "Collingwood College",
+    "Lyndhurst School",
+    "Tomlinscote School",
+    "Kings International College"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "geography",
+   "difficulty": 5,
+   "prompt": "What is the capital of Burkina Faso?",
+   "correct": "Ouagadougou",
+   "choices": [
+    "Abidjan",
+    "Yaounde",
+    "Yamoussoukro",
+    "Ouagadougou"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "Abel Magwitch is a character from which Charles Dickens novel?",
+   "correct": "Great Expectations",
+   "choices": [
+    "Great Expectations",
+    "Oliver Twist",
+    "The Pickwick Papers",
+    "Nicholas Nickleby"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "screen",
+   "difficulty": 5,
+   "prompt": "Better known by his nickname Logan, what is Wolverine's birth name?",
+   "correct": "James Howlett",
+   "choices": [
+    "Logan Wolf",
+    "James Howlett",
+    "Thomas Wilde",
+    "John Savage"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "history",
+   "difficulty": 5,
+   "prompt": "During the Roman Triumvirate of 42 BCE, what region of the Roman Republic was given to Lepidus?",
+   "correct": "Hispania",
+   "choices": [
+    "Asia",
+    "Italia",
+    "Hispania",
+    "Gallia"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "screen",
+   "difficulty": 5,
+   "prompt": "What was the first superhero film James Gunn was involved with?",
+   "correct": "The Specials",
+   "choices": [
+    "The Specials",
+    "Brightburn",
+    "Guardians of the Galaxy",
+    "Super"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "history",
+   "difficulty": 5,
+   "prompt": "Which of these was an official candidate in the 2017 British General Election?",
+   "correct": "Lord Buckethead",
+   "choices": [
+    "Robert Wimbledon",
+    "Lord Buckethead",
+    "James Francis",
+    "Sir Crumpetsby"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "history",
+   "difficulty": 5,
+   "prompt": "Who was the President of the United States during the signing of the Gadsden Purchase?",
+   "correct": "Franklin Pierce",
+   "choices": [
+    "Abraham Lincoln",
+    "James Polk",
+    "Andrew Johnson",
+    "Franklin Pierce"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "history",
+   "difficulty": 5,
+   "prompt": "Which country did the Eureka Rebellion, an 1856 battle against colonial rule, take place in?",
+   "correct": "Australia",
+   "choices": [
+    "Australia",
+    "Canada",
+    "India",
+    "Brazil"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "screen",
+   "difficulty": 5,
+   "prompt": "What is the name of Broadway's first \"long-run\" musical?",
+   "correct": "The Elves",
+   "choices": [
+    "The Book of Mormon",
+    "The Elves",
+    "Wicked",
+    "Hamilton"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "sports",
+   "difficulty": 5,
+   "prompt": "Which female player won the gold medal of table tennis singles in 2016 Olympics Games?",
+   "correct": "DING Ning (China)",
+   "choices": [
+    "Song KIM (North Korea)",
+    "DING Ning (China)",
+    "Ai FUKUHARA (Japan)",
+    "LI Xiaoxia (China)"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "All of the following human genetic haplogroup names are shared between Y-chromosome and mitochondrial DNA haplogroups EXCEPT:",
+   "correct": "Haplogroup U",
+   "choices": [
+    "Haplogroup L",
+    "Haplogroup U",
+    "Haplogroup J",
+    "Haplogroup T"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "history",
+   "difficulty": 5,
+   "prompt": "The coat of arms of the King of Spain contains the arms from the monarchs of Castille, Leon, Aragon and which other former Iberian kingdom?",
+   "correct": "Navarre",
+   "choices": [
+    "Navarre",
+    "Granada",
+    "Galicia",
+    "Catalonia"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "wildcard",
+   "difficulty": 3,
+   "prompt": "What Latin phrase roughly translates to \"seize the day\"?",
+   "correct": "Carpe diem",
+   "choices": [
+    "Sic semper tyrannis",
+    "Carpe diem",
+    "Plus ultra",
+    "Memento mori"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "wildcard",
+   "difficulty": 3,
+   "prompt": "Directly between the Washington Monument and the Reflecting Pool is a memorial to which war?",
+   "correct": "World War II",
+   "choices": [
+    "American Civil War",
+    "World War II",
+    "Vietnam War",
+    "American Revolutionary War"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "wildcard",
+   "difficulty": 3,
+   "prompt": "What did the Spanish autonomous community of Catalonia ban in 2010, that took effect in 2012?",
+   "correct": "Bullfighting",
+   "choices": [
+    "Bullfighting",
+    "Flamenco",
+    "Fiestas",
+    "Mariachi"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "wildcard",
+   "difficulty": 3,
+   "prompt": "If a person's hair is described as 'Titian', what colour is it?",
+   "correct": "Red",
+   "choices": [
+    "Red",
+    "Black",
+    "Brunette",
+    "Blonde"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "wildcard",
+   "difficulty": 3,
+   "prompt": "What character was once considered to be the 27th letter of the alphabet?",
+   "correct": "Ampersand",
+   "choices": [
+    "Interrobang",
+    "Pilcrow",
+    "Tilde",
+    "Ampersand"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "wildcard",
+   "difficulty": 3,
+   "prompt": "Only 9% of US Households owned a television in what year?",
+   "correct": "1950",
+   "choices": [
+    "1913",
+    "1965",
+    "1950",
+    "1969"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "wildcard",
+   "difficulty": 3,
+   "prompt": "Which country has the most Trappist breweries?",
+   "correct": "Belgium",
+   "choices": [
+    "Belgium",
+    "USA",
+    "France",
+    "Netherlands"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "wildcard",
+   "difficulty": 3,
+   "prompt": "What do the Dutch call their language?",
+   "correct": "Nederlands",
+   "choices": [
+    "Hollander",
+    "Dansk",
+    "Deutsch",
+    "Nederlands"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "wildcard",
+   "difficulty": 3,
+   "prompt": "Which river flows through the Scottish city of Glasgow?",
+   "correct": "Clyde",
+   "choices": [
+    "Tweed",
+    "Dee",
+    "Tay",
+    "Clyde"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "wildcard",
+   "difficulty": 3,
+   "prompt": "Where did the pineapple plant originate?",
+   "correct": "South America",
+   "choices": [
+    "South America",
+    "Hawaii",
+    "Asia",
+    "Europe"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "wildcard",
+   "difficulty": 3,
+   "prompt": "The Fields Medal, one of the most sought after awards in mathematics, is awarded every how many years?",
+   "correct": "4",
+   "choices": [
+    "6",
+    "3",
+    "4",
+    "5"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "wildcard",
+   "difficulty": 3,
+   "prompt": "The architect known as Le Corbusier was an important figure in what style of architecture?",
+   "correct": "Modernism",
+   "choices": [
+    "Baroque",
+    "Neoclassical",
+    "Gothic Revival",
+    "Modernism"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "wildcard",
+   "difficulty": 3,
+   "prompt": "What is the largest rapid transit system in the world by number of stations, with 472 stations in operation?",
+   "correct": "New York City Subway",
+   "choices": [
+    "Berlin U-Bahn",
+    "New York City Subway",
+    "London Underground",
+    "Shanghai Metro"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "wildcard",
+   "difficulty": 3,
+   "prompt": "What fast food chain has the most locations globally?",
+   "correct": "Subway",
+   "choices": [
+    "KFC",
+    "McDonalds",
+    "Starbucks",
+    "Subway"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "wildcard",
+   "difficulty": 3,
+   "prompt": "According to the BBPA, what is the most common pub name in the UK?",
+   "correct": "Red Lion",
+   "choices": [
+    "White Hart",
+    "Royal Oak",
+    "King's Head",
+    "Red Lion"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "wildcard",
+   "difficulty": 3,
+   "prompt": "In a 1994 CBS interview, Microsoft co-founder Bill Gates performed what unusual trick on camera?",
+   "correct": "Jumping over an office chair",
+   "choices": [
+    "Jumping over an office chair",
+    "Jumping backwards over a desk",
+    "Standing on his head",
+    "Typing on a keyboard during a handstand"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "wildcard",
+   "difficulty": 3,
+   "prompt": "What is the real name of viral internet meme Grumpy Cat?",
+   "correct": "Tardar Sauce",
+   "choices": [
+    "Tardar Sauce",
+    "Maru",
+    "Colonel Meow",
+    "Lil Bub"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "wildcard",
+   "difficulty": 3,
+   "prompt": "Who is a co-founder of music streaming service Spotify?",
+   "correct": "Daniel Ek",
+   "choices": [
+    "Michael Breidenbruecker",
+    "Daniel Ek",
+    "Felix Miller",
+    "Sean Parker"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "wildcard",
+   "difficulty": 3,
+   "prompt": "What is the world's most expensive spice by weight?",
+   "correct": "Saffron",
+   "choices": [
+    "Vanilla",
+    "Cardamom",
+    "Cinnamon",
+    "Saffron"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "wildcard",
+   "difficulty": 3,
+   "prompt": "What is the Italian word for \"tomato\"?",
+   "correct": "Pomodoro",
+   "choices": [
+    "Cipolla",
+    "Pomodoro",
+    "Peperoncino",
+    "Aglio"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "wildcard",
+   "difficulty": 3,
+   "prompt": "Coleslaw originated from which European country?",
+   "correct": "The Netherlands",
+   "choices": [
+    "United Kingdom",
+    "Denmark",
+    "Germany",
+    "The Netherlands"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "wildcard",
+   "difficulty": 3,
+   "prompt": "What does a milliner make and sell?",
+   "correct": "Hats",
+   "choices": [
+    "Shoes",
+    "Hats",
+    "Shirts",
+    "Belts"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "wildcard",
+   "difficulty": 3,
+   "prompt": "Which language is NOT Indo-European?",
+   "correct": "Hungarian",
+   "choices": [
+    "Russian",
+    "Hungarian",
+    "Latvian",
+    "Greek"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "wildcard",
+   "difficulty": 3,
+   "prompt": "What does the \"G\" mean in \"G-Man\"?",
+   "correct": "Government",
+   "choices": [
+    "Geronimo",
+    "Government",
+    "Going",
+    "Ghost"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "wildcard",
+   "difficulty": 3,
+   "prompt": "\"Gum arabic\" is a natural gum consisting of the hardened sap of which tree species?",
+   "correct": "Acacia",
+   "choices": [
+    "Acacia",
+    "Ficus",
+    "Palm",
+    "Eucalyptus"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "wildcard",
+   "difficulty": 3,
+   "prompt": "What is the name given to Indian food cooked over charcoal in a clay oven?",
+   "correct": "Tandoori",
+   "choices": [
+    "Biryani",
+    "Pani puri",
+    "Tiki masala",
+    "Tandoori"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "wildcard",
+   "difficulty": 3,
+   "prompt": "Frank Lloyd Wright was the architect behind what famous building?",
+   "correct": "The Guggenheim",
+   "choices": [
+    "Sydney Opera House",
+    "Villa Savoye",
+    "The Guggenheim",
+    "The Space Needle"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "wildcard",
+   "difficulty": 3,
+   "prompt": "Macintosh named their 2007 OS release after which big cat?",
+   "correct": "Leopard",
+   "choices": [
+    "Panther",
+    "Puma",
+    "Tiger",
+    "Leopard"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "wildcard",
+   "difficulty": 3,
+   "prompt": "What are the tallest twin buildings in the world, with a height of 1,483 ft (451.9 m)?",
+   "correct": "Petronas Twin Towers, Malaysia",
+   "choices": [
+    "Petronas Twin Towers, Malaysia",
+    "Palm Towers, Qatar",
+    "Emirates Towers, United Arab Emirates",
+    "Huaguoyuan Towers, China"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "wildcard",
+   "difficulty": 3,
+   "prompt": "Which mountain has the highest peak in North America?",
+   "correct": "Denali, USA",
+   "choices": [
+    "Mount Logan, Canada",
+    "Denali, USA",
+    "Pico de Orizaba, Mexico",
+    "Mount Saint Elias, US/Canada border"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "wildcard",
+   "difficulty": 3,
+   "prompt": "The new One World Trade Center in Manhattan was designed by which architect?",
+   "correct": "David Childs",
+   "choices": [
+    "Bjarke Ingels",
+    "Michael Arad",
+    "David Childs",
+    "Fumihiko Maki"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "wildcard",
+   "difficulty": 3,
+   "prompt": "Bob and Mike Bryan were well known brothers in which sport?",
+   "correct": "Tennis",
+   "choices": [
+    "Basketball",
+    "Football",
+    "Baseball",
+    "Tennis"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "multiple_choice",
+   "category": "wildcard",
+   "difficulty": 3,
+   "prompt": "What year was the first Apple iPod introduced?",
+   "correct": "2001",
+   "choices": [
+    "2000",
+    "2001",
+    "1998",
+    "1999"
+   ],
+   "source_url": "https://opentdb.com"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "When this diplomat met the singer Psy in 2012, he said, 'Until 2 days ago... I was the most famous Korean in the world'",
+   "correct": "Ban Ki-moon",
+   "source_url": "https://www.trivialstudies.com/study_53670139"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "In 1954 she became the first recipient of the Grand Master Award from the Mystery Writers of America",
+   "correct": "Agatha Christie",
+   "source_url": "https://www.trivialstudies.com/study_53670139"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "He published a history of Virginia & New England in 1624, after escaping from Turks, Indians & pirates",
+   "correct": "Captain John Smith",
+   "source_url": "https://www.trivialstudies.com/study_53670139"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "In one 19th century translation, she 'perceived the dawn of day and ceased' speaking nearly 1,000 times",
+   "correct": "Scheherazade",
+   "source_url": "https://www.trivialstudies.com/study_53670139"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "Whitman said this man's poetry has 'a propensity toward nocturnal themes, a demoniac undertone behind every page'",
+   "correct": "Edgar Allan Poe",
+   "source_url": "https://www.trivialstudies.com/study_53670139"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "This Norwegian was in his early 20s when he wrote his first play, 'Catalina', in 1850",
+   "correct": "Ibsen",
+   "source_url": "https://www.trivialstudies.com/study_53670100"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "One book calls it 'The Classic Novel about a Scientific Experiment to Create a Man-Made Human'",
+   "correct": "Frankenstein",
+   "source_url": "https://www.trivialstudies.com/study_53670100"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "At its most evil, this alter ego of Dr. Jekyll murders a member of Parliament",
+   "correct": "Mr. Hyde",
+   "source_url": "https://www.trivialstudies.com/study_53670100"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "In 1905 you didn't want to eat a pork chop while reading the paper 'appeal to reason', as it serialized this stockyard novel",
+   "correct": "The Jungle",
+   "source_url": "https://www.trivialstudies.com/study_53670100"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "Born Adeline Virginia Stephen, she & her husband founded Hogarth Press in 1917 to publish her works",
+   "correct": "Virginia Woolf",
+   "source_url": "https://www.trivialstudies.com/study_53670100"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "Gene Forrester recalls his prep school friend Phineas in this 1960 John Knowles book",
+   "correct": "A Separate Peace",
+   "source_url": "https://www.trivialstudies.com/study_53670100"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "In 'Tom Sawyer' this newcomer to St. Petersburg is described as 'a blue-eyed creature with yellow hair'",
+   "correct": "Becky Thatcher",
+   "source_url": "https://www.trivialstudies.com/study_53670100"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "This Poe story tells of a prisoner's torture during the Spanish Inquisition",
+   "correct": "The Pit and the Pendulum",
+   "source_url": "https://www.trivialstudies.com/study_53670100"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "The displaced title man escapes being put to death in this 1889 novel by accurately predicting a solar eclipse",
+   "correct": "A Connecticut Yankee in King Arthur's Court",
+   "source_url": "https://www.trivialstudies.com/study_53670100"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "Sir William Catesby's last line in this play is 'Withdraw, my lord; I'll help you to a horse'",
+   "correct": "Richard III",
+   "source_url": "https://www.trivialstudies.com/study_53670101"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "Shakespeare's play about this Tudor king begins, 'I come no more to make you laugh...'",
+   "correct": "Henry VIII",
+   "source_url": "https://www.trivialstudies.com/study_53670101"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "Wealthy Portia, her gentlewoman, Nerissa & religiously conflicted Jessica",
+   "correct": "The Merchant of Venice",
+   "source_url": "https://www.trivialstudies.com/study_53670101"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "Title character who says, 'Like an eagle in a dove-cote, I flutter'd your Volscians in Corioli'",
+   "correct": "Coriolanus",
+   "source_url": "https://www.trivialstudies.com/study_53670101"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "He tells his daughter Cordelia 'I fear I am not in my perfect mind'",
+   "correct": "King Lear",
+   "source_url": "https://www.trivialstudies.com/study_53670101"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "In Helsingor a memorial to this author can be found in Kronborg Castle",
+   "correct": "William Shakespeare",
+   "source_url": "https://www.trivialstudies.com/study_53670101"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "Pin your hopes on Dickens: 'My father's family name being Pirrip, and my Christian name Philip...'",
+   "correct": "Great Expectations",
+   "source_url": "https://www.trivialstudies.com/study_53670102"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "In a 1988 movie Bill Murray played Frank Cross, who's this Dickens character updated as a TV executive",
+   "correct": "Ebenezer Scrooge",
+   "source_url": "https://www.trivialstudies.com/study_53670102"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "In 'The Old Curiosity Shop', this means a miser, even without an initial 'skin'",
+   "correct": "flint",
+   "source_url": "https://www.trivialstudies.com/study_53670102"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "Ethan Hawke & Robert De Niro starred in this film based on a Dickens novel",
+   "correct": "Great Expectations",
+   "source_url": "https://www.trivialstudies.com/study_53670102"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "Clara Peggotty, Mr. Murdstone, Uriah Heep",
+   "correct": "David Copperfield",
+   "source_url": "https://www.trivialstudies.com/study_53670102"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "In 'Pride and Prejudice', she wrote that a wealthy bachelor 'must be in want of a wife'",
+   "correct": "Jane Austen",
+   "source_url": "https://www.trivialstudies.com/study_53670103"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "The title of this Jane Austen novel refers to the Tilneys' country home",
+   "correct": "Northanger Abbey",
+   "source_url": "https://www.trivialstudies.com/study_53670103"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "Jane Austen described this title 20-year-old as 'handsome, clever, and rich'",
+   "correct": "Emma",
+   "source_url": "https://www.trivialstudies.com/study_53670103"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "She described her narrative world as 'The little bit (two inches wide) of ivory on which I work'",
+   "correct": "Jane Austen",
+   "source_url": "https://www.trivialstudies.com/study_53670103"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "Originally titled 'First Impressions', this tale of Elizabeth Bennet would be Jane's second novel published",
+   "correct": "Pride and Prejudice",
+   "source_url": "https://www.trivialstudies.com/study_53670103"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 5,
+   "prompt": "You can drive from Yellowstone to the national park named for these \"Grand\" mountains in under 30 minutes",
+   "correct": "the Tetons",
+   "source_url": "https://www.trivialstudies.com/study_53670041"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 5,
+   "prompt": "2 nuclear reactors help the 1,100-foot-long Gerald R. Ford, this type of military ship, hit around 35 mph",
+   "correct": "an aircraft carrier",
+   "source_url": "https://www.trivialstudies.com/study_53670041"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 5,
+   "prompt": "The epicenter of the great Alaska earthquake of 1964 was just 75 miles east of this large city",
+   "correct": "Anchorage",
+   "source_url": "https://www.trivialstudies.com/study_53670041"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 5,
+   "prompt": "The name of a chain known until 1946 as Tote'm Stores reflected these new opening & closing times of day",
+   "correct": "7-Eleven",
+   "source_url": "https://www.trivialstudies.com/study_53670041"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 5,
+   "prompt": "It's April 14, 1865 & I'm bored; I know... Abe & I will go to Ford's Theater & see this comedy about a man abroad",
+   "correct": "Our American Cousin",
+   "source_url": "https://www.trivialstudies.com/study_53670041"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 5,
+   "prompt": "The Jamestown colony was on land in the territory of this leader whose empire spanned more than a dozen tribes",
+   "correct": "Powhatan",
+   "source_url": "https://www.trivialstudies.com/study_53670041"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "Philosopher who was grossly caricatured in Aristophanes' 'The Clouds'",
+   "correct": "Socrates",
+   "source_url": "https://www.trivialstudies.com/study_53670090"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "The book 'Mama's Bank Account' evolved into this play",
+   "correct": "I Remember Mama",
+   "source_url": "https://www.trivialstudies.com/study_53670090"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "Some think his works, including 'The Social Contract', inspired the French Revolution",
+   "correct": "Rousseau",
+   "source_url": "https://www.trivialstudies.com/study_53670090"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "Though in love with Rachel, Jacob was tricked into marrying this sister first",
+   "correct": "Leah",
+   "source_url": "https://www.trivialstudies.com/study_53670090"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "The zero km. mark from which all Spanish roads are measured is in the Puerta del Sol in this city",
+   "correct": "Madrid",
+   "source_url": "https://www.trivialstudies.com/study_53670090"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "Cole Younger was probably the father of this lady desperado's daughter Pearl",
+   "correct": "Belle Starr",
+   "source_url": "https://www.trivialstudies.com/study_53670090"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "The Skeksis and the Mystics were saved by the Gelflings in this 1982 fantasy film",
+   "correct": "The Dark Crystal",
+   "source_url": "https://www.trivialstudies.com/study_53670090"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "This Roman emperor gave his horse Incitatus a marble stable",
+   "correct": "Caligula",
+   "source_url": "https://www.trivialstudies.com/study_53670090"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "This bay in New South Wales was so named because many new plant species were found on its shores",
+   "correct": "Botany Bay",
+   "source_url": "https://www.trivialstudies.com/study_53670090"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "This king of England lost territories, was excommunicated & was forced to accept the Magna Carta",
+   "correct": "King John",
+   "source_url": "https://www.trivialstudies.com/study_53670090"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "The term 'puritan' first described a faction within this church",
+   "correct": "the Anglican Church",
+   "source_url": "https://www.trivialstudies.com/study_53670090"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "The Chinese call this sea the Hwang Hai",
+   "correct": "Yellow Sea",
+   "source_url": "https://www.trivialstudies.com/study_53670090"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "Running from April 1860 to October 1861, it lost the mail only once",
+   "correct": "Pony Express",
+   "source_url": "https://www.trivialstudies.com/study_53670090"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "Richard Pryor co-wrote this Western with Mel Brooks; its original title was 'Black Bart'",
+   "correct": "Blazing Saddles",
+   "source_url": "https://www.trivialstudies.com/study_53670090"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "Duke Cosimo I commissioned Cellini to produce the bronze of this man holding Medusa's head",
+   "correct": "Perseus",
+   "source_url": "https://www.trivialstudies.com/study_53670090"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "EPCOT, as in EPCOT Center, is an acronym for 'Experimental Prototype Community of' this",
+   "correct": "Tomorrow",
+   "source_url": "https://www.trivialstudies.com/study_53670090"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "This palace facing St. James Park was built for John Sheffield in 1703",
+   "correct": "Buckingham Palace",
+   "source_url": "https://www.trivialstudies.com/study_53670090"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "Much of this British poet's works dealt with death including her most famous, 'Not Waving, But Drowning'",
+   "correct": "Stevie Smith",
+   "source_url": "https://www.trivialstudies.com/study_53670090"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "This term that means 'without knee breeches' was applied to some ill-clad French revolutionaries",
+   "correct": "sans-culottes",
+   "source_url": "https://www.trivialstudies.com/study_53670090"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "Probably Emile Zola's most famous quote, it's the title of a letter he wrote to the French president",
+   "correct": "J'accuse",
+   "source_url": "https://www.trivialstudies.com/study_53670090"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "In 1839 he was given an annuity of 6,000 francs for revealing his photographic process",
+   "correct": "(Louis) Daguerre",
+   "source_url": "https://www.trivialstudies.com/study_53670090"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "The Elder wrote natural history & the Younger, his nephew & adopted son, was known for his books of letters",
+   "correct": "Pliny",
+   "source_url": "https://www.trivialstudies.com/study_53670090"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "He lost the presidential nomination to Hubert Humphrey in 1968 & ran as an independent in 1976",
+   "correct": "Eugene McCarthy",
+   "source_url": "https://www.trivialstudies.com/study_53670090"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "In 'Moby Dick' the narrator begins by telling the reader to call him this",
+   "correct": "Ishmael",
+   "source_url": "https://www.trivialstudies.com/study_53670090"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 5,
+   "prompt": "This emperor was in his villa at Antium, 35 miles from the city, when Rome burned",
+   "correct": "Nero",
+   "source_url": "https://www.trivialstudies.com/study_53670006"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 5,
+   "prompt": "Their marriage in 1469 began the unification of nearly all of present-day Spain",
+   "correct": "Ferdinand & Isabella",
+   "source_url": "https://www.trivialstudies.com/study_53670006"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 5,
+   "prompt": "Gone with the Wind's Rhett Butler was a profiteer from this South Carolina port city",
+   "correct": "Charleston",
+   "source_url": "https://www.trivialstudies.com/study_53670006"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 5,
+   "prompt": "Lavender, blue, yellow, white & red sandstone, marls & shale color this area of Northern Arizona",
+   "correct": "the Painted Desert",
+   "source_url": "https://www.trivialstudies.com/study_53670006"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 5,
+   "prompt": "The 1st female med school grad in Italy, she revolutionized methods of teaching young children",
+   "correct": "Maria Montessori",
+   "source_url": "https://www.trivialstudies.com/study_53670006"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 5,
+   "prompt": "Sophocles, Aeschylus & this man are regarded as the 3 greatest ancient Greek tragedians",
+   "correct": "Euripides",
+   "source_url": "https://www.trivialstudies.com/study_53670006"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 5,
+   "prompt": "On May 1, 1898 in Manila Bay, Admiral George Dewey told him, 'You may fire when you are ready'",
+   "correct": "Captain (Charles Vernon) Gridley",
+   "source_url": "https://www.trivialstudies.com/study_53670006"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 5,
+   "prompt": "Super dense stars known for bursts of radiation at regular intervals are called this",
+   "correct": "pulsars",
+   "source_url": "https://www.trivialstudies.com/study_53670006"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 5,
+   "prompt": "This city on the Huangpu River is Asia's most populous",
+   "correct": "Shanghai",
+   "source_url": "https://www.trivialstudies.com/study_53670006"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 5,
+   "prompt": "This geneticist's given name was Johann; he took the name Gregor when he entered a monastery",
+   "correct": "Mendel",
+   "source_url": "https://www.trivialstudies.com/study_53670006"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 5,
+   "prompt": "Overlooking the Champs Elysees, its construction was begun by Napoleon & completed by Louis Philippe",
+   "correct": "Arc de Triomphe",
+   "source_url": "https://www.trivialstudies.com/study_53670006"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 5,
+   "prompt": "Sir Joshua Reynolds was knighted by this king in 1769",
+   "correct": "George III",
+   "source_url": "https://www.trivialstudies.com/study_53670006"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 5,
+   "prompt": "The Boston Symphony had to pay this actress $100,000 for canceling her contract due to her PLO support",
+   "correct": "Vanessa Redgrave",
+   "source_url": "https://www.trivialstudies.com/study_53670006"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 5,
+   "prompt": "These islands off the African coast were the last stop Columbus made before he headed west to the New World",
+   "correct": "the Canary Islands",
+   "source_url": "https://www.trivialstudies.com/study_53670006"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 5,
+   "prompt": "In The Picture of Dorian Gray this author claimed, All art is quite useless",
+   "correct": "Oscar Wilde",
+   "source_url": "https://www.trivialstudies.com/study_53670006"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 5,
+   "prompt": "One of New York's oldest skyscrapers; its name is derived from its shape",
+   "correct": "Flat Iron Building",
+   "source_url": "https://www.trivialstudies.com/study_53670006"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 5,
+   "prompt": "This university opened in 1868 on a hill overlooking Cayuga Lake in Ithaca, N.Y.",
+   "correct": "Cornell",
+   "source_url": "https://www.trivialstudies.com/study_53670006"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 5,
+   "prompt": "Always do right he wrote; This will gratify some people and astonish the rest",
+   "correct": "Mark Twain",
+   "source_url": "https://www.trivialstudies.com/study_53670006"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 5,
+   "prompt": "In 1897 people rushed to this area located near Dawson in the Yukon Territory",
+   "correct": "The Klondike",
+   "source_url": "https://www.trivialstudies.com/study_53670006"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 5,
+   "prompt": "With over 39 mil. copies sold, his Baby & Child Care is the top U.S. paperback of all time",
+   "correct": "Dr. Spock",
+   "source_url": "https://www.trivialstudies.com/study_53670006"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 5,
+   "prompt": "The watt is a unit of power, & the calorie is a unit of this type of energy",
+   "correct": "heat",
+   "source_url": "https://www.trivialstudies.com/study_53670006"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 5,
+   "prompt": "The water in this large Utah lake is saltier than ocean water",
+   "correct": "The Great Salt Lake",
+   "source_url": "https://www.trivialstudies.com/study_53670006"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "Nan Wood Graham, who posed for this painting by her brother in 1930, died in 1990",
+   "correct": "American Gothic",
+   "source_url": "https://www.trivialstudies.com/study_53670005"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "After years of near blindness, his sight was supposedly restored 10 days before he died in 1750",
+   "correct": "Johann Sebastian Bach",
+   "source_url": "https://www.trivialstudies.com/study_53670005"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "Shortly before this country gained independence in 1975, many citizens moved to Holland",
+   "correct": "Suriname",
+   "source_url": "https://www.trivialstudies.com/study_53670005"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "Winged Victory is the common name of a statue of this Greek goddess whose name means victory",
+   "correct": "Nike",
+   "source_url": "https://www.trivialstudies.com/study_53670005"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "Introduction of this company's DC-3 in 1936 made profitable passenger service possible",
+   "correct": "Douglas",
+   "source_url": "https://www.trivialstudies.com/study_53670005"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "In 1990 this Reds outfielder set a world series record with hits in 7 straight at-bats",
+   "correct": "Billy Hatcher",
+   "source_url": "https://www.trivialstudies.com/study_53670005"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "Act I, Scene II of this play is set in a room in Portia's house in Belmont",
+   "correct": "The Merchant of Venice",
+   "source_url": "https://www.trivialstudies.com/study_53670005"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "From 1981 to 1989 he was the U.S. Surgeon General",
+   "correct": "C. Everett Koop",
+   "source_url": "https://www.trivialstudies.com/study_53670007"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "\"Arundel\" is a historical novel about this traitor's attack on Quebec",
+   "correct": "Benedict Arnold",
+   "source_url": "https://www.trivialstudies.com/study_53670007"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "Bernard Marx works at the Hatchery and Conditioning Centre in this futuristic tale",
+   "correct": "Brave New World",
+   "source_url": "https://www.trivialstudies.com/study_53670007"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "Using this propagation method, you can grow several kinds of fruit on one tree",
+   "correct": "grafting",
+   "source_url": "https://www.trivialstudies.com/study_53670007"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "In 1930 Bernhard Schmidt made the first effective telescope that combined lenses & these",
+   "correct": "mirrors",
+   "source_url": "https://www.trivialstudies.com/study_53670007"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "It's estimated on May 11, 1934 the Great Plains lost 300 million tons of this",
+   "correct": "topsoil",
+   "source_url": "https://www.trivialstudies.com/study_53670007"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "The knife or sword fitted on the barrel of a gun, named for the region of France where it was invented",
+   "correct": "a bayonet",
+   "source_url": "https://www.trivialstudies.com/study_53670007"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "It's often known as \"The Bounty Island\"",
+   "correct": "Pitcairn",
+   "source_url": "https://www.trivialstudies.com/study_53670007"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 5,
+   "prompt": "Among ancient libraries Pergamon's was second only to this city's",
+   "correct": "Alexandria",
+   "source_url": "https://www.trivialstudies.com/study_53670007"
+  },
+  {
+   "qtype": "clue",
+   "category": "geography",
+   "difficulty": 5,
+   "prompt": "1 of the 2 names for the body of water that separates Baja California from the Mexican mainland",
+   "correct": "Gulf of California",
+   "source_url": "https://www.trivialstudies.com/study_53670008"
+  },
+  {
+   "qtype": "clue",
+   "category": "geography",
+   "difficulty": 5,
+   "prompt": "South Carolina's flag has a blue field with this state tree in the center",
+   "correct": "palmetto",
+   "source_url": "https://www.trivialstudies.com/study_53670008"
+  },
+  {
+   "qtype": "clue",
+   "category": "geography",
+   "difficulty": 5,
+   "prompt": "He's the only jockey to have ridden 2 triple crown winners--'Whirlaway' in '41 & 'Citation' in '48",
+   "correct": "Eddie Arcaro",
+   "source_url": "https://www.trivialstudies.com/study_53670008"
+  },
+  {
+   "qtype": "clue",
+   "category": "geography",
+   "difficulty": 5,
+   "prompt": "According to its 1662 charter, Connecticut was to extend westward from Narragansett Bay to this ocean",
+   "correct": "Pacific",
+   "source_url": "https://www.trivialstudies.com/study_53670008"
+  },
+  {
+   "qtype": "clue",
+   "category": "geography",
+   "difficulty": 5,
+   "prompt": "Once abundant, now protected, it the heaviest land mammal native to North America",
+   "correct": "the buffalo (bison)",
+   "source_url": "https://www.trivialstudies.com/study_53670008"
+  },
+  {
+   "qtype": "clue",
+   "category": "geography",
+   "difficulty": 5,
+   "prompt": "Flowers produce this sugary liquid which bees use to make honey",
+   "correct": "nectar",
+   "source_url": "https://www.trivialstudies.com/study_53670008"
+  },
+  {
+   "qtype": "clue",
+   "category": "geography",
+   "difficulty": 5,
+   "prompt": "Caimans are most closely related to these animals",
+   "correct": "alligators",
+   "source_url": "https://www.trivialstudies.com/study_53670008"
+  },
+  {
+   "qtype": "clue",
+   "category": "geography",
+   "difficulty": 5,
+   "prompt": "This Latin name for Switzerland appears on Swiss postage stamps",
+   "correct": "Helvetia",
+   "source_url": "https://www.trivialstudies.com/study_53670008"
+  },
+  {
+   "qtype": "clue",
+   "category": "geography",
+   "difficulty": 3,
+   "prompt": "What was Mountain Dew's original slogan?",
+   "correct": "Yahoo! Mountain Dew... It'll tickle your innards!",
+   "source_url": "https://www.brightful.me/blog/general-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 4,
+   "prompt": "What was the soft drink Pepsi originally introduced as?",
+   "correct": "Brad's Drink",
+   "source_url": "https://www.brightful.me/blog/general-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 4,
+   "prompt": "What was the original name of the search engine 'Google'?",
+   "correct": "BackRub",
+   "source_url": "https://www.brightful.me/blog/general-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 4,
+   "prompt": "What is the unit of currency in Laos?",
+   "correct": "Kip",
+   "source_url": "https://www.brightful.me/blog/general-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "music",
+   "difficulty": 4,
+   "prompt": "Electronic music producer Kygo's popularity skyrocketed after remixing which song?",
+   "correct": "Ed Sheeran - I See Fire",
+   "source_url": "https://www.brightful.me/blog/general-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 4,
+   "prompt": "Before the 19th Century, the 'Living Room' was originally called the...",
+   "correct": "Parlor",
+   "source_url": "https://www.brightful.me/blog/general-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 4,
+   "prompt": "What is the romanized Arabic word for 'moon'?",
+   "correct": "Qamar",
+   "source_url": "https://www.brightful.me/blog/general-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 4,
+   "prompt": "Virtual reality company Oculus VR lost which co-founder in a car accident in 2013?",
+   "correct": "Andrew Scott Reisse",
+   "source_url": "https://www.brightful.me/blog/general-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 4,
+   "prompt": "In flight systems, what does TCAS stand for?",
+   "correct": "Traffic Collision Avoidance System",
+   "source_url": "https://www.brightful.me/blog/general-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 4,
+   "prompt": "If someone said 'you are olid', what would they mean?",
+   "correct": "You smell extremely unpleasant",
+   "source_url": "https://www.brightful.me/blog/general-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 4,
+   "prompt": "Nephelococcygia is the practice of doing what?",
+   "correct": "Finding shapes in clouds",
+   "source_url": "https://www.brightful.me/blog/general-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 4,
+   "prompt": "If you planted the seeds of Quercus robur, what would grow?",
+   "correct": "Trees (oak trees)",
+   "source_url": "https://www.brightful.me/blog/general-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 4,
+   "prompt": "What is the name of the Duke of Milan who casts a spell on a ship in 'The Tempest'?",
+   "correct": "Prospero",
+   "source_url": "https://www.brightful.me/blog/general-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 4,
+   "prompt": "What Benedictine monk invented champagne?",
+   "correct": "Dom Pierre Perignon",
+   "source_url": "https://www.brightful.me/blog/general-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "sports",
+   "difficulty": 4,
+   "prompt": "In football, who was nicknamed 'The Divine Ponytail'?",
+   "correct": "Roberto Baggio",
+   "source_url": "https://www.brightful.me/blog/general-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 4,
+   "prompt": "Where on the human body is the zygomatic bone found?",
+   "correct": "Facial cheek",
+   "source_url": "https://www.brightful.me/blog/general-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 4,
+   "prompt": "Who claimed he could 'drive away the devil with a fart'?",
+   "correct": "Martin Luther",
+   "source_url": "https://www.brightful.me/blog/general-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 4,
+   "prompt": "What Was The 9th Century Tax Levied To Fight The Vikings?",
+   "correct": "Dane Geld",
+   "source_url": "https://www.brightful.me/blog/general-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 4,
+   "prompt": "What did Temujin change his name to?",
+   "correct": "Genghis Khan",
+   "source_url": "https://www.brightful.me/blog/general-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 4,
+   "prompt": "Of What Tribe Was Boadicea The Head?",
+   "correct": "Iceni",
+   "source_url": "https://www.brightful.me/blog/general-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 4,
+   "prompt": "Of which ship was Miles Standish captain?",
+   "correct": "The Mayflower",
+   "source_url": "https://www.brightful.me/blog/general-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 4,
+   "prompt": "What is measured in 'Mickeys'?",
+   "correct": "The speed of a computer mouse",
+   "source_url": "https://www.brightful.me/blog/general-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "sports",
+   "difficulty": 4,
+   "prompt": "Which Sporting Event Was BBC2's First Ever Colour Transmission In 1967?",
+   "correct": "Wimbledon",
+   "source_url": "https://www.brightful.me/blog/general-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "sports",
+   "difficulty": 4,
+   "prompt": "With what did cricketer Mansoor Ali Khan Pataudi frequently play within his hands?",
+   "correct": "A glass eye",
+   "source_url": "https://www.brightful.me/blog/general-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "geography",
+   "difficulty": 3,
+   "prompt": "What was the first patented service uniform in the United States?",
+   "correct": "Playboy Bunny",
+   "source_url": "https://www.brightful.me/blog/general-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 4,
+   "prompt": "What two cities represent letters in the phonetic alphabet?",
+   "correct": "Lima and Quebec",
+   "source_url": "https://www.brightful.me/blog/general-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 4,
+   "prompt": "What were clocks missing before 1577?",
+   "correct": "Minute hands",
+   "source_url": "https://www.brightful.me/blog/general-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 4,
+   "prompt": "How many years old is the oldest piece of chewing gum?",
+   "correct": "9,000 years",
+   "source_url": "https://www.brightful.me/blog/general-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 4,
+   "prompt": "What was Marilyn Monroe's natural hair color?",
+   "correct": "Red",
+   "source_url": "https://www.brightful.me/blog/general-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 4,
+   "prompt": "What was Walt Disney afraid of?",
+   "correct": "Mice",
+   "source_url": "https://www.brightful.me/blog/general-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 4,
+   "prompt": "What was the name for chocolate consumed by Aztecs?",
+   "correct": "Xocoatl",
+   "source_url": "https://www.brightful.me/blog/general-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 4,
+   "prompt": "Prior to being called the Big Mac, what was the previous name?",
+   "correct": "Blue Ribbon Burger",
+   "source_url": "https://www.brightful.me/blog/general-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 4,
+   "prompt": "Which berries give gin its strong flavor?",
+   "correct": "Juniper",
+   "source_url": "https://www.brightful.me/blog/general-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 4,
+   "prompt": "When was tea first introduced into Europe from Asia?",
+   "correct": "17th Century",
+   "source_url": "https://www.brightful.me/blog/general-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "geography",
+   "difficulty": 3,
+   "prompt": "In the harbour of which city was the Rainbow Warrior sunk in 1985?",
+   "correct": "Auckland",
+   "source_url": "https://www.brightful.me/blog/general-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "geography",
+   "difficulty": 3,
+   "prompt": "Which country was split into two zones by the Yalta agreement?",
+   "correct": "Germany",
+   "source_url": "https://www.brightful.me/blog/general-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 4,
+   "prompt": "During Which King's Reign Did The Great Fire Of London Occur?",
+   "correct": "Charles II",
+   "source_url": "https://www.brightful.me/blog/general-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 4,
+   "prompt": "Who Was The 1st Wife of Henry VIII?",
+   "correct": "Catherine Of Aragon",
+   "source_url": "https://www.brightful.me/blog/general-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 4,
+   "prompt": "In what year did the UK's lease on Hong Kong expire?",
+   "correct": "1997",
+   "source_url": "https://www.brightful.me/blog/general-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 4,
+   "prompt": "Which Chinese dynasty lasted from 1368 to 1644?",
+   "correct": "Ming",
+   "source_url": "https://www.brightful.me/blog/general-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 4,
+   "prompt": "In Which Year Did The Falklands Conflict Begin?",
+   "correct": "1982",
+   "source_url": "https://www.brightful.me/blog/general-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "geography",
+   "difficulty": 3,
+   "prompt": "In what country did the 'Sepoy Mutiny' occur?",
+   "correct": "India",
+   "source_url": "https://www.brightful.me/blog/general-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 4,
+   "prompt": "Which King Was Overthrown As A Result Of The French Revolution?",
+   "correct": "Louis XVI",
+   "source_url": "https://www.brightful.me/blog/general-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 4,
+   "prompt": "Who banned Christmas in Britain in 1647?",
+   "correct": "Oliver Cromwell",
+   "source_url": "https://www.brightful.me/blog/general-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 4,
+   "prompt": "To What Was Byzantium Renamed In 330 AD?",
+   "correct": "Constantinople",
+   "source_url": "https://www.brightful.me/blog/general-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 4,
+   "prompt": "Which ancient wonder of the world was located in Alexandria, Egypt?",
+   "correct": "The Lighthouse of Alexandria (Pharos of Alexandria)",
+   "source_url": "https://www.jotform.com/blog/history-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 4,
+   "prompt": "What was the first system of writing called?",
+   "correct": "Cuneiform",
+   "source_url": "https://www.jotform.com/blog/history-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 3,
+   "prompt": "Which Roman leader was assassinated on the Ides of March?",
+   "correct": "Julius Caesar",
+   "source_url": "https://www.jotform.com/blog/history-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 4,
+   "prompt": "What was the name of the ancient Greek marketplace?",
+   "correct": "Agora",
+   "source_url": "https://www.jotform.com/blog/history-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 3,
+   "prompt": "Who was the last pharaoh of ancient Egypt?",
+   "correct": "Cleopatra VII",
+   "source_url": "https://www.jotform.com/blog/history-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 4,
+   "prompt": "What was the name of the ancient Greek historian known as the Father of History?",
+   "correct": "Herodotus",
+   "source_url": "https://www.jotform.com/blog/history-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 4,
+   "prompt": "Which ancient Roman road connected Rome to southeastern Italy?",
+   "correct": "The Appian Way",
+   "source_url": "https://www.jotform.com/blog/history-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 4,
+   "prompt": "What was the capital city of the ancient Persian Empire?",
+   "correct": "Persepolis",
+   "source_url": "https://www.jotform.com/blog/history-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 4,
+   "prompt": "Which ancient civilization is credited with inventing the wheel?",
+   "correct": "The Sumerians",
+   "source_url": "https://www.jotform.com/blog/history-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 4,
+   "prompt": "What was the name of the ancient Greek formation of soldiers with spears and shields?",
+   "correct": "Phalanx",
+   "source_url": "https://www.jotform.com/blog/history-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 4,
+   "prompt": "Which ancient Egyptian pharaoh built the first pyramid?",
+   "correct": "Djoser (Step Pyramid at Saqqara)",
+   "source_url": "https://www.jotform.com/blog/history-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 4,
+   "prompt": "What was the name of the ancient Mesopotamian epic poem about a legendary king?",
+   "correct": "The Epic of Gilgamesh",
+   "source_url": "https://www.jotform.com/blog/history-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 3,
+   "prompt": "Which ancient Greek philosopher tutored Alexander the Great?",
+   "correct": "Aristotle",
+   "source_url": "https://www.jotform.com/blog/history-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 4,
+   "prompt": "What was the name of the ancient Roman military formation where soldiers would lock shields above their heads?",
+   "correct": "Testudo (tortoise formation)",
+   "source_url": "https://www.jotform.com/blog/history-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 4,
+   "prompt": "Which ancient civilization developed the first known legal code?",
+   "correct": "The Babylonians (Code of Ur-Nammu)",
+   "source_url": "https://www.jotform.com/blog/history-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 4,
+   "prompt": "Which disease killed approximately one-third of Europe's population in the 14th century?",
+   "correct": "The Black Death (Bubonic Plague)",
+   "source_url": "https://www.jotform.com/blog/history-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 3,
+   "prompt": "Which French military leader claimed to have received visions from saints?",
+   "correct": "Joan of Arc",
+   "source_url": "https://www.jotform.com/blog/history-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 3,
+   "prompt": "Which English king signed the Magna Carta in 1215?",
+   "correct": "King John",
+   "source_url": "https://www.jotform.com/blog/history-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 4,
+   "prompt": "Which medieval university is considered the oldest in continuous operation?",
+   "correct": "University of Bologna (founded in 1088)",
+   "source_url": "https://www.jotform.com/blog/history-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 3,
+   "prompt": "Which medieval emperor was crowned by the Pope on Christmas Day in 800 AD?",
+   "correct": "Charlemagne",
+   "source_url": "https://www.jotform.com/blog/history-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 4,
+   "prompt": "What was the name of the medieval Islamic scholar who wrote The Canon of Medicine?",
+   "correct": "Avicenna (Ibn Sina)",
+   "source_url": "https://www.jotform.com/blog/history-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 3,
+   "prompt": "Which medieval English king was known as Lionheart?",
+   "correct": "Richard I",
+   "source_url": "https://www.jotform.com/blog/history-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 4,
+   "prompt": "Which medieval battle in 1066 changed the course of English history?",
+   "correct": "The Battle of Hastings",
+   "source_url": "https://www.jotform.com/blog/history-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 4,
+   "prompt": "What was the name of the secret U.S. program that developed the atomic bomb?",
+   "correct": "The Manhattan Project",
+   "source_url": "https://www.jotform.com/blog/history-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 4,
+   "prompt": "Which conference in 1945 determined the post-war division of Europe?",
+   "correct": "The Yalta Conference",
+   "source_url": "https://www.jotform.com/blog/history-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 4,
+   "prompt": "What was the name of the 1947 plan that provided economic aid to Western Europe?",
+   "correct": "The Marshall Plan",
+   "source_url": "https://www.jotform.com/blog/history-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 4,
+   "prompt": "Which event in 1962 brought the world close to nuclear war?",
+   "correct": "The Cuban Missile Crisis",
+   "source_url": "https://www.jotform.com/blog/history-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 3,
+   "prompt": "Which American President was involved in the Watergate scandal?",
+   "correct": "Richard Nixon",
+   "source_url": "https://www.jotform.com/blog/history-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 4,
+   "prompt": "Which ancient Roman emperor supposedly made his horse a consul?",
+   "correct": "Caligula",
+   "source_url": "https://www.jotform.com/blog/history-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 4,
+   "prompt": "What was the shortest war in history?",
+   "correct": "The Anglo-Zanzibar War (lasted 38 minutes)",
+   "source_url": "https://www.jotform.com/blog/history-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 4,
+   "prompt": "What unusual tax did the Roman Empire impose?",
+   "correct": "A tax on urine",
+   "source_url": "https://www.jotform.com/blog/history-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 4,
+   "prompt": "What was the original purpose of high heels?",
+   "correct": "They were worn by men, particularly Persian cavalry, to help secure their feet in stirrups",
+   "source_url": "https://www.jotform.com/blog/history-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 4,
+   "prompt": "Which historical figure survived over 600 assassination attempts?",
+   "correct": "Fidel Castro",
+   "source_url": "https://www.jotform.com/blog/history-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 4,
+   "prompt": "Which historical figure died holding a deck of cards now known as Dead Man's Hand?",
+   "correct": "Wild Bill Hickok",
+   "source_url": "https://www.jotform.com/blog/history-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 4,
+   "prompt": "What was the original color of the Statue of Liberty?",
+   "correct": "Copper brown (it turned green due to oxidation)",
+   "source_url": "https://www.jotform.com/blog/history-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 4,
+   "prompt": "What unusual animal did Benjamin Franklin want to make the national bird of the United States?",
+   "correct": "The turkey",
+   "source_url": "https://www.jotform.com/blog/history-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 4,
+   "prompt": "Which historical figure was known to have a pet alligator in the White House?",
+   "correct": "John Quincy Adams",
+   "source_url": "https://www.jotform.com/blog/history-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 4,
+   "prompt": "Which ancient civilization first used fingerprints for identification?",
+   "correct": "Ancient China",
+   "source_url": "https://www.jotform.com/blog/history-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 4,
+   "prompt": "Which Chinese emperor connected the Great Wall?",
+   "correct": "Emperor Qin Shi Huang",
+   "source_url": "https://www.jotform.com/blog/history-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 4,
+   "prompt": "What was the name of the Japanese warrior class?",
+   "correct": "Samurai",
+   "source_url": "https://www.jotform.com/blog/history-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 4,
+   "prompt": "Which medieval African emperor was known for his pilgrimage to Mecca and distribution of gold?",
+   "correct": "Mansa Musa",
+   "source_url": "https://www.jotform.com/blog/history-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 4,
+   "prompt": "Which medieval South American civilization developed an extensive road system without the wheel?",
+   "correct": "The Inca Empire",
+   "source_url": "https://www.jotform.com/blog/history-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 4,
+   "prompt": "What was the name of the ancient Persian religion founded by Zoroaster?",
+   "correct": "Zoroastrianism",
+   "source_url": "https://www.jotform.com/blog/history-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 4,
+   "prompt": "What is the name of the only fully deciphered ancient Mesoamerican writing system?",
+   "correct": "Maya script/Maya glyphs",
+   "source_url": "https://www.jotform.com/blog/history-trivia-questions/"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 4,
+   "prompt": "What is the name of the ancient Chinese philosophy that emphasized harmony with nature?",
+   "correct": "Taoism (Daoism)",
+   "source_url": "https://www.jotform.com/blog/history-trivia-questions/"
+  }
  ]
 }

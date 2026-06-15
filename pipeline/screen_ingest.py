@@ -25,7 +25,7 @@ from __future__ import annotations
 import argparse
 import os
 
-from common import console, dump_raw, get_json, get_supabase, make_fact, upsert_facts
+from common import console, dump_raw, get_json, get_db, make_fact, upsert_facts
 
 API = "https://api.themoviedb.org/3"
 IMG = "https://image.tmdb.org/t/p/w780"
@@ -112,7 +112,7 @@ def main() -> None:
             console.print(f"[yellow]skip {m.get('title')}: {e}[/yellow]")
 
     dump_raw("tmdb", facts)
-    n = upsert_facts(get_supabase(), facts)
+    n = upsert_facts(get_db(), facts)
     console.print(f"[green]✓ {len(facts)} facts collected, {n} upserted[/green]")
 
 

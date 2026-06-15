@@ -1,81 +1,125 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useReducedMotion } from "framer-motion";
 
-const COLORS = ["#ffb43a", "#ff4fa3", "#3ddc84", "#4f9dff", "#2fd4c4", "#b07aff"];
+const SUITS = ["♦", "♣", "♥", "♠", "✦", "✧"];
+const GOLDS = ["#d4af37", "#b8902e", "#f5c518", "#c8963c", "#f0ede6"];
 
 interface Particle {
-  x: number; y: number; vx: number; vy: number;
-  rot: number; vr: number; size: number; color: string; life: number;
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  rot: number;
+  rotV: number;
+  color: string;
+  symbol: string;
+  size: number;
+  opacity: number;
+  fade: number;
 }
 
-/** Full-screen canvas confetti. Each increment of `trigger` fires a fresh burst. */
-export default function Confetti({ trigger, count = 120 }: { trigger: number; count?: number }) {
+function mkParticle(w: number): Particle {
+  return {
+    x: Math.random() * w,
+    y: -20,
+    vx: (Math.random() - 0.5) * 2.5,
+    vy: 1.5 + Math.random() * 2.5,
+    rot: Math.random() * 360,
+    rotV: (Math.random() - 0.5) * 8,
+    color: GOLDS[Math.floor(Math.random() * GOLDS.length)],
+    symbol: SUITS[Math.floor(Math.random() * SUITS.length)],
+    size: 10 + Math.random() * 14,
+    opacity: 0.9 + Math.random() * 0.1,
+    fade: 0.004 + Math.random() * 0.006,
+  };
+}
+
+// Accepts either prop style: `active` (boolean, used by The Ladder) or `trigger`
+// (an incrementing counter, used by the older rooms). A burst fires when `active`
+// becomes true or each time `trigger` changes to a new value.
+export default function Confetti({
+  active,
+  trigger = 0,
+  count = 80,
+}: {
+  active?: boolean;
+  trigger?: number;
+  count?: number;
+}) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particles = useRef<Particle[]>([]);
-  const raf = useRef<number>();
-  const reduced = useReducedMotion();
+  const raf = useRef<number>(0);
+  const spawned = useRef(0);
+
+  const fire = Boolean(active) || trigger > 0;
 
   useEffect(() => {
-    if (trigger === 0 || reduced) return;
+    if (!fire) {
+      cancelAnimationFrame(raf.current);
+      particles.current = [];
+      return;
+    }
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    const cx = canvas.width / 2;
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+    particles.current = [];
+    spawned.current = 0;
 
-    for (let i = 0; i < count; i++) {
-      const angle = (Math.PI * (0.15 + Math.random() * 0.7)) * -1; // upward fan
-      const speed = 6 + Math.random() * 9;
-      particles.current.push({
-        x: cx + (Math.random() - 0.5) * 120,
-        y: canvas.height * 0.5,
-        vx: Math.cos(angle) * speed * (Math.random() < 0.5 ? -1 : 1),
-        vy: Math.sin(angle) * speed,
-        rot: Math.random() * Math.PI,
-        vr: (Math.random() - 0.5) * 0.3,
-        size: 5 + Math.random() * 7,
-        color: COLORS[(Math.random() * COLORS.length) | 0],
-        life: 1,
-      });
-    }
+    const TOTAL = count;
+    const BURST = 4;
 
-    const tick = () => {
+    function tick() {
+      if (!ctx || !canvas) return;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      particles.current = particles.current.filter((p) => p.life > 0);
+
+      // Spawn burst
+      if (spawned.current < TOTAL) {
+        for (let i = 0; i < BURST && spawned.current < TOTAL; i++) {
+          particles.current.push(mkParticle(canvas.width));
+          spawned.current++;
+        }
+      }
+
+      // Update + draw
+      ctx.save();
+      particles.current = particles.current.filter((p) => p.opacity > 0.01);
       for (const p of particles.current) {
         p.x += p.vx;
         p.y += p.vy;
-        p.vy += 0.28; // gravity
-        p.vx *= 0.99;
-        p.rot += p.vr;
-        p.life -= 0.009;
+        p.vy += 0.06; // gravity
+        p.rot += p.rotV;
+        p.opacity -= p.fade;
+
         ctx.save();
-        ctx.globalAlpha = Math.max(0, p.life);
+        ctx.globalAlpha = Math.max(0, p.opacity);
         ctx.translate(p.x, p.y);
-        ctx.rotate(p.rot);
+        ctx.rotate((p.rot * Math.PI) / 180);
+        ctx.font = `${p.size}px serif`;
         ctx.fillStyle = p.color;
-        ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
+        ctx.fillText(p.symbol, -p.size / 2, p.size / 3);
         ctx.restore();
       }
-      if (particles.current.length > 0) {
+      ctx.restore();
+
+      if (particles.current.length > 0 || spawned.current < TOTAL) {
         raf.current = requestAnimationFrame(tick);
       }
-    };
-    cancelAnimationFrame(raf.current ?? 0);
+    }
     raf.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf.current);
+  }, [fire, trigger, count]);
 
-    return () => cancelAnimationFrame(raf.current ?? 0);
-  }, [trigger, count, reduced]);
+  if (!fire) return null;
 
   return (
     <canvas
       ref={canvasRef}
-      className="pointer-events-none fixed inset-0 z-[60]"
+      className="pointer-events-none fixed inset-0 z-50 h-full w-full"
       aria-hidden
     />
   );

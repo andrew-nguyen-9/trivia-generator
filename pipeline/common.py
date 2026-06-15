@@ -27,6 +27,7 @@ console = Console()
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 RAW_DIR = REPO_ROOT / "data" / "raw"
+CACHE_DIR = REPO_ROOT / "data" / "cache"
 
 USER_AGENT = "parlor-trivia/1.0 (https://github.com/andrew-nguyen-9/trivia-generator)"
 
@@ -41,6 +42,83 @@ def get_json(url: str, params: dict | None = None, headers: dict | None = None) 
     resp = requests.get(url, params=params, headers=h, timeout=20)
     resp.raise_for_status()
     return resp.json()
+
+
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(min=1, max=8))
+def get_json_conditional(
+    url: str,
+    cache_path: Path,
+    params: dict | None = None,
+    max_age_seconds: int = 7 * 86400,
+) -> dict | list:
+    """GET with ETag/If-Modified-Since caching — returns cached data on 304.
+
+    Stores {etag, last_modified, timestamp, data} in cache_path as JSON.
+    Falls back to unconditional GET if the cache file is missing or unreadable.
+    """
+    CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    cache: dict = {}
+    if cache_path.exists():
+        try:
+            cache = json.loads(cache_path.read_text())
+        except Exception:
+            cache = {}
+
+    # Serve from cache if fresh enough
+    cached_at = cache.get("timestamp", 0)
+    now = datetime.now(timezone.utc).timestamp()
+    if cache.get("data") and (now - cached_at) < max_age_seconds:
+        console.print(f"[dim]cache hit → {cache_path.name} (age {int(now - cached_at)}s)[/dim]")
+        return cache["data"]
+
+    h = {"User-Agent": USER_AGENT}
+    if cache.get("etag"):
+        h["If-None-Match"] = cache["etag"]
+    if cache.get("last_modified"):
+        h["If-Modified-Since"] = cache["last_modified"]
+
+    resp = requests.get(url, params=params, headers=h, timeout=30)
+
+    if resp.status_code == 304 and cache.get("data"):
+        console.print(f"[dim]304 Not Modified → reusing {cache_path.name}[/dim]")
+        cache["timestamp"] = now
+        cache_path.write_text(json.dumps(cache))
+        return cache["data"]
+
+    resp.raise_for_status()
+    data = resp.json()
+
+    cache = {
+        "etag": resp.headers.get("ETag"),
+        "last_modified": resp.headers.get("Last-Modified"),
+        "timestamp": now,
+        "data": data,
+    }
+    cache_path.write_text(json.dumps(cache))
+    console.print(f"[dim]cache refreshed → {cache_path.name}[/dim]")
+    return data
+
+
+def load_json_cache(cache_path: Path, max_age_seconds: int = 7 * 86400) -> dict | list | None:
+    """Return cached data if the file exists and is younger than max_age_seconds."""
+    if not cache_path.exists():
+        return None
+    try:
+        cache = json.loads(cache_path.read_text())
+    except Exception:
+        return None
+    age = datetime.now(timezone.utc).timestamp() - cache.get("timestamp", 0)
+    if age > max_age_seconds:
+        return None
+    return cache.get("data")
+
+
+def save_json_cache(cache_path: Path, data: dict | list) -> None:
+    CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    cache_path.write_text(json.dumps({
+        "timestamp": datetime.now(timezone.utc).timestamp(),
+        "data": data,
+    }))
 
 
 def content_hash(*parts: str) -> str:
@@ -125,28 +203,94 @@ def dump_raw(name: str, rows: list[dict]) -> Path:
     return path
 
 
-def get_supabase():
-    """Service-role client for pipeline writes. Returns None when unconfigured
+# ── database (Neon / any Postgres) ──────────────────────────────────────────
+# Writes go to a plain Postgres database via psycopg2 — Neon is the default host
+# (serverless, scale-to-zero, generous free tier). The connection string lives in
+# DATABASE_URL (or NEON_DATABASE_URL). Unconfigured ⇒ None ⇒ bronze-only mode, so
+# the pipeline still runs from a clone with zero secrets (the repo is the DB).
+
+# columns written per table — order matters, must match the VALUES tuples below.
+_FACT_COLS = (
+    "content_hash", "source", "category", "subject", "fact_text", "year",
+    "numeric_value", "numeric_unit", "lat", "lng", "image_url", "source_url",
+    "popularity", "meta",
+)
+_FACT_JSONB = {"meta"}
+
+_QUESTION_COLS = (
+    "content_hash", "qtype", "category", "difficulty", "prompt", "correct",
+    "choices", "year", "value_a", "value_b", "subject_a", "subject_b", "unit",
+    "lat", "lng", "image_url", "source_url", "clues", "candidates",
+)
+_QUESTION_JSONB = {"choices", "clues", "candidates"}
+
+
+def get_db():
+    """psycopg2 connection for pipeline writes. Returns None when unconfigured
     (offline/dev mode) — callers must tolerate that and still write bronze."""
-    url = os.environ.get("SUPABASE_URL")
-    key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
-    if not url or not key:
-        console.print("[yellow]SUPABASE_URL / SERVICE_ROLE_KEY not set — bronze-only mode[/yellow]")
+    dsn = os.environ.get("DATABASE_URL") or os.environ.get("NEON_DATABASE_URL")
+    if not dsn:
+        console.print("[yellow]DATABASE_URL / NEON_DATABASE_URL not set — bronze-only mode[/yellow]")
         return None
-    from supabase import create_client
+    import psycopg2  # lazy: selftest and offline forges never import the driver
 
-    return create_client(url, key)
+    conn = psycopg2.connect(dsn)
+    conn.autocommit = True
+    return conn
 
 
-def upsert_facts(sb, facts: list[dict]) -> int:
-    if sb is None or not facts:
+def _upsert(conn, table: str, cols: tuple[str, ...], jsonb: set[str],
+            rows: list[dict], conflict: str) -> int:
+    """Generic INSERT ... ON CONFLICT DO UPDATE keyed on `conflict`.
+
+    jsonb columns are wrapped with psycopg2's Json adapter; every non-conflict
+    column is refreshed on conflict so re-forges overwrite cleanly.
+    """
+    if conn is None or not rows:
         return 0
-    sb.table("facts").upsert(facts, on_conflict="content_hash").execute()
-    return len(facts)
+    from psycopg2.extras import Json, execute_values
+
+    updates = ", ".join(f"{c} = excluded.{c}" for c in cols if c not in conflict.split(","))
+    sql = (
+        f"insert into {table} ({', '.join(cols)}) values %s "
+        f"on conflict ({conflict}) do update set {updates}"
+    )
+    values = [
+        tuple(Json(r.get(c)) if c in jsonb else r.get(c) for c in cols)
+        for r in rows
+    ]
+    with conn.cursor() as cur:
+        execute_values(cur, sql, values, page_size=500)
+    return len(rows)
 
 
-def upsert_questions(sb, questions: list[dict]) -> int:
-    if sb is None or not questions:
+def upsert_facts(conn, facts: list[dict]) -> int:
+    return _upsert(conn, "facts", _FACT_COLS, _FACT_JSONB, facts, "content_hash")
+
+
+def upsert_questions(conn, questions: list[dict]) -> int:
+    return _upsert(conn, "questions", _QUESTION_COLS, _QUESTION_JSONB, questions, "content_hash")
+
+
+def upsert_daily_set(conn, board: dict) -> int:
+    """daily_sets is keyed on (set_date, mode); payload is jsonb."""
+    if conn is None or not board:
         return 0
-    sb.table("questions").upsert(questions, on_conflict="content_hash").execute()
-    return len(questions)
+    from psycopg2.extras import Json
+    with conn.cursor() as cur:
+        cur.execute(
+            "insert into daily_sets (set_date, mode, payload) values (%s, %s, %s) "
+            "on conflict (set_date, mode) do update set payload = excluded.payload",
+            (board["set_date"], board["mode"], Json(board["payload"])),
+        )
+    return 1
+
+
+def fetch_all(conn, sql: str, limit: int = 20000) -> list[dict]:
+    """Read helper — returns rows as dicts. Used by the forge / seed export."""
+    if conn is None:
+        return []
+    from psycopg2.extras import RealDictCursor
+    with conn.cursor(cursor_factory=RealDictCursor) as cur:
+        cur.execute(sql + f" limit {int(limit)}")
+        return [dict(r) for r in cur.fetchall()]

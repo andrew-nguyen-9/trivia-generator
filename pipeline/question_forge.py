@@ -9,13 +9,15 @@ Recipes:
 - higher_lower    pair facts sharing numeric_unit (min gap)  → THE STREAK
 - multiple_choice facts with meta.answer_field, distractors
                   sampled from category siblings             → THE WEDGES
-- clue            answer-phrased declarative from fact_text  → THE BOARD
+- clue            answer-phrased declarative from fact_text  → THE BOARD / THE THREAD
 - where           any fact with lat/lng coordinates          → THE MAP
+- seance          ≥3 facts per subject, ordered vague→spec   → THE SÉANCE  (Phase 6)
+- ladder          numeric sibling pool around a target       → THE LADDER   (Phase 7)
 
 Difficulty = popularity percentile within category (popular ⇒ easy).
 
 Run:
-    python question_forge.py                 # facts from Supabase → questions + today's daily board
+    python question_forge.py                 # facts from the DB (Neon) → questions + today's daily board
     python question_forge.py --from-bronze   # offline: read data/raw/*.jsonl instead
 
 Schedule: daily via etl_daily.yml (after ingests + dbt build)
@@ -25,6 +27,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import random
 from datetime import date
 from pathlib import Path
@@ -33,11 +36,15 @@ from common import (
     RAW_DIR,
     console,
     content_hash,
-    get_supabase,
+    fetch_all,
+    get_db,
+    upsert_daily_set,
     upsert_questions,
 )
 
 MIN_HL_GAP_RATIO = 0.25  # higher/lower pairs must differ by ≥25% — never a coin flip
+MIN_SEANCE_CLUES = 3     # minimum facts per subject to forge a séance question
+LADDER_CANDIDATES = 6    # candidate pool size per ladder question
 
 
 # ── difficulty ──────────────────────────────────────────────────────────────
@@ -151,125 +158,6 @@ def forge_multiple_choice(facts: list[dict], rng: random.Random) -> list[dict]:
     return out
 
 
-def forge_audio_guess(facts: list[dict], rng: random.Random) -> list[dict]:
-    """THE JUKEBOX (live mode): facts carrying meta.preview_url (a Deezer 30s clip)
-    plus meta.answer become 'name this' questions; distractors are sibling answers."""
-    pool: dict[str, list[dict]] = {}
-    for f in facts:
-        m = f.get("meta") or {}
-        if m.get("preview_url") and m.get("answer"):
-            pool.setdefault(f["category"], []).append(f)
-
-    out = []
-    for category, rows in pool.items():
-        answers = list({r["meta"]["answer"] for r in rows})
-        if len(answers) < 4:
-            continue
-        for f in rows:
-            answer = f["meta"]["answer"]
-            distractors = rng.sample([a for a in answers if a != answer], 3)
-            choices = distractors + [answer]
-            rng.shuffle(choices)
-            out.append(
-                {
-                    "content_hash": content_hash("audio_guess", f["content_hash"]),
-                    "qtype": "audio_guess",
-                    "category": category,
-                    "difficulty": f.get("_difficulty", 3),
-                    "prompt": f.get("meta", {}).get("audio_prompt", "Name the artist of this track."),
-                    "correct": answer,
-                    "choices": choices,
-                    "audio_url": f["meta"]["preview_url"],
-                    "image_url": f.get("image_url"),
-                    "source_url": f.get("source_url"),
-                }
-            )
-    return out
-
-
-# prompt per image kind
-_IMAGE_PROMPT = {
-    "flag": "Which country does this flag belong to?",
-    "poster": "Name this film.",
-    "title": "Name this title.",
-}
-
-
-def forge_image_guess(facts: list[dict], rng: random.Random) -> list[dict]:
-    """THE GALLERY: facts with an image_url + meta.answer (+ answer_field naming the
-    kind) become blur-reveal 'name what you see' questions; sibling distractors."""
-    pool: dict[tuple[str, str], list[dict]] = {}
-    for f in facts:
-        m = f.get("meta") or {}
-        if f.get("image_url") and m.get("answer") and m.get("answer_field") in _IMAGE_PROMPT:
-            pool.setdefault((f["category"], m["answer_field"]), []).append(f)
-
-    out = []
-    for (category, field), rows in pool.items():
-        answers = list({r["meta"]["answer"] for r in rows})
-        if len(answers) < 4:
-            continue
-        for f in rows:
-            answer = f["meta"]["answer"]
-            distractors = rng.sample([a for a in answers if a != answer], 3)
-            choices = distractors + [answer]
-            rng.shuffle(choices)
-            out.append(
-                {
-                    "content_hash": content_hash("image_guess", f["content_hash"]),
-                    "qtype": "image_guess",
-                    "category": category,
-                    "difficulty": f.get("_difficulty", 3),
-                    "prompt": _IMAGE_PROMPT[field],
-                    "correct": answer,
-                    "choices": choices,
-                    "image_url": f["image_url"],
-                    "source_url": f.get("source_url"),
-                }
-            )
-    return out
-
-
-def forge_connections(facts: list[dict], rng: random.Random, max_puzzles: int = 3) -> list[dict]:
-    """THE CONNECTIONS: assemble 16-tile grids from four distinct answer clusters
-    (same category+answer_field), four members each. Best-effort — the curated
-    seed bank carries the polished daily puzzles."""
-    clusters: dict[tuple[str, str], set[str]] = {}
-    for f in facts:
-        m = f.get("meta") or {}
-        field, answer = m.get("answer_field"), m.get("answer")
-        if field and answer:
-            clusters.setdefault((f["category"], field), set()).add(answer)
-
-    usable = [(k, sorted(v)) for k, v in clusters.items() if len(v) >= 4]
-    out = []
-    for _ in range(max_puzzles):
-        if len(usable) < 4:
-            break
-        rng.shuffle(usable)
-        chosen = usable[:4]
-        groups = []
-        for tier, ((category, field), answers) in enumerate(chosen, start=1):
-            members = rng.sample(answers, 4)
-            groups.append(
-                {"label": f"{category} · {field}", "members": members, "difficulty": tier}
-            )
-        members_flat = [m for g in groups for m in g["members"]]
-        out.append(
-            {
-                "content_hash": content_hash("connections", *sorted(members_flat)),
-                "qtype": "connections",
-                "category": "wildcard",
-                "difficulty": 3,
-                "prompt": "Sort these sixteen into four groups of four.",
-                "correct": "",
-                "groups": groups,
-                "source_url": None,
-            }
-        )
-    return out
-
-
 def forge_where(facts: list[dict]) -> list[dict]:
     """THE MAP: the fact text says WHAT the place is; the skill is pinning it.
     The text naming the answer is fine — coordinates are the hidden truth."""
@@ -324,6 +212,136 @@ def forge_clues(facts: list[dict]) -> list[dict]:
     return out
 
 
+def forge_seance(facts: list[dict]) -> list[dict]:
+    """THE SÉANCE: groups facts by (category, subject) and emits a multi-clue
+    question. Clues are ordered vague→specific (numeric/generic first, answer_field
+    last). Subject name is masked throughout. Requires ≥3 clean clues per subject.
+    """
+    by_subject: dict[tuple[str, str], list[dict]] = {}
+    for f in facts:
+        key = (f["category"], f["subject"])
+        by_subject.setdefault(key, []).append(f)
+
+    out = []
+    for (category, subject), group in by_subject.items():
+        if len(group) < MIN_SEANCE_CLUES:
+            continue
+
+        def _specificity(f: dict) -> int:
+            # 0 = most vague (plain numeric), 1 = year, 2 = specific (answer_field)
+            has_answer = bool((f.get("meta") or {}).get("answer_field"))
+            if has_answer:
+                return 2
+            if f.get("year"):
+                return 1
+            return 0
+
+        ordered = sorted(group, key=_specificity)
+
+        clues: list[str] = []
+        for f in ordered:
+            text = f["fact_text"]
+            if subject.lower() in text.lower():
+                masked = text.replace(subject, "this " + _subject_class(f))
+                if subject.lower() in masked.lower():
+                    continue  # substitution didn't fully mask — skip
+                clues.append(masked)
+            else:
+                clues.append(text)
+
+        if len(clues) < MIN_SEANCE_CLUES:
+            continue
+
+        # Difficulty from the most popular fact in the group
+        best = max(group, key=lambda f: f.get("popularity") or 0)
+        img = next((f.get("image_url") for f in group if f.get("image_url")), None)
+        src = next((f.get("source_url") for f in group if f.get("source_url")), None)
+
+        out.append(
+            {
+                "content_hash": content_hash("seance", category, subject),
+                "qtype": "seance",
+                "category": category,
+                "difficulty": best.get("_difficulty", 3),
+                "prompt": "Who or what am I? Reveal clues one at a time.",
+                "correct": subject,
+                "clues": clues[:5],  # cap at 5 clues
+                "image_url": img,
+                "source_url": src,
+            }
+        )
+    return out
+
+
+def forge_ladder(facts: list[dict], rng: random.Random) -> list[dict]:
+    """THE LADDER: emits a target subject + a candidate pool of numeric siblings.
+    Each candidate carries {label, category, region, magnitude} so the client
+    distance function can surface shared-attribute hints.
+    """
+    by_unit: dict[str, list[dict]] = {}
+    for f in facts:
+        if f.get("numeric_value") and f.get("numeric_unit"):
+            by_unit.setdefault(f["numeric_unit"], []).append(f)
+
+    def _mag(f: dict) -> float:
+        return math.log10(max(1, f["numeric_value"]))
+
+    def _region(f: dict) -> str | None:
+        return (f.get("meta") or {}).get("region")
+
+    def _dist(target: dict, candidate: dict) -> float:
+        d = 0.0
+        if target["category"] != candidate["category"]:
+            d += 2.0
+        tr, cr = _region(target), _region(candidate)
+        if tr and cr and tr != cr:
+            d += 1.0
+        d += min(1.0, abs(_mag(target) - _mag(candidate)))
+        return d
+
+    out = []
+    for unit, rows in by_unit.items():
+        if len(rows) < LADDER_CANDIDATES + 1:
+            continue
+        rng.shuffle(rows)
+        # Use first half as targets, build pools from the rest
+        for target in rows[: len(rows) // 2]:
+            others = [r for r in rows if r["subject"] != target["subject"]]
+            if len(others) < LADDER_CANDIDATES:
+                continue
+            # Pick LADDER_CANDIDATES others, ensuring variety
+            pool = rng.sample(others, min(LADDER_CANDIDATES + 2, len(others)))
+            pool.sort(key=lambda c: _dist(target, c))
+            pool = pool[:LADDER_CANDIDATES]
+
+            correct = pool[0]["subject"]  # closest candidate is the right answer
+            candidates = [
+                {
+                    "label": c["subject"],
+                    "category": c["category"],
+                    "region": _region(c),
+                    "magnitude": round(_mag(c), 2),
+                }
+                for c in pool
+            ]
+            rng.shuffle(candidates)
+
+            out.append(
+                {
+                    "content_hash": content_hash("ladder", target["content_hash"]),
+                    "qtype": "ladder",
+                    "category": target["category"],
+                    "difficulty": target.get("_difficulty", 3),
+                    "prompt": f"Which is closest to {target['subject']} by {unit}?",
+                    "correct": correct,
+                    "candidates": candidates,
+                    "image_url": target.get("image_url"),
+                    "source_url": target.get("source_url"),
+                }
+            )
+    return out
+
+
 def _subject_class(f: dict) -> str:
     return {
         "music": "artist",
@@ -371,9 +389,8 @@ def load_facts_from_bronze() -> list[dict]:
     return list({f["content_hash"]: f for f in facts}.values())
 
 
-def load_facts_from_supabase(sb) -> list[dict]:
-    rows = sb.table("facts").select("*").limit(20000).execute().data or []
-    return rows
+def load_facts_from_db(conn) -> list[dict]:
+    return fetch_all(conn, "select * from facts", limit=20000)
 
 
 def forge_all(facts: list[dict], seed: int = 0) -> list[dict]:
@@ -385,11 +402,9 @@ def forge_all(facts: list[dict], seed: int = 0) -> list[dict]:
         + forge_multiple_choice(facts, rng)
         + forge_clues(facts)
         + forge_where(facts)
-        + forge_audio_guess(facts, rng)
-        + forge_image_guess(facts, rng)
-        + forge_connections(facts, rng)
+        + forge_seance(facts)
+        + forge_ladder(facts, rng)
     )
-    # attach fact provenance where the column exists
     return questions
 
 
@@ -399,8 +414,8 @@ def main() -> None:
     args = ap.parse_args()
 
     console.rule("[bold]Question forge")
-    sb = None if args.from_bronze else get_supabase()
-    facts = load_facts_from_bronze() if (args.from_bronze or sb is None) else load_facts_from_supabase(sb)
+    conn = None if args.from_bronze else get_db()
+    facts = load_facts_from_bronze() if (args.from_bronze or conn is None) else load_facts_from_db(conn)
     console.print(f"loaded {len(facts)} facts")
 
     questions = forge_all(facts)
@@ -409,10 +424,9 @@ def main() -> None:
         by_type[q["qtype"]] = by_type.get(q["qtype"], 0) + 1
     console.print(f"forged {len(questions)} questions: {by_type}")
 
-    n = upsert_questions(sb, questions)
+    n = upsert_questions(conn, questions)
     board = build_daily_board(questions, date.today())
-    if sb is not None and board:
-        sb.table("daily_sets").upsert(board, on_conflict="set_date,mode").execute()
+    if conn is not None and board and upsert_daily_set(conn, board):
         console.print("[green]✓ daily board published[/green]")
     console.print(f"[green]✓ {n} questions upserted[/green]")
 

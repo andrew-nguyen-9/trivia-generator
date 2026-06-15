@@ -14,7 +14,16 @@ export type QType =
   | "where"
   | "audio_guess"
   | "image_guess"
-  | "connections";
+  | "connections"
+  | "seance"
+  | "ladder";
+
+export interface LadderCandidate {
+  label: string;
+  category: string;
+  region?: string | null;
+  magnitude: number;
+}
 
 /** A single note in an offline synthesized melody (Jukebox, no audio files). */
 export interface Note {
@@ -49,6 +58,8 @@ export interface Question {
   audio_url?: string | null; // Jukebox: streamed clip (Deezer preview)
   melody?: Note[]; // Jukebox: offline synthesized tune (no audio file)
   groups?: ConnectionGroup[]; // Connections puzzle
+  clues?: string[];             // seance: ordered clue strings (vague → specific)
+  candidates?: LadderCandidate[]; // ladder: comparable sibling pool
 }
 
 export const CATEGORIES: Category[] = [
@@ -71,10 +82,10 @@ export const CATEGORY_LABEL: Record<Category, string> = {
 
 // hex values mirror tailwind.config.ts — used where Tailwind classes can't reach (SVG, inline glow)
 export const CATEGORY_HEX: Record<Category, string> = {
-  history: "#ffb43a",
-  music: "#ff4fa3",
-  sports: "#3ddc84",
-  screen: "#4f9dff",
-  geography: "#2fd4c4",
-  wildcard: "#b07aff",
+  history: "#c8852a",
+  music: "#b83468",
+  sports: "#2d9155",
+  screen: "#2b6ab5",
+  geography: "#178b99",
+  wildcard: "#7040a8",
 };

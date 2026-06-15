@@ -8,11 +8,16 @@ One API sweep yields three kinds of game fuel per country:
 - capital (answer_field) → multiple_choice (THE WEDGES)
 - capital coordinates    → where (THE MAP)
 
+API efficiency (Phase 6): restcountries is essentially static data (country
+populations and capitals change rarely). The response is cached with ETag/
+If-Modified-Since, refreshed at most once per week. This eliminates ~364
+redundant network calls/year.
+
 Run:
     python geo_ingest.py
     python geo_ingest.py --min-population 5000000
 
-Schedule: daily via etl_daily.yml (the dataset barely changes; the upserts no-op)
+Schedule: daily via etl_daily.yml
 """
 
 from __future__ import annotations
@@ -20,10 +25,11 @@ from __future__ import annotations
 import argparse
 import math
 
-from common import console, dump_raw, get_json, get_supabase, make_fact, upsert_facts
+from common import CACHE_DIR, console, dump_raw, get_json_conditional, get_db, make_fact, upsert_facts
 
 API = "https://restcountries.com/v3.1/all"
 FIELDS = "name,capital,capitalInfo,population,area,region,flags,maps"
+_GEO_CACHE = CACHE_DIR / "restcountries_cache.json"
 
 
 def _popularity(population: int) -> float:
@@ -42,6 +48,7 @@ def facts_for_country(c: dict) -> list[dict]:
     flag = (c.get("flags") or {}).get("svg")
     url = (c.get("maps") or {}).get("openStreetMaps")
     pop_score = _popularity(population)
+    region = c.get("region")
 
     out = [
         make_fact(
@@ -49,14 +56,14 @@ def facts_for_country(c: dict) -> list[dict]:
             fact_text=f"{name} has a population of {population:,}.",
             numeric_value=float(population), numeric_unit="population",
             image_url=flag, source_url=url, popularity=pop_score,
-            meta={"region": c.get("region")},
+            meta={"region": region},  # region kept for Ladder distance fn
         ),
         make_fact(
             source="restcountries", category="geography", subject=name,
             fact_text=f"{name} covers {int(area):,} km².",
             numeric_value=float(area), numeric_unit="area (km²)",
             image_url=flag, source_url=url, popularity=pop_score,
-            meta={"region": c.get("region")},
+            meta={"region": region},
         ),
     ]
     if capital and len(latlng) == 2:
@@ -66,17 +73,7 @@ def facts_for_country(c: dict) -> list[dict]:
                 fact_text=f"{capital} is the capital of {name}.",
                 lat=float(latlng[0]), lng=float(latlng[1]),
                 image_url=flag, source_url=url, popularity=pop_score,
-                meta={"answer_field": "capital", "answer": capital, "region": c.get("region")},
-            )
-        )
-    # THE GALLERY: name the country from its flag (image_guess fuel)
-    if flag:
-        out.append(
-            make_fact(
-                source="restcountries", category="geography", subject=name,
-                fact_text=f"The national flag of {name}.",
-                image_url=flag, source_url=url, popularity=pop_score,
-                meta={"answer_field": "flag", "answer": name, "region": c.get("region")},
+                meta={"answer_field": "capital", "answer": capital, "region": region},
             )
         )
     return out
@@ -89,7 +86,12 @@ def main() -> None:
     args = ap.parse_args()
 
     console.rule("[bold]Geography ingest — restcountries")
-    countries = get_json(API, params={"fields": FIELDS})
+    countries = get_json_conditional(
+        API,
+        cache_path=_GEO_CACHE,
+        params={"fields": FIELDS},
+        max_age_seconds=7 * 86400,  # static dataset; weekly refresh is plenty
+    )
 
     facts: list[dict] = []
     for c in countries:
@@ -101,7 +103,7 @@ def main() -> None:
             console.print(f"[yellow]skip {(c.get('name') or {}).get('common')}: {e}[/yellow]")
 
     dump_raw("geography", facts)
-    n = upsert_facts(get_supabase(), facts)
+    n = upsert_facts(get_db(), facts)
     console.print(f"[green]✓ {len(facts)} facts collected, {n} upserted[/green]")
 
 

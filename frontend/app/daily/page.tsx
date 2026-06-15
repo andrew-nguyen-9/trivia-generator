@@ -1,7 +1,7 @@
 import DailyGame from "@/components/DailyGame";
 import RoomShell from "@/components/RoomShell";
 import { getQuestionsByType } from "@/lib/queries";
-import { daySeed, mulberry32, shuffled } from "@/lib/rng";
+import { daySeed, pickRotating } from "@/lib/rng";
 import type { Question } from "@/lib/types";
 
 export const revalidate = 3600;
@@ -17,12 +17,19 @@ export default async function DailyPage() {
     getQuestionsByType("where"),
   ]);
 
-  // date-seeded → the same gauntlet for everyone today
-  const rand = mulberry32(daySeed() * 31 + 7);
-  const mcs = shuffled(mc, rand);
-  const rounds = [mcs[0], mcs[1], shuffled(yr, rand)[0], shuffled(hl, rand)[0], shuffled(wh, rand)[0]]
-    .filter(Boolean) as Question[];
-  const dailyNumber = daySeed() - EPOCH + 1;
+  // date-seeded, no-repeat rotation → same gauntlet for everyone today, and a
+  // fresh one tomorrow. Per-pool offsets keep these picks from colliding with
+  // the standalone rooms (so The Daily never echoes today's Clock/Map).
+  const day = daySeed();
+  const mcs = pickRotating(mc, 2, day + 404);
+  const rounds = [
+    mcs[0],
+    mcs[1],
+    pickRotating(yr, 1, day + 101)[0],
+    pickRotating(hl, 1, day + 202)[0],
+    pickRotating(wh, 1, day + 303)[0],
+  ].filter(Boolean) as Question[];
+  const dailyNumber = day - EPOCH + 1;
 
   return (
     <RoomShell label="room 06 — the daily" accent="wildcard">

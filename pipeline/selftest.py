@@ -54,29 +54,28 @@ def synthetic_facts() -> list[dict]:
             popularity=9.0 * i, source_url="https://example.com",
             meta={"answer_field": "capital", "answer": f"Capital {i}"},
         ))
-        # audio (Jukebox): a music fact carrying a preview clip + answer
+        # Numeric geo facts (needed for seance grouping and ladder)
         facts.append(make_fact(
-            source="deezer", category="music", subject=f"Track {i}",
-            fact_text=f"A 30-second clip of a song by Artist {i}.",
-            image_url=f"https://example.com/cover{i}.jpg",
-            popularity=11.0 * i, source_url="https://example.com",
-            meta={"answer_field": "artist", "answer": f"Artist {i}",
-                  "preview_url": f"https://example.com/p{i}.mp3"},
-        ))
-        # image (Gallery): a screen poster + a geography flag
-        facts.append(make_fact(
-            source="tmdb", category="screen", subject=f"Movie {i}",
-            fact_text=f"A film poster for Movie {i}.",
-            image_url=f"https://image.tmdb.org/poster{i}.jpg",
-            popularity=7.0 * i, source_url="https://example.com",
-            meta={"answer_field": "title", "answer": f"Movie {i}"},
+            source="restcountries", category="geography", subject=f"Country {i}",
+            fact_text=f"Country {i} has a population of {(i + 1) * 10_000_000:,}.",
+            numeric_value=float((i + 1) * 10_000_000), numeric_unit="population",
+            popularity=9.0 * i, source_url="https://example.com",
+            meta={"region": f"Region {i % 3}"},
         ))
         facts.append(make_fact(
-            source="restcountries", category="geography", subject=f"Flagland {i}",
-            fact_text=f"The national flag of Flagland {i}.",
-            image_url=f"https://flagcdn.com/w320/f{i}.png",
-            popularity=6.0 * i, source_url="https://example.com",
-            meta={"answer_field": "flag", "answer": f"Flagland {i}"},
+            source="restcountries", category="geography", subject=f"Country {i}",
+            fact_text=f"Country {i} covers {(i + 1) * 50_000:,} km².",
+            numeric_value=float((i + 1) * 50_000), numeric_unit="area (km²)",
+            popularity=9.0 * i, source_url="https://example.com",
+            meta={"region": f"Region {i % 3}"},
+        ))
+        # Music album year for seance grouping
+        facts.append(make_fact(
+            source="deezer", category="music", subject=f"Artist {i}",
+            fact_text=f'Artist {i} released the album "Album {i}" in {1990 + i * 3}.',
+            year=1990 + i * 3,
+            numeric_value=float(i + 1), numeric_unit="Deezer albums",
+            popularity=10.0 * i, source_url="https://example.com",
         ))
     return facts
 
@@ -91,26 +90,8 @@ def main() -> None:
     check("forge produces multiple_choice", "multiple_choice" in types)
     check("forge produces clue", "clue" in types)
     check("forge produces where", "where" in types)
-    check("forge produces audio_guess", "audio_guess" in types)
-    check("forge produces image_guess", "image_guess" in types)
-    check("forge produces connections", "connections" in types)
-
-    for q in qs:
-        if q["qtype"] == "audio_guess":
-            check("audio_guess carries a clip + 4 choices",
-                  bool(q.get("audio_url")) and len(q["choices"]) == 4 and q["correct"] in q["choices"])
-            break
-    for q in qs:
-        if q["qtype"] == "image_guess":
-            check("image_guess carries an image + 4 choices",
-                  bool(q.get("image_url")) and len(q["choices"]) == 4 and q["correct"] in q["choices"])
-            break
-    for q in qs:
-        if q["qtype"] == "connections":
-            g = q.get("groups") or []
-            check("connections has 4 groups of 4",
-                  len(g) == 4 and all(len(grp["members"]) == 4 for grp in g))
-            break
+    check("forge produces seance", "seance" in types)
+    check("forge produces ladder", "ladder" in types)
 
     for q in qs:
         if q["qtype"] == "where":
@@ -124,15 +105,40 @@ def main() -> None:
                   len(q["choices"]) == 4 and q["correct"] in q["choices"])
             check("MC prompt blanks the answer", "_____" in q["prompt"] and q["correct"] not in q["prompt"])
             break
+
     for q in qs:
         if q["qtype"] == "higher_lower":
             gap_ok = q["value_a"] != q["value_b"]
             check("HL pair has distinct values", gap_ok)
             break
+
     for q in qs:
         if q["qtype"] == "clue":
             check("clue does not leak the answer", q["correct"].lower() not in q["prompt"].lower())
             break
+
+    for q in qs:
+        if q["qtype"] == "seance":
+            clues = q.get("clues") or []
+            check("seance has ≥3 clues", len(clues) >= 3, f"{len(clues)} found")
+            check("seance clues are strings", all(isinstance(c, str) for c in clues))
+            check("seance clues don't leak answer",
+                  all(q["correct"].lower() not in c.lower() for c in clues))
+            break
+    else:
+        check("forge produces seance", False, "no seance question in output")
+
+    for q in qs:
+        if q["qtype"] == "ladder":
+            cands = q.get("candidates") or []
+            check("ladder has ≥3 candidates", len(cands) >= 3, f"{len(cands)} found")
+            check("ladder candidates have required fields",
+                  all("label" in c and "magnitude" in c for c in cands))
+            check("ladder correct is a candidate label",
+                  any(c["label"] == q["correct"] for c in cands))
+            break
+    else:
+        check("forge produces ladder", False, "no ladder question in output")
 
     d = date(2026, 6, 12)
     b1, b2 = build_daily_board(qs, d), build_daily_board(qs, d)
@@ -171,20 +177,36 @@ def main() -> None:
                 ok = ok and all(q.get(k) is not None for k in ("value_a", "value_b", "subject_a", "subject_b", "unit"))
             if q["qtype"] == "where":
                 ok = ok and -90 <= q.get("lat", 999) <= 90 and -180 <= q.get("lng", 999) <= 180
-            if q["qtype"] == "audio_guess":
-                ok = ok and isinstance(q.get("choices"), list) and q["correct"] in q["choices"]
-                ok = ok and (bool(q.get("audio_url")) or bool(q.get("melody")))
-            if q["qtype"] == "image_guess":
-                ok = ok and isinstance(q.get("choices"), list) and q["correct"] in q["choices"]
-                ok = ok and bool(q.get("image_url"))
-            if q["qtype"] == "connections":
-                g = q.get("groups") or []
-                ok = ok and len(g) == 4 and all(len(grp.get("members", [])) == 4 for grp in g)
+            if q["qtype"] == "seance":
+                ok = ok and isinstance(q.get("clues"), list) and len(q["clues"]) >= 3
+            if q["qtype"] == "ladder":
+                ok = ok and isinstance(q.get("candidates"), list) and len(q["candidates"]) >= 3
+                ok = ok and any(c.get("label") == q["correct"] for c in (q.get("candidates") or []))
             if not ok:
                 check("seed bank question shape", False, json.dumps(q)[:120])
                 break
         else:
             check("seed bank question shapes all valid", True)
+
+        # ── difficulty calibration gate ──────────────────────────────────────
+        # New/sourced questions must spread across tiers, not pile onto one
+        # difficulty — otherwise THE BOARD (needs ≥3 tiers/category) can't build
+        # and "hard mode" silently degrades into a wall of 5s.
+        clues = [q for q in bank if q["qtype"] == "clue"]
+        tiers = {q.get("difficulty") for q in clues}
+        check("clue difficulties span ≥3 tiers", len(tiers) >= 3, f"tiers {sorted(tiers)}")
+        if clues:
+            from collections import Counter
+            hist = Counter(q.get("difficulty") for q in clues)
+            top_share = max(hist.values()) / len(clues)
+            check("no clue difficulty tier exceeds 70%",
+                  top_share <= 0.70, f"max share {top_share:.0%} {dict(sorted(hist.items()))}")
+        cats_with_board_spread = sum(
+            1 for c in {q["category"] for q in clues}
+            if len({q["difficulty"] for q in clues if q["category"] == c}) >= 3
+        )
+        check("≥3 categories have a board-ready difficulty spread",
+              cats_with_board_spread >= 3, f"{cats_with_board_spread} categories")
     else:
         check("seed bank exists", False, str(seed_path))
 

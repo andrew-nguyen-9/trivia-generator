@@ -7,7 +7,7 @@ the repo is hand-curated; this script replaces it with pipeline output once the
 ETL is live. Runs last in etl_daily.yml.
 
 Run:
-    python export_seed.py                # from Supabase
+    python export_seed.py                # from the database (Neon)
     python export_seed.py --from-bronze  # offline: forge from data/raw and export
 """
 
@@ -17,7 +17,7 @@ import argparse
 import json
 from pathlib import Path
 
-from common import REPO_ROOT, console, get_supabase
+from common import REPO_ROOT, console, fetch_all, get_db
 from question_forge import forge_all, load_facts_from_bronze
 
 SEED_PATH = REPO_ROOT / "frontend" / "public" / "seed-questions.json"
@@ -27,6 +27,8 @@ FIELDS = [
     "qtype", "category", "difficulty", "prompt", "correct", "choices",
     "year", "value_a", "value_b", "subject_a", "subject_b", "unit",
     "lat", "lng", "image_url", "source_url", "audio_url", "melody", "groups",
+    "clues",       # seance: ordered clue strings
+    "candidates",  # ladder: [{label, category, region, magnitude}]
 ]
 
 
@@ -39,11 +41,11 @@ def main() -> None:
     ap.add_argument("--from-bronze", action="store_true")
     args = ap.parse_args()
 
-    sb = None if args.from_bronze else get_supabase()
-    if sb is None:
+    conn = None if args.from_bronze else get_db()
+    if conn is None:
         questions = forge_all(load_facts_from_bronze())
     else:
-        questions = sb.table("questions").select("*").limit(5000).execute().data or []
+        questions = fetch_all(conn, "select * from questions", limit=5000)
 
     by_type: dict[str, list[dict]] = {}
     for q in sorted(questions, key=lambda q: q.get("difficulty", 3)):

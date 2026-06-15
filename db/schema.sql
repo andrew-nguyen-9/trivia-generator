@@ -1,7 +1,10 @@
--- PARLOR (trivia-generator) — full Supabase schema
--- Run in the Supabase SQL editor. Conventions match fantasy-football-tool and
--- music-festival-analyzer: RLS on every table, public read policy, writes via
--- service role (pipeline) only.
+-- PARLOR (trivia-generator) — full Postgres schema (Neon).
+-- Run with: psql "$DATABASE_URL" -f db/schema.sql  (or paste into the Neon SQL editor).
+-- Conventions match fantasy-football-tool and music-festival-analyzer: RLS on
+-- every table, public read policy, writes via a privileged pipeline role only.
+-- NOTE: the RLS policies below are Supabase-flavored but valid Postgres; on Neon
+-- they're optional — least privilege is enforced by using a read-only role for
+-- the frontend connection string. They do no harm if left in place.
 
 -- ── facts: the atomic unit. Questions are forged FROM facts, never stored alone. ──
 create table if not exists facts (
@@ -33,7 +36,7 @@ create table if not exists questions (
   id            uuid primary key default gen_random_uuid(),
   content_hash  text not null unique,
   fact_id       uuid references facts(id) on delete cascade,
-  qtype         text not null check (qtype in ('multiple_choice','year_guess','higher_lower','clue','where','audio_guess','image_guess','connections')),
+  qtype         text not null check (qtype in ('multiple_choice','year_guess','higher_lower','clue','where','audio_guess','image_guess','connections','seance','ladder')),
   category      text not null check (category in ('history','music','sports','screen','geography','wildcard')),
   difficulty    int not null default 3 check (difficulty between 1 and 5),
   prompt        text not null,                  -- the clue / question / pair framing
@@ -52,6 +55,8 @@ create table if not exists questions (
   audio_url     text,                           -- audio_guess (THE JUKEBOX): streamed clip
   melody        jsonb,                          -- audio_guess offline synth: [{n,d}]
   groups        jsonb,                          -- connections: [{label,members,difficulty}]
+  clues         jsonb,                          -- seance: ordered clue strings (vague→specific)
+  candidates    jsonb,                          -- ladder: [{label,category,region,magnitude}]
   created_at    timestamptz default now()
 );
 

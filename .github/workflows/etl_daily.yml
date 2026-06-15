@@ -2,12 +2,12 @@
 # so the shape maps 1:1 onto Airflow/Dagster later (see docs/RESEARCH_DATA_PLATFORM.md).
 #
 # Runs in two modes with zero config changes:
-# - DB-less (default): no Supabase secrets → ingests accumulate in the COMMITTED
+# - DB-less (default): no DATABASE_URL secret → ingests accumulate in the COMMITTED
 #   bronze layer (data/raw/*.jsonl, compacted by content_hash), the forge runs
 #   from bronze, and publish commits bronze + the refreshed seed bank. The repo
 #   is the database; the app serves the seed bank.
-# - Live-DB: add SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY secrets and the same
-#   steps also upsert facts/questions/daily_sets to Supabase.
+# - Live-DB: add a DATABASE_URL secret (a Neon Postgres connection string) and the
+#   same steps also upsert facts/questions/daily_sets to Neon.
 name: etl_daily
 
 on:
@@ -33,33 +33,28 @@ jobs:
         continue-on-error: true
         run: python pipeline/wikipedia_ingest.py
         env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
       - name: Ingest Deezer
         continue-on-error: true
         run: python pipeline/music_ingest.py
         env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
       - name: Ingest Sleeper + ESPN
         continue-on-error: true
         run: python pipeline/sports_ingest.py
         env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
       - name: Ingest restcountries
         continue-on-error: true
         run: python pipeline/geo_ingest.py
         env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
       - name: Ingest TMDB (skipped without TMDB_API_KEY)
         continue-on-error: true
         if: ${{ secrets.TMDB_API_KEY != '' }}
         run: python pipeline/screen_ingest.py
         env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
           TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
       - name: Upload bronze layer
         uses: actions/upload-artifact@v4
@@ -112,13 +107,11 @@ jobs:
       - name: Forge questions + daily board
         run: python pipeline/question_forge.py
         env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
       - name: Refresh committed seed bank
         run: python pipeline/export_seed.py
         env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
       - name: Commit bronze layer + refreshed seed bank
         run: |
           git config user.name "parlor-etl"

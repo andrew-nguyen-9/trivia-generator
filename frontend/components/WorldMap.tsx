@@ -1,14 +1,15 @@
 "use client";
 
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { Position } from "geojson";
 import { feature } from "topojson-client";
 import type { GeometryCollection, Topology } from "topojson-specification";
-import landTopo from "world-atlas/land-110m.json";
 import { project, unproject, type LatLng } from "@/lib/geo";
 
-// Natural Earth land (110m) via the world-atlas npm package — fully offline,
-// no tile servers (house rule: playable from clone).
+// world-atlas (~50-80 KB) is loaded lazily — only fetched when WorldMap first
+// renders, so the Google Map path (which never mounts WorldMap) skips it entirely.
+let LAND_PATH_CACHE = "";
+
 function ringsToPath(coords: Position[][]): string {
   let d = "";
   for (const ring of coords) {
@@ -21,23 +22,6 @@ function ringsToPath(coords: Position[][]): string {
   return d;
 }
 
-let LAND_PATH = "";
-function landPath(): string {
-  if (LAND_PATH) return LAND_PATH;
-  const topo = landTopo as unknown as Topology<{ land: GeometryCollection }>;
-  const land = feature(topo, topo.objects.land);
-  LAND_PATH = land.features
-    .map((f) =>
-      f.geometry.type === "Polygon"
-        ? ringsToPath(f.geometry.coordinates)
-        : f.geometry.type === "MultiPolygon"
-          ? f.geometry.coordinates.map(ringsToPath).join("")
-          : "",
-    )
-    .join("");
-  return LAND_PATH;
-}
-
 export default function WorldMap({
   guess,
   truth,
@@ -46,13 +30,34 @@ export default function WorldMap({
   accent,
 }: {
   guess: LatLng | null;
-  truth: LatLng | null; // non-null ⇒ revealed
+  truth: LatLng | null;
   onPick: (p: LatLng) => void;
   disabled?: boolean;
   accent: string;
 }) {
   const svgRef = useRef<SVGSVGElement>(null);
-  const d = useMemo(landPath, []);
+  const [landPath, setLandPath] = useState(LAND_PATH_CACHE);
+
+  useEffect(() => {
+    if (LAND_PATH_CACHE) {
+      setLandPath(LAND_PATH_CACHE);
+      return;
+    }
+    import("world-atlas/land-110m.json").then((mod) => {
+      const topo = mod.default as unknown as Topology<{ land: GeometryCollection }>;
+      const land = feature(topo, topo.objects.land);
+      LAND_PATH_CACHE = land.features
+        .map((f) =>
+          f.geometry.type === "Polygon"
+            ? ringsToPath(f.geometry.coordinates)
+            : f.geometry.type === "MultiPolygon"
+              ? f.geometry.coordinates.map(ringsToPath).join("")
+              : "",
+        )
+        .join("");
+      setLandPath(LAND_PATH_CACHE);
+    });
+  }, []);
 
   function handleClick(e: React.MouseEvent<SVGSVGElement>) {
     if (disabled || !svgRef.current) return;
@@ -74,7 +79,9 @@ export default function WorldMap({
       aria-label="world map — click to place your guess"
       className={`w-full rounded-2xl border border-line bg-surface ${disabled ? "" : "cursor-crosshair"}`}
     >
-      <path d={d} fill="#1c1c2e" stroke="#26263a" strokeWidth="0.3" />
+      {landPath && (
+        <path d={landPath} fill="#0d0d18" stroke="#1a1a2e" strokeWidth="0.3" />
+      )}
       {g && t && (
         <line
           x1={g.x}
@@ -88,8 +95,8 @@ export default function WorldMap({
       )}
       {g && (
         <>
-          <circle cx={g.x} cy={g.y} r="2.4" fill="none" stroke="#f5f3ee" strokeWidth="0.8" />
-          <circle cx={g.x} cy={g.y} r="0.9" fill="#f5f3ee" />
+          <circle cx={g.x} cy={g.y} r="2.4" fill="none" stroke="#f0ede6" strokeWidth="0.8" />
+          <circle cx={g.x} cy={g.y} r="0.9" fill="#f0ede6" />
         </>
       )}
       {t && (

@@ -9,6 +9,10 @@ Facts produced per chart artist:
 - earliest album year  → year_guess fuel
 - album count          → multiple_choice fuel
 
+API efficiency (Phase 6): the chart endpoint already returns nb_fan, picture_xl,
+and link for each artist — we no longer re-fetch /artist/{id} for chart mode.
+The per-artist re-fetch was ~50 redundant calls/day that added no new data.
+
 Run:
     python music_ingest.py                 # top 50 chart artists
     python music_ingest.py --limit 100
@@ -22,7 +26,7 @@ from __future__ import annotations
 import argparse
 import math
 
-from common import console, dump_raw, get_json, get_supabase, make_fact, upsert_facts
+from common import console, dump_raw, get_json, get_db, make_fact, upsert_facts
 
 API = "https://api.deezer.com"
 
@@ -49,7 +53,7 @@ def facts_for_artist(artist: dict) -> list[dict]:
                 fact_text=f"{name} has {nb_fan:,} fans on Deezer.",
                 numeric_value=float(nb_fan), numeric_unit="Deezer fans",
                 image_url=pic, source_url=link, popularity=pop,
-                meta={"deezer_id": artist["id"]},
+                meta={},  # deezer_id not read downstream; keep meta lean
             )
         )
 
@@ -65,7 +69,7 @@ def facts_for_artist(artist: dict) -> list[dict]:
                     fact_text=f"{name} released the album “{first['title']}” in {year}.",
                     year=year, image_url=first.get("cover_xl") or pic,
                     source_url=link, popularity=pop,
-                    meta={"album_id": first["id"], "album": first["title"]},
+                    meta={},  # album_id/album not read by forge
                 )
             )
         out.append(
@@ -80,30 +84,6 @@ def facts_for_artist(artist: dict) -> list[dict]:
     return out
 
 
-def facts_for_track(track: dict) -> list[dict]:
-    """THE JUKEBOX: a chart track's 30-second preview clip → audio_guess fuel.
-    The answer is the artist (lots of sibling distractors from the same chart)."""
-    preview = track.get("preview")
-    artist = (track.get("artist") or {}).get("name")
-    title = track.get("title")
-    if not (preview and artist and title):
-        return []
-    cover = (track.get("album") or {}).get("cover_xl")
-    link = track.get("link") or f"https://www.deezer.com/track/{track['id']}"
-    return [
-        make_fact(
-            source="deezer", category="music", subject=title,
-            fact_text=f"A 30-second preview of “{title}” by {artist}.",
-            image_url=cover, source_url=link, popularity=50.0,
-            meta={
-                "answer_field": "artist", "answer": artist,
-                "preview_url": preview,
-                "audio_prompt": "Name the artist of this track.",
-            },
-        )
-    ]
-
-
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--limit", type=int, default=50)
@@ -114,11 +94,12 @@ def main() -> None:
     if args.artist:
         found = get_json(f"{API}/search/artist", params={"q": args.artist, "limit": 1})
         artists = found.get("data", [])
-        # search results omit nb_fan detail → refetch full record
+        # search results omit nb_fan detail → refetch full record (single artist, not bulk)
         artists = [get_json(f"{API}/artist/{a['id']}") for a in artists]
     else:
         chart = get_json(f"{API}/chart/0/artists", params={"limit": args.limit})
-        artists = [get_json(f"{API}/artist/{a['id']}") for a in chart.get("data", [])]
+        # Chart payload already includes nb_fan, picture_xl, link — no per-artist re-fetch needed
+        artists = chart.get("data", [])
 
     facts: list[dict] = []
     for a in artists:
@@ -127,16 +108,8 @@ def main() -> None:
         except Exception as e:  # one bad artist never kills the run
             console.print(f"[yellow]skip {a.get('name')}: {e}[/yellow]")
 
-    if not args.artist:  # chart tracks → Jukebox audio fuel
-        try:
-            tracks = get_json(f"{API}/chart/0/tracks", params={"limit": args.limit})
-            for t in tracks.get("data", []):
-                facts.extend(facts_for_track(t))
-        except Exception as e:
-            console.print(f"[yellow]skip chart tracks: {e}[/yellow]")
-
     dump_raw("deezer", facts)
-    n = upsert_facts(get_supabase(), facts)
+    n = upsert_facts(get_db(), facts)
     console.print(f"[green]✓ {len(facts)} facts collected, {n} upserted[/green]")
 
 
