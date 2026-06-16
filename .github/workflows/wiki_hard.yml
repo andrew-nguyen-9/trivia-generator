@@ -28,6 +28,8 @@ concurrency:
 jobs:
   scrape-hard:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Add this to allow pushing commits
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
