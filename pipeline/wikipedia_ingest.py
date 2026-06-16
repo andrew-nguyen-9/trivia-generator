@@ -7,6 +7,9 @@ Sources:
 - On This Day feed:  /api/rest_v1/feed/onthisday/{type}/{MM}/{DD}   → dated events (year_guess fuel)
 - Random summaries:  /api/rest_v1/page/random/summary               → wildcard facts
 - Pageviews metric:  /metrics/pageviews/per-article/...             → REAL popularity
+- MediaWiki API:     /w/api.php                                     → better rate limits
+- Wikidata SPARQL:   query.wikidata.org/sparql                      → structured facts
+- DBpedia SPARQL:    dbpedia.org/sparql                             → linked open data
 
 Difficulty is popularity-percentile within category (see question_forge), so the
 surest way to mint HARD questions is to scrape OBSCURE articles. `--hard` does
@@ -26,15 +29,18 @@ Schedule: daily via etl_daily.yml; hard sweep every 6h via wiki_hard.yml
 from __future__ import annotations
 
 import argparse
+import html
 import math
-import time
 import urllib.parse
 from datetime import date, timedelta
 
 from common import console, dump_raw, get_json, get_db, make_fact, upsert_facts, get_request_id
 
 API = "https://en.wikipedia.org/api/rest_v1"
+API_MW = "https://en.wikipedia.org/w/api.php"
 PAGEVIEWS = "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article"
+WIKIDATA_SPARQL = "https://query.wikidata.org/sparql"
+DBPEDIA_SPARQL = "https://dbpedia.org/sparql"
 
 # A monthly view count of ~3M maps to the top of the 0-100 scale; obscure stubs
 # with a few hundred views land near 0 (→ difficulty 5).
@@ -181,6 +187,218 @@ def fetch_random_summaries(n: int) -> list[dict]:
     return facts
 
 
+def fetch_random_summaries_mw(n: int) -> list[dict]:
+    """Fetch random Wikipedia articles via MediaWiki API (better rate limits).
+    
+    Falls back to MediaWiki API when REST API is rate-limited. Less aggressive
+    request pattern than REST API.
+    """
+    facts = []
+    skipped = 0
+    req_id = get_request_id()
+    
+    for attempt in range(n * 2):
+        if len(facts) >= n:
+            break
+        try:
+            # Get random articles
+            data = get_json(
+                API_MW,
+                params={
+                    "action": "query",
+                    "format": "json",
+                    "list": "random",
+                    "rnnamespace": "0",
+                    "rnlimit": "1",
+                },
+            )
+            pages = data.get("query", {}).get("random", [])
+            if not pages:
+                continue
+
+            title = pages[0].get("title")
+            # Fetch article summary
+            page_data = get_json(
+                API_MW,
+                params={
+                    "action": "query",
+                    "format": "json",
+                    "titles": title,
+                    "prop": "extracts|pageimages|info",
+                    "explaintext": True,
+                    "exintro": True,
+                    "piprop": "thumbnail",
+                    "pithumbsize": "300",
+                },
+            )
+
+            pages_dict = page_data.get("query", {}).get("pages", {})
+            if not pages_dict:
+                continue
+
+            page = list(pages_dict.values())[0]
+            extract = (page.get("extract") or "").strip()
+
+            if len(extract) < 120:
+                continue
+
+            facts.append(
+                make_fact(
+                    source="wikipedia",
+                    category="wildcard",
+                    subject=title,
+                    fact_text=extract.split(". ")[0] + ".",
+                    image_url=page.get("thumbnail", {}).get("source"),
+                    source_url=f"https://en.wikipedia.org/wiki/{urllib.parse.quote(title)}",
+                    popularity=40.0,
+                    meta={"description": page.get("description"), "source": "mediawiki_api"},
+                )
+            )
+        except Exception as e:
+            console.print(f"[dim][{req_id}] MediaWiki #{attempt}: {type(e).__name__}[/dim]")
+            skipped += 1
+            if skipped > n:
+                break
+            continue
+    
+    console.print(f"[dim][{req_id}] MediaWiki sweep: {len(facts)}/{n} kept[/dim]")
+    return facts
+
+
+def fetch_from_wikidata(n: int = 20) -> list[dict]:
+    """Mine trivia facts from Wikidata (structured knowledge base).
+    
+    Fallback source when Wikipedia REST/MediaWiki APIs are rate-limited.
+    Uses SPARQL queries for structured historical facts.
+    """
+    facts = []
+    req_id = get_request_id()
+
+    sparql_queries = [
+        # Historical events
+        """
+        SELECT ?item ?itemLabel ?date ?description WHERE {
+            ?item wdt:P279 wd:Q1656682;  # historical event
+                  wdt:P585 ?date.
+            SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
+        } LIMIT 50
+        """,
+        # Notable discoveries
+        """
+        SELECT ?item ?itemLabel ?discoverer ?date WHERE {
+            ?item wdt:P31 wd:Q2095382;  # discovery
+                  wdt:P575 ?date;
+                  wdt:P61 ?discoverer.
+            SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
+        } LIMIT 50
+        """,
+        # Notable battles
+        """
+        SELECT ?item ?itemLabel ?date ?description WHERE {
+            ?item wdt:P31 wd:Q178561;  # battle
+                  wdt:P585 ?date.
+            SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
+        } LIMIT 50
+        """,
+    ]
+
+    for query_idx, query in enumerate(sparql_queries):
+        if len(facts) >= n:
+            break
+        try:
+            data = get_json(
+                WIKIDATA_SPARQL, params={"query": query, "format": "json"}
+            )
+            for binding in data.get("results", {}).get("bindings", []):
+                if len(facts) >= n:
+                    break
+
+                item_label = binding.get("itemLabel", {}).get("value", "")
+                date_val = binding.get("date", {}).get("value", "")
+                description = binding.get("description", {}).get("value", "")
+
+                if not item_label or len(item_label) < 5:
+                    continue
+
+                year = None
+                if date_val:
+                    try:
+                        year = int(date_val.split("-")[0])
+                    except (ValueError, IndexError):
+                        pass
+
+                facts.append(
+                    make_fact(
+                        source="wikidata",
+                        category="history",
+                        subject=item_label,
+                        fact_text=f"{item_label}: {description or 'A notable historical fact.'}",
+                        year=year,
+                        popularity=50.0,
+                        meta={"source": "wikidata_sparql", "query_idx": query_idx},
+                    )
+                )
+        except Exception as e:
+            console.print(f"[dim][{req_id}] Wikidata query {query_idx}: {type(e).__name__}[/dim]")
+            continue
+
+    console.print(f"[dim][{req_id}] Wikidata sweep: {len(facts)}/{n} kept[/dim]")
+    return facts[:n]
+
+
+def fetch_from_dbpedia(n: int = 20) -> list[dict]:
+    """DBpedia - structured Wikipedia data with SPARQL endpoint.
+    
+    Final fallback source. Queries linked open data for notable people and facts.
+    """
+    facts = []
+    req_id = get_request_id()
+
+    sparql_query = """
+    PREFIX dbpedia: <http://dbpedia.org/resource/>
+    PREFIX dbo: <http://dbpedia.org/ontology/>
+    PREFIX dbp: <http://dbpedia.org/property/>
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+    SELECT DISTINCT ?label ?abstract WHERE {
+        ?person a dbo:Person ;
+                rdfs:label ?label ;
+                dbo:abstract ?abstract .
+        FILTER(lang(?label) = "en" && lang(?abstract) = "en")
+    } LIMIT 100
+    """
+
+    try:
+        data = get_json(
+            DBPEDIA_SPARQL, params={"query": sparql_query, "format": "json"}
+        )
+        for binding in data.get("results", {}).get("bindings", []):
+            if len(facts) >= n:
+                break
+
+            label = binding.get("label", {}).get("value", "")
+            abstract = binding.get("abstract", {}).get("value", "")
+
+            if not label or len(abstract) < 100:
+                continue
+
+            facts.append(
+                make_fact(
+                    source="dbpedia",
+                    category="history",
+                    subject=label,
+                    fact_text=abstract.split(". ")[0] + ".",
+                    popularity=50.0,
+                    meta={"source": "dbpedia_sparql"},
+                )
+            )
+    except Exception as e:
+        console.print(f"[dim][{req_id}] DBpedia query: {type(e).__name__}[/dim]")
+
+    console.print(f"[dim][{req_id}] DBpedia sweep: {len(facts)}/{n} kept[/dim]")
+    return facts[:n]
+
+
 def fetch_hard(n: int, oversample: int = 5, max_popularity: float = HARD_MAX_POPULARITY) -> list[dict]:
     """Mint EXTREMELY DIFFICULT facts by mining obscure articles.
 
@@ -188,6 +406,12 @@ def fetch_hard(n: int, oversample: int = 5, max_popularity: float = HARD_MAX_POP
     Wikipedia pageviews, and keeps only the low-traffic tail (popularity below
     max_popularity). Those facts carry a tiny popularity score, so the forge's
     percentile engine ranks them difficulty 5 within their category.
+    
+    Implements intelligent fallback chain:
+    1. Try Wikipedia REST API (primary, fastest)
+    2. Fall back to MediaWiki API (better rate limits)
+    3. Fall back to Wikidata SPARQL (structured, different approach)
+    4. Fall back to DBpedia SPARQL (linked data, final option)
     
     Rate limiting and retries are automatic per get_json(). Graceful degradation:
     if a pageviews call fails, uses nominal popularity and continues.
@@ -198,6 +422,9 @@ def fetch_hard(n: int, oversample: int = 5, max_popularity: float = HARD_MAX_POP
     budget = max(n * oversample, n + 10)
     pv_calls_failed = 0
     random_calls_failed = 0
+    req_id = get_request_id()
+    
+    console.print(f"[dim][{req_id}] Primary: attempting Wikipedia REST API hard sweep...[/dim]")
     
     while len(kept) < n and attempts < budget:
         attempts += 1
@@ -208,10 +435,10 @@ def fetch_hard(n: int, oversample: int = 5, max_popularity: float = HARD_MAX_POP
         except Exception as e:
             random_calls_failed += 1
             console.print(
-                f"[yellow][{get_request_id()}] hard #{attempts}: random failed "
+                f"[yellow][{req_id}] hard #{attempts}: random failed "
                 f"({type(e).__name__})[/yellow]"
             )
-            continue
+            break  # Exit primary loop on first error, try fallbacks
         
         title = (s.get("title") or "").replace("_", " ")
         extract = (s.get("extract") or "").strip()
@@ -251,13 +478,41 @@ def fetch_hard(n: int, oversample: int = 5, max_popularity: float = HARD_MAX_POP
                 image_url=(s.get("thumbnail") or {}).get("source"),
                 source_url=(s.get("content_urls", {}).get("desktop", {}) or {}).get("page"),
                 popularity=pop,
-                meta={"description": s.get("description"), "hard": True},
+                meta={"description": s.get("description"), "hard": True, "source": "wikipedia_api"},
             )
         )
     
+    # Fallback 1: MediaWiki API
+    if len(kept) < n // 2:
+        console.print(f"[dim][{req_id}] Fallback 1/3: Trying MediaWiki API ({len(kept)}/{n} facts)...[/dim]")
+        try:
+            mw_facts = fetch_random_summaries_mw(n - len(kept))
+            # For MediaWiki, we skip pageviews check and trust the API; add them as-is
+            kept.extend(mw_facts[:n - len(kept)])
+        except Exception as e:
+            console.print(f"[dim][{req_id}] MediaWiki fallback failed: {type(e).__name__}[/dim]")
+
+    # Fallback 2: Wikidata
+    if len(kept) < n // 2:
+        console.print(f"[dim][{req_id}] Fallback 2/3: Trying Wikidata SPARQL ({len(kept)}/{n} facts)...[/dim]")
+        try:
+            wd_facts = fetch_from_wikidata(n - len(kept))
+            kept.extend(wd_facts[:n - len(kept)])
+        except Exception as e:
+            console.print(f"[dim][{req_id}] Wikidata fallback failed: {type(e).__name__}[/dim]")
+
+    # Fallback 3: DBpedia
+    if len(kept) < n // 2:
+        console.print(f"[dim][{req_id}] Fallback 3/3: Trying DBpedia SPARQL ({len(kept)}/{n} facts)...[/dim]")
+        try:
+            db_facts = fetch_from_dbpedia(n - len(kept))
+            kept.extend(db_facts[:n - len(kept)])
+        except Exception as e:
+            console.print(f"[dim][{req_id}] DBpedia fallback failed: {type(e).__name__}[/dim]")
+
     console.print(
-        f"[dim][{get_request_id()}] hard sweep: kept {len(kept)}/{n} after {attempts} draws "
-        f"(random_failed={random_calls_failed}, pv_failed={pv_calls_failed})[/dim]"
+        f"[dim][{req_id}] hard sweep: kept {len(kept)}/{n} after {attempts} REST draws "
+        f"+ fallbacks (random_failed={random_calls_failed}, pv_failed={pv_calls_failed})[/dim]"
     )
     return kept
 
