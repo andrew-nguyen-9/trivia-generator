@@ -36,6 +36,7 @@ CATEGORIES = ("history", "music", "sports", "screen", "geography", "wildcard")
 import time
 
 RATE_LIMIT_DELAY = 1  # seconds between Wikipedia API calls
+from tenacity import retry_if_exception_type
 
 def _rate_limited_get(url: str, params: dict | None = None, headers: dict | None = None) -> requests.Response:
     time.sleep(RATE_LIMIT_DELAY)
@@ -44,13 +45,19 @@ def _rate_limited_get(url: str, params: dict | None = None, headers: dict | None
         h.update(headers)
     return requests.get(url, params=params, headers=h, timeout=20)
 
-@retry(stop=stop_after_attempt(3), wait=wait_exponential(min=2, max=60))
+@retry(
+    stop=stop_after_attempt(5),
+    wait=wait_exponential(min=2, max=60),
+    retry=retry_if_exception_type(requests.exceptions.HTTPError)
+)
 def get_json(url: str, params: dict | None = None, headers: dict | None = None) -> dict | list:
-    resp = _rate_limited_get(url, params, headers)
+    h = {"User-Agent": USER_AGENT}
+    if headers:
+        h.update(headers)
+    resp = requests.get(url, params=params, headers=h, timeout=20)
     resp.raise_for_status()
     return resp.json()
-
-@retry(stop=stop_after_attempt(3), wait=wait_exponential(min=1, max=8))
+    
 def get_json_conditional(
     url: str,
     cache_path: Path,
