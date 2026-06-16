@@ -23,6 +23,7 @@ export const ROOMS = [
   "gallery",
   "blitz",
   "connections",
+  "mystery",
 ] as const;
 export type Room = (typeof ROOMS)[number];
 

@@ -29,6 +29,7 @@ const ROOM_LABEL: Record<Room, string> = {
   gallery: "The Gallery",
   blitz: "The Blitz",
   connections: "The Connections",
+  mystery: "The Mystery",
 };
 
 /** last 12 weeks of play-activity, GitHub-style. */
