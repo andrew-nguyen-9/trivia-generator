@@ -27,15 +27,11 @@ from __future__ import annotations
 
 import argparse
 import math
+import time
 import urllib.parse
 from datetime import date, timedelta
 
-from common import console, dump_raw, get_json, get_db, make_fact, upsert_facts
-
-import time
-
-# Between each API call to Wikipedia:
-time.sleep(2)  # or higher if needed
+from common import console, dump_raw, get_json, get_db, make_fact, upsert_facts, get_request_id
 
 API = "https://en.wikipedia.org/api/rest_v1"
 PAGEVIEWS = "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article"
@@ -61,7 +57,11 @@ def _popularity_from_extract(item: dict) -> float:
 
 
 def _pageviews(title: str) -> int | None:
-    """Total pageviews over the trailing ~60 days for an article. None on miss."""
+    """Total pageviews over the trailing ~60 days for an article. None on miss.
+    
+    With adaptive retry logic in get_json(), this automatically handles rate limits.
+    Failures are logged and gracefully degrade the popularity score.
+    """
     if not title:
         return None
     end = date.today().replace(day=1)
@@ -73,7 +73,11 @@ def _pageviews(title: str) -> int | None:
     )
     try:
         data = get_json(url)
-    except Exception:
+    except Exception as e:
+        console.print(
+            f"[yellow][{get_request_id()}] pageviews miss for '{title}': "
+            f"{type(e).__name__}[/yellow]"
+        )
         return None
     return sum(item.get("views", 0) for item in data.get("items", []))
 
@@ -86,9 +90,22 @@ def _popularity_from_pageviews(views: int | None) -> float:
 
 
 def fetch_on_this_day(mm: str, dd: str) -> list[dict]:
+    """Fetch On This Day feed (events, births, deaths) for a given date.
+    
+    Makes 3 sequential calls (one per feed). Rate limiting and retries are automatic
+    per get_json(), so transient failures are gracefully handled.
+    """
     facts = []
     for feed in ("events", "births", "deaths"):
-        data = get_json(f"{API}/feed/onthisday/{feed}/{mm}/{dd}")
+        try:
+            data = get_json(f"{API}/feed/onthisday/{feed}/{mm}/{dd}")
+        except Exception as e:
+            console.print(
+                f"[yellow][{get_request_id()}] OnThisDay/{feed} {mm}/{dd} failed: "
+                f"{type(e).__name__}[/yellow]"
+            )
+            continue
+        
         for item in data.get(feed, []):
             year = item.get("year")
             text = (item.get("text") or "").strip()
@@ -117,13 +134,33 @@ def fetch_on_this_day(mm: str, dd: str) -> list[dict]:
 
 
 def fetch_random_summaries(n: int) -> list[dict]:
+    """Fetch n random Wikipedia articles with quality gating.
+    
+    Each call fetches one random summary and quality-gates it (stub check, type check).
+    Built-in rate limiting in get_json() prevents hammering the API.
+    """
     facts = []
-    for _ in range(n):
-        s = get_json(f"{API}/page/random/summary")
+    skipped = 0
+    for attempt in range(n * 2):  # Oversample to account for quality filtering
+        if len(facts) >= n:
+            break
+        try:
+            s = get_json(f"{API}/page/random/summary")
+        except Exception as e:
+            console.print(
+                f"[yellow][{get_request_id()}] random summary #{attempt} failed: "
+                f"{type(e).__name__}[/yellow]"
+            )
+            skipped += 1
+            if skipped > n:  # Give up if we've failed too many times
+                break
+            continue
+        
         extract = (s.get("extract") or "").strip()
         # Skip stubs and disambiguation noise — quality gate from the research doc
         if len(extract) < 120 or s.get("type") != "standard":
             continue
+        
         facts.append(
             make_fact(
                 source="wikipedia",
@@ -136,6 +173,11 @@ def fetch_random_summaries(n: int) -> list[dict]:
                 meta={"description": s.get("description")},
             )
         )
+    
+    console.print(
+        f"[dim][{get_request_id()}] random sweep: {len(facts)}/{n} kept "
+        f"(skipped {skipped})[/dim]"
+    )
     return facts
 
 
@@ -146,25 +188,59 @@ def fetch_hard(n: int, oversample: int = 5, max_popularity: float = HARD_MAX_POP
     Wikipedia pageviews, and keeps only the low-traffic tail (popularity below
     max_popularity). Those facts carry a tiny popularity score, so the forge's
     percentile engine ranks them difficulty 5 within their category.
+    
+    Rate limiting and retries are automatic per get_json(). Graceful degradation:
+    if a pageviews call fails, uses nominal popularity and continues.
     """
     kept: list[dict] = []
     seen: set[str] = set()
     attempts = 0
     budget = max(n * oversample, n + 10)
+    pv_calls_failed = 0
+    random_calls_failed = 0
+    
     while len(kept) < n and attempts < budget:
         attempts += 1
-        s = get_json(f"{API}/page/random/summary")
+        
+        # Fetch a random summary with built-in retry/rate-limit handling
+        try:
+            s = get_json(f"{API}/page/random/summary")
+        except Exception as e:
+            random_calls_failed += 1
+            console.print(
+                f"[yellow][{get_request_id()}] hard #{attempts}: random failed "
+                f"({type(e).__name__})[/yellow]"
+            )
+            continue
+        
         title = (s.get("title") or "").replace("_", " ")
         extract = (s.get("extract") or "").strip()
+        
+        # Quality gates: title, dedup, type, extract length
         if not title or title in seen or s.get("type") != "standard" or len(extract) < 120:
             continue
+        
         seen.add(title)
-        pop = _popularity_from_pageviews(_pageviews(title))
+        
+        # Query pageviews for this article to determine popularity
+        # Graceful degradation: if pageviews fails, use nominal score
+        views = _pageviews(title)
+        if views is None:
+            pv_calls_failed += 1
+            # Even if pageviews fails, assign nominal popularity and include it
+            pop = 50.0
+        else:
+            pop = _popularity_from_pageviews(views)
+        
+        # Keep only articles below the popularity threshold
         if pop > max_popularity:
-            continue  # too famous to be hard — drop it
+            continue
+        
+        # Infer category from description
         year = None
         desc = (s.get("description") or "").lower()
         category = "history" if any(w in desc for w in ("politician", "war", "battle", "empire", "dynasty", "historian", "ancient")) else "wildcard"
+        
         kept.append(
             make_fact(
                 source="wikipedia",
@@ -178,7 +254,11 @@ def fetch_hard(n: int, oversample: int = 5, max_popularity: float = HARD_MAX_POP
                 meta={"description": s.get("description"), "hard": True},
             )
         )
-    console.print(f"[dim]hard sweep: kept {len(kept)}/{n} after {attempts} draws[/dim]")
+    
+    console.print(
+        f"[dim][{get_request_id()}] hard sweep: kept {len(kept)}/{n} after {attempts} draws "
+        f"(random_failed={random_calls_failed}, pv_failed={pv_calls_failed})[/dim]"
+    )
     return kept
 
 
@@ -190,6 +270,9 @@ def main() -> None:
     args = ap.parse_args()
 
     facts: list[dict] = []
+    req_id = get_request_id()
+    console.print(f"[dim]Request ID: {req_id}[/dim]")
+    
     if args.hard:
         console.rule(f"[bold]Wikipedia HARD sweep — {args.hard} obscure facts")
         facts += fetch_hard(args.hard)

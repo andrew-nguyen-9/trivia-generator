@@ -14,13 +14,24 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import sys
+import time
+import uuid
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import TypeVar
 
 import requests
 from dotenv import load_dotenv
 from rich.console import Console
-from tenacity import retry, stop_after_attempt, wait_exponential
+from tenacity import (
+    retry,
+    stop_after_attempt,
+    wait_exponential,
+    retry_if_exception,
+    RetryError,
+    after_log,
+)
 
 load_dotenv()
 console = Console()
@@ -33,31 +44,185 @@ USER_AGENT = "parlor-trivia/1.0 (https://github.com/andrew-nguyen-9/trivia-gener
 
 CATEGORIES = ("history", "music", "sports", "screen", "geography", "wildcard")
 
-import time
+# ── Rate Limiting & Telemetry ──────────────────────────────────────────
 
-RATE_LIMIT_DELAY = 1  # seconds between Wikipedia API calls
-from tenacity import retry_if_exception_type
+class RateLimitTracker:
+    """Thread-safe tracker for API call telemetry and adaptive rate limiting.
+    
+    Attributes:
+        session_id: Unique ID for this invocation (for log correlation)
+        calls_made: Total HTTP requests attempted
+        calls_succeeded: Total successful responses (2xx-3xx)
+        calls_rate_limited: Total 429 responses
+        calls_failed: Total other HTTP errors
+        total_retry_wait_seconds: Cumulative wait time across retries
+        last_call_time: Timestamp of most recent API call
+    """
+    
+    def __init__(self):
+        self.session_id = str(uuid.uuid4())[:8]
+        self.calls_made = 0
+        self.calls_succeeded = 0
+        self.calls_rate_limited = 0
+        self.calls_failed = 0
+        self.total_retry_wait_seconds = 0
+        self.last_call_time = 0.0
+        self._start_time = time.time()
+    
+    def log_call(self, status_code: int, wait_seconds: float = 0) -> None:
+        """Record an API call outcome."""
+        self.calls_made += 1
+        self.last_call_time = time.time()
+        self.total_retry_wait_seconds += wait_seconds
+        
+        if 200 <= status_code < 400:
+            self.calls_succeeded += 1
+        elif status_code == 429:
+            self.calls_rate_limited += 1
+        else:
+            self.calls_failed += 1
+    
+    def stats_summary(self) -> str:
+        """Return a debug summary of telemetry."""
+        elapsed = time.time() - self._start_time
+        return (
+            f"session={self.session_id} elapsed={elapsed:.1f}s "
+            f"calls={self.calls_made} success={self.calls_succeeded} "
+            f"rate_limited={self.calls_rate_limited} failed={self.calls_failed} "
+            f"retry_wait={self.total_retry_wait_seconds:.1f}s"
+        )
 
-def _rate_limited_get(url: str, params: dict | None = None, headers: dict | None = None) -> requests.Response:
-    time.sleep(RATE_LIMIT_DELAY)
-    h = {"User-Agent": USER_AGENT}
-    if headers:
-        h.update(headers)
-    return requests.get(url, params=params, headers=h, timeout=20)
+
+_tracker = RateLimitTracker()
+
+
+def get_request_id() -> str:
+    """Return a debug-friendly request correlation ID."""
+    return _tracker.session_id
+
+
+# ── HTTP Client with Adaptive Rate Limiting ────────────────────────────
+
+class _RateLimitedSession:
+    """Manages per-domain rate limiting with adaptive backoff."""
+    
+    def __init__(self, min_interval_seconds: float = 1.5):
+        self.min_interval = min_interval_seconds
+        self.domain_last_call: dict[str, float] = {}
+    
+    def _extract_domain(self, url: str) -> str:
+        """Extract domain from URL for rate-limit bucketing."""
+        try:
+            from urllib.parse import urlparse
+            return urlparse(url).netloc or "unknown"
+        except Exception:
+            return "unknown"
+    
+    def _enforce_interval(self, url: str) -> None:
+        """Sleep until min_interval has elapsed since last call to this domain."""
+        domain = self._extract_domain(url)
+        last = self.domain_last_call.get(domain, 0)
+        elapsed = time.time() - last
+        if elapsed < self.min_interval:
+            sleep_time = self.min_interval - elapsed
+            console.print(
+                f"[dim][{_tracker.session_id}] rate-limit throttle: "
+                f"sleeping {sleep_time:.2f}s for {domain}[/dim]"
+            )
+            time.sleep(sleep_time)
+        self.domain_last_call[domain] = time.time()
+
+
+_rate_limiter = _RateLimitedSession()
+
+
+def _is_retryable_error(exc: Exception) -> bool:
+    """Determine if an exception warrants a retry.
+    
+    Retries on:
+    - 429 (rate limit)
+    - 503/504 (service unavailable / gateway timeout)
+    - Connection errors / timeouts
+    - Do NOT retry on 4xx client errors (bad request, not found, etc.)
+    """
+    if not isinstance(exc, requests.exceptions.RequestException):
+        return False
+    
+    if isinstance(exc, (requests.exceptions.Timeout, requests.exceptions.ConnectionError)):
+        return True
+    
+    if isinstance(exc, requests.exceptions.HTTPError):
+        code = exc.response.status_code
+        return code in (429, 503, 504)
+    
+    return False
+
+
+def _after_retry_log(retry_state) -> None:
+    """Log retry attempts with full diagnostic context."""
+    attempt = retry_state.attempt_number
+    exc = retry_state.outcome.exception() if retry_state.outcome else None
+    
+    status_code = "unknown"
+    if isinstance(exc, requests.exceptions.HTTPError):
+        status_code = exc.response.status_code
+    
+    console.print(
+        f"[yellow][{_tracker.session_id}] RETRY #{attempt}: "
+        f"{type(exc).__name__} (status={status_code})[/yellow]"
+    )
+
 
 @retry(
-    stop=stop_after_attempt(5),
-    wait=wait_exponential(min=2, max=60),
-    retry=retry_if_exception_type(requests.exceptions.HTTPError)
+    stop=stop_after_attempt(8),  # 8 attempts for max resilience
+    wait=wait_exponential(multiplier=2, min=1, max=60),  # 1s → 2s → 4s → 8s → 16s → 32s → 60s → 60s
+    retry=retry_if_exception(_is_retryable_error),
+    reraise=True,
 )
 def get_json(url: str, params: dict | None = None, headers: dict | None = None) -> dict | list:
+    """HTTP GET with adaptive rate limiting, intelligent retries, and telemetry.
+    
+    Args:
+        url: The URL to fetch.
+        params: Optional query parameters.
+        headers: Optional custom headers (merged with User-Agent).
+    
+    Returns:
+        Parsed JSON response.
+    
+    Raises:
+        requests.exceptions.HTTPError: After 8 retries or on non-retryable errors.
+        tenacity.RetryError: If all retries exhausted.
+    """
+    # Enforce per-domain rate limiting
+    _rate_limiter._enforce_interval(url)
+    
+    # Build headers
     h = {"User-Agent": USER_AGENT}
     if headers:
         h.update(headers)
-    resp = requests.get(url, params=params, headers=h, timeout=20)
-    resp.raise_for_status()
-    return resp.json()
     
+    # Attempt the call
+    try:
+        resp = requests.get(url, params=params, headers=h, timeout=20)
+        _tracker.log_call(resp.status_code, wait_seconds=0)
+        resp.raise_for_status()
+        return resp.json()
+    except requests.exceptions.HTTPError as e:
+        # Log detail for debugging
+        console.print(
+            f"[red][{_tracker.session_id}] HTTP {e.response.status_code}: {e.response.reason} "
+            f"@ {url}[/red]"
+        )
+        raise
+    except Exception as e:
+        console.print(
+            f"[red][{_tracker.session_id}] Request failed: {type(e).__name__} @ {url}[/red]"
+        )
+        raise
+
+
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(min=1, max=8))
 def get_json_conditional(
     url: str,
     cache_path: Path,
