@@ -10,12 +10,12 @@ import { TooltipWrapper } from "./MysteryCharacterTooltip";
 // These percentages target the visual center of each room in the image.
 // Adjust after the image is in place.
 const ROOM_CENTERS: Record<string, { cx: number; cy: number }> = {
-  "the Observatory":    { cx: 50, cy: 22 },
-  "the Smoking Lounge": { cx: 13, cy: 37 },
-  "the Conservatory":   { cx: 87, cy: 37 },
-  "the Grand Ballroom": { cx: 50, cy: 53 },
-  "the Velvet Library": { cx: 13, cy: 67 },
-  "the Wine Cellar":    { cx: 87, cy: 67 },
+  "the Observatory":    { cx: 50,   cy: 19 },
+  "the Smoking Lounge": { cx: 13,   cy: 40 },
+  "the Conservatory":   { cx: 86,   cy: 37 },
+  "the Grand Ballroom": { cx: 50,   cy: 57 },
+  "the Velvet Library": { cx: 14,   cy: 70 },
+  "the Wine Cellar":    { cx: 84,   cy: 70 },
 };
 
 export const DOORS: [string, string][] = [
@@ -70,7 +70,8 @@ export default function MysteryMapView({
     const result: Record<string, { x: number; y: number }> = {};
     for (const [room, ids] of Object.entries(roomGroups)) {
       const center = ROOM_CENTERS[room] ?? { cx: 50, cy: 50 };
-      const pts = polygonPositions(ids.length, center.cx, center.cy, 5);
+      const spread = ids.length <= 1 ? 0 : ids.length <= 3 ? 3.5 : 5;
+      const pts = polygonPositions(ids.length, center.cx, center.cy, spread);
       ids.forEach((id, i) => {
         result[id] = { x: pts[i][0], y: pts[i][1] };
       });
@@ -109,6 +110,9 @@ export default function MysteryMapView({
                   left: `${pos.x}%`,
                   top: `${pos.y}%`,
                   transform: "translate(-50%, -50%)",
+                  filter: glowing
+                    ? "drop-shadow(0 0 10px rgba(220,80,60,0.9))"
+                    : "drop-shadow(0 0 7px rgba(255, 248, 220, 0.85))",
                 }}
                 transition={{ type: "spring", stiffness: 180, damping: 28 }}
               >
@@ -119,9 +123,7 @@ export default function MysteryMapView({
                 >
                   <div
                     className={`cursor-pointer select-none text-2xl ${
-                      glowing
-                        ? "animate-pulse drop-shadow-[0_0_8px_rgba(220,80,60,0.9)]"
-                        : ""
+                      glowing ? "animate-pulse" : ""
                     }`}
                   >
                     {suspect.emoji}
