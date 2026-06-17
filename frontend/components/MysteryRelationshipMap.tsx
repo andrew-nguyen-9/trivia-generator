@@ -25,6 +25,7 @@ export default function MysteryRelationshipMap({
   context: MysteryContext;
 }) {
   const [selected, setSelected] = useState<string | null>(null);
+  const [compared, setCompared] = useState<string | null>(null);
   const suspects = mystery.suspects;
 
   // Circumference positions (x, y in SVG coordinates)
@@ -47,17 +48,29 @@ export default function MysteryRelationshipMap({
   }
 
   function isActive(id: string): boolean {
-    if (!selected) return true;
-    return selected === id;
+    if (!selected && !compared) return true;
+    return id === selected || id === compared;
   }
 
   function edgeActive(fromId: string, toId: string): boolean {
     if (!selected) return false;
+    if (compared) {
+      return (fromId === selected && toId === compared) ||
+             (fromId === compared && toId === selected);
+    }
     return selected === fromId || selected === toId;
   }
 
   return (
-    <div className="relative w-full">
+    <div
+      className="relative w-full"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          setSelected(null);
+          setCompared(null);
+        }
+      }}
+    >
       {/* SVG layer — lines only */}
       <svg
         viewBox={`0 0 ${SVG_SIZE} ${SVG_SIZE}`}
@@ -138,9 +151,14 @@ export default function MysteryRelationshipMap({
             stroke={isActive(pos.id) ? "rgba(201,162,74,0.4)" : "rgba(80,70,60,0.2)"}
             strokeWidth={1.5}
             style={{ cursor: "pointer" }}
-            onClick={() =>
-              setSelected(selected === pos.id ? null : pos.id)
-            }
+            onClick={() => {
+              if (!selected || selected === pos.id) {
+                setSelected(selected === pos.id ? null : pos.id);
+                setCompared(null);
+              } else {
+                setCompared(compared === pos.id ? null : pos.id);
+              }
+            }}
           />
         ))}
       </svg>
@@ -173,9 +191,14 @@ export default function MysteryRelationshipMap({
                 opacity: isActive(pos.id) ? 1 : 0.35,
                 transition: "opacity 0.15s",
               }}
-              onClick={() =>
-                setSelected(selected === pos.id ? null : pos.id)
-              }
+              onClick={() => {
+                if (!selected || selected === pos.id) {
+                  setSelected(selected === pos.id ? null : pos.id);
+                  setCompared(null);
+                } else {
+                  setCompared(compared === pos.id ? null : pos.id);
+                }
+              }}
             >
               <TooltipWrapper
                 character={suspect}
@@ -191,12 +214,32 @@ export default function MysteryRelationshipMap({
         })}
       </div>
 
+      {/* Compare label pill between the two characters */}
+      {selected && compared && (() => {
+        const fromPos = nodePos.find(p => p.id === selected)!;
+        const toPos = nodePos.find(p => p.id === compared)!;
+        const midXPct = ((fromPos.x + toPos.x) / 2 / SVG_SIZE) * 100;
+        const midYPct = ((fromPos.y + toPos.y) / 2 / SVG_SIZE) * 100;
+        const sharedRel = mystery.dossiers[selected]?.relationships.find(r => r.to === compared)
+          ?? mystery.dossiers[compared]?.relationships.find(r => r.to === selected);
+        return (
+          <div
+            className="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 rounded-full border border-gold/40 bg-surface/90 px-2 py-0.5"
+            style={{ left: `${midXPct}%`, top: `${midYPct}%` }}
+          >
+            <p className="microlabel text-gold">{sharedRel?.kind ?? "no direct tie"}</p>
+          </div>
+        );
+      })()}
+
       {/* Selected character label */}
       {selected && (
         <div className="mt-2 text-center">
-          <p className="microlabel text-gold">{pretty(selected)}</p>
+          <p className="microlabel text-gold">{pretty(selected)}{compared ? ` ↔ ${pretty(compared)}` : ""}</p>
           <p className="text-xs text-muted">
-            {victimRelKind(selected)} to victim
+            {compared
+              ? (mystery.dossiers[selected]?.relationships.find(r => r.to === compared)?.kind ?? "no direct tie")
+              : `${victimRelKind(selected)} to victim`}
           </p>
         </div>
       )}

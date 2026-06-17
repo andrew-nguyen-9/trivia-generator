@@ -16,6 +16,7 @@ export interface MysteryScoreBreakdown {
   base: number;
   cluePenalty: number;
   timePenalty: number;
+  autoMarkPenalty: number;
   tableBonus: number;
 }
 
@@ -54,7 +55,7 @@ export function score(c: MysteryCase, a: MysteryAttempt): MysteryScoreResult {
     [...whoGuessSet].every((id) => culpritSet.has(id));
   const won = whoCorrect && a.whereGuess === c.scene && a.whenGuess === c.hourIndex;
 
-  return { total, won, breakdown: { base, cluePenalty, timePenalty, tableBonus } };
+  return { total, won, breakdown: { base, cluePenalty, timePenalty, autoMarkPenalty, tableBonus } };
 }
 
 function formatClock(totalSeconds: number): string {
