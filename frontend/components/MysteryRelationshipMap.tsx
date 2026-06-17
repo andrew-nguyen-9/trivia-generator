@@ -17,6 +17,8 @@ function relColor(kind: string): string {
   return "rgba(201,162,74,0.6)";
 }
 
+type HoveredEdge = { x: number; y: number; label: string } | null;
+
 export default function MysteryRelationshipMap({
   mystery,
   context,
@@ -26,6 +28,7 @@ export default function MysteryRelationshipMap({
 }) {
   const [selected, setSelected] = useState<string | null>(null);
   const [compared, setCompared] = useState<string | null>(null);
+  const [hoveredEdge, setHoveredEdge] = useState<HoveredEdge>(null);
   const suspects = mystery.suspects;
 
   // Circumference positions (x, y in SVG coordinates)
@@ -62,136 +65,142 @@ export default function MysteryRelationshipMap({
   }
 
   return (
-    <div
-      className="relative w-full"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) {
-          setSelected(null);
-          setCompared(null);
-        }
-      }}
-    >
-      {/* SVG layer — lines only */}
-      <svg
-        viewBox={`0 0 ${SVG_SIZE} ${SVG_SIZE}`}
-        className="w-full"
-        style={{ maxHeight: 500 }}
-      >
-        <defs>
-          <filter id="rel-glow">
-            <feGaussianBlur stdDeviation="3" result="blur" />
-            <feMerge>
-              <feMergeNode in="blur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-        </defs>
-
-        {/* Between-suspect relationship lines */}
-        {suspects.flatMap((s) =>
-          mystery.dossiers[s.id].relationships
-            .filter((r) => posMap[r.to])
-            .map((rel) => {
-              const from = posMap[s.id];
-              const to = posMap[rel.to];
-              const active = edgeActive(s.id, rel.to);
-              return (
-                <line
-                  key={`${s.id}→${rel.to}`}
-                  x1={from.x}
-                  y1={from.y}
-                  x2={to.x}
-                  y2={to.y}
-                  stroke={relColor(rel.kind)}
-                  strokeWidth={active ? 2 : 1}
-                  opacity={selected ? (active ? 0.75 : 0.07) : 0.15}
-                  filter={active ? "url(#rel-glow)" : undefined}
-                />
-              );
-            })
-        )}
-
-        {/* Victim → suspect spokes */}
-        {nodePos.map((pos) => {
-          const kind = victimRelKind(pos.id);
-          const active = !selected || selected === pos.id;
-          return (
-            <line
-              key={`victim→${pos.id}`}
-              x1={CENTER}
-              y1={CENTER}
-              x2={pos.x}
-              y2={pos.y}
-              stroke={relColor(kind)}
-              strokeWidth={active ? 2.5 : 1}
-              opacity={selected ? (selected === pos.id ? 0.9 : 0.08) : 0.5}
-              filter={selected === pos.id ? "url(#rel-glow)" : undefined}
-            />
-          );
-        })}
-
-        {/* Victim circle at center */}
-        <circle
-          cx={CENTER}
-          cy={CENTER}
-          r={NODE_R + 6}
-          fill="rgba(20,16,12,0.9)"
-          stroke="rgba(201,162,74,0.8)"
-          strokeWidth={2}
-        />
-
-        {/* Suspect ring circles */}
-        {nodePos.map((pos) => (
-          <circle
-            key={`circle-${pos.id}`}
-            cx={pos.x}
-            cy={pos.y}
-            r={NODE_R}
-            fill="rgba(20,16,12,0.9)"
-            stroke={isActive(pos.id) ? "rgba(201,162,74,0.4)" : "rgba(80,70,60,0.2)"}
-            strokeWidth={1.5}
-            style={{ cursor: "pointer" }}
-            onClick={() => {
-              if (!selected || selected === pos.id) {
-                setSelected(selected === pos.id ? null : pos.id);
-                setCompared(null);
-              } else {
-                setCompared(compared === pos.id ? null : pos.id);
-              }
-            }}
-          />
-        ))}
-      </svg>
-
-      {/* Emoji overlays (absolute-positioned divs so TooltipWrapper works) */}
+    <div>
       <div
-        className="pointer-events-none absolute inset-0"
-        style={{ aspectRatio: "1 / 1" }}
+        className="relative mx-auto w-full"
+        style={{ maxWidth: 500, aspectRatio: "1 / 1" }}
+        onClick={(e) => {
+          if (e.target === e.currentTarget) {
+            setSelected(null);
+            setCompared(null);
+          }
+        }}
       >
-        {/* Victim at center */}
-        <div
-          className="absolute -translate-x-1/2 -translate-y-1/2 select-none text-2xl"
-          style={{ left: "50%", top: "50%" }}
+        {/* SVG layer — lines and circles */}
+        <svg
+          viewBox={`0 0 ${SVG_SIZE} ${SVG_SIZE}`}
+          className="absolute inset-0 h-full w-full"
         >
-          {mystery.victim.emoji}
-        </div>
+          <defs>
+            <filter id="rel-glow">
+              <feGaussianBlur stdDeviation="3" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
 
-        {/* Suspects on circumference */}
-        {nodePos.map((pos) => {
-          const suspect = suspects.find((s) => s.id === pos.id);
-          if (!suspect) return null;
-          const xPct = (pos.x / SVG_SIZE) * 100;
-          const yPct = (pos.y / SVG_SIZE) * 100;
-          return (
-            <div
-              key={`emoji-${pos.id}`}
-              className="pointer-events-auto absolute -translate-x-1/2 -translate-y-1/2"
-              style={{
-                left: `${xPct}%`,
-                top: `${yPct}%`,
-                opacity: isActive(pos.id) ? 1 : 0.35,
-                transition: "opacity 0.15s",
-              }}
+          {/* Between-suspect relationship lines */}
+          {suspects.flatMap((s) =>
+            mystery.dossiers[s.id].relationships
+              .filter((r) => posMap[r.to])
+              .map((rel) => {
+                const from = posMap[s.id];
+                const to = posMap[rel.to];
+                const active = edgeActive(s.id, rel.to);
+                return (
+                  <g key={`${s.id}→${rel.to}`}>
+                    {/* Visible line */}
+                    <line
+                      x1={from.x}
+                      y1={from.y}
+                      x2={to.x}
+                      y2={to.y}
+                      stroke={relColor(rel.kind)}
+                      strokeWidth={active ? 2 : 1}
+                      opacity={selected ? (active ? 0.75 : 0.07) : 0.15}
+                      filter={active ? "url(#rel-glow)" : undefined}
+                    />
+                    {/* Invisible hitbox */}
+                    <line
+                      x1={from.x}
+                      y1={from.y}
+                      x2={to.x}
+                      y2={to.y}
+                      stroke="transparent"
+                      strokeWidth={14}
+                      style={{ cursor: "pointer" }}
+                      onMouseEnter={() => setHoveredEdge({
+                        x: (from.x + to.x) / 2,
+                        y: (from.y + to.y) / 2,
+                        label: `${pretty(s.id)} ↔ ${pretty(rel.to)}: ${rel.kind}`,
+                      })}
+                      onMouseLeave={() => setHoveredEdge(null)}
+                      onClick={() => setHoveredEdge(hoveredEdge ? null : {
+                        x: (from.x + to.x) / 2,
+                        y: (from.y + to.y) / 2,
+                        label: `${pretty(s.id)} ↔ ${pretty(rel.to)}: ${rel.kind}`,
+                      })}
+                    />
+                  </g>
+                );
+              })
+          )}
+
+          {/* Victim → suspect spokes */}
+          {nodePos.map((pos) => {
+            const kind = victimRelKind(pos.id);
+            const active = !selected || selected === pos.id;
+            return (
+              <g key={`victim→${pos.id}`}>
+                {/* Visible line */}
+                <line
+                  x1={CENTER}
+                  y1={CENTER}
+                  x2={pos.x}
+                  y2={pos.y}
+                  stroke={relColor(kind)}
+                  strokeWidth={active ? 2.5 : 1}
+                  opacity={selected ? (selected === pos.id ? 0.9 : 0.08) : 0.5}
+                  filter={selected === pos.id ? "url(#rel-glow)" : undefined}
+                />
+                {/* Invisible hitbox */}
+                <line
+                  x1={CENTER}
+                  y1={CENTER}
+                  x2={pos.x}
+                  y2={pos.y}
+                  stroke="transparent"
+                  strokeWidth={14}
+                  style={{ cursor: "pointer" }}
+                  onMouseEnter={() => setHoveredEdge({
+                    x: (CENTER + pos.x) / 2,
+                    y: (CENTER + pos.y) / 2,
+                    label: `Victim ↔ ${pretty(pos.id)}: ${victimRelKind(pos.id)}`,
+                  })}
+                  onMouseLeave={() => setHoveredEdge(null)}
+                  onClick={() => setHoveredEdge(hoveredEdge ? null : {
+                    x: (CENTER + pos.x) / 2,
+                    y: (CENTER + pos.y) / 2,
+                    label: `Victim ↔ ${pretty(pos.id)}: ${victimRelKind(pos.id)}`,
+                  })}
+                />
+              </g>
+            );
+          })}
+
+          {/* Victim circle at center */}
+          <circle
+            cx={CENTER}
+            cy={CENTER}
+            r={NODE_R + 6}
+            fill="rgba(20,16,12,0.9)"
+            stroke="rgba(201,162,74,0.8)"
+            strokeWidth={2}
+          />
+
+          {/* Suspect ring circles */}
+          {nodePos.map((pos) => (
+            <circle
+              key={`circle-${pos.id}`}
+              cx={pos.x}
+              cy={pos.y}
+              r={NODE_R}
+              fill="rgba(20,16,12,0.9)"
+              stroke={isActive(pos.id) ? "rgba(201,162,74,0.4)" : "rgba(80,70,60,0.2)"}
+              strokeWidth={1.5}
+              style={{ cursor: "pointer" }}
               onClick={() => {
                 if (!selected || selected === pos.id) {
                   setSelected(selected === pos.id ? null : pos.id);
@@ -200,38 +209,95 @@ export default function MysteryRelationshipMap({
                   setCompared(compared === pos.id ? null : pos.id);
                 }
               }}
+            />
+          ))}
+
+          {/* Floating tooltip for hovered/clicked edge */}
+          {hoveredEdge && (
+            <foreignObject
+              x={hoveredEdge.x - 90}
+              y={hoveredEdge.y - 20}
+              width={180}
+              height={40}
+              style={{ pointerEvents: "none", overflow: "visible" }}
             >
-              <TooltipWrapper
-                character={suspect}
-                mystery={mystery}
-                context={context}
+              <div
+                className="flex items-center justify-center rounded-full border border-gold/50 bg-surface/95 px-3 py-1 text-center"
+                style={{ fontSize: 11, color: "rgba(201,162,74,0.9)", whiteSpace: "nowrap" }}
               >
-                <span className="cursor-pointer select-none text-xl">
-                  {suspect.emoji}
-                </span>
-              </TooltipWrapper>
+                {hoveredEdge.label}
+              </div>
+            </foreignObject>
+          )}
+        </svg>
+
+        {/* Emoji overlays (absolute-positioned divs so TooltipWrapper works) */}
+        <div className="pointer-events-none absolute inset-0">
+          {/* Victim at center */}
+          <div
+            className="absolute -translate-x-1/2 -translate-y-1/2 select-none text-2xl"
+            style={{ left: "50%", top: "50%" }}
+          >
+            {mystery.victim.emoji}
+          </div>
+
+          {/* Suspects on circumference */}
+          {nodePos.map((pos) => {
+            const suspect = suspects.find((s) => s.id === pos.id);
+            if (!suspect) return null;
+            const xPct = (pos.x / SVG_SIZE) * 100;
+            const yPct = (pos.y / SVG_SIZE) * 100;
+            return (
+              <div
+                key={`emoji-${pos.id}`}
+                className="pointer-events-auto absolute -translate-x-1/2 -translate-y-1/2"
+                style={{
+                  left: `${xPct}%`,
+                  top: `${yPct}%`,
+                  opacity: isActive(pos.id) ? 1 : 0.35,
+                  transition: "opacity 0.15s",
+                }}
+                onClick={() => {
+                  if (!selected || selected === pos.id) {
+                    setSelected(selected === pos.id ? null : pos.id);
+                    setCompared(null);
+                  } else {
+                    setCompared(compared === pos.id ? null : pos.id);
+                  }
+                }}
+              >
+                <TooltipWrapper
+                  character={suspect}
+                  mystery={mystery}
+                  context={context}
+                >
+                  <span className="cursor-pointer select-none text-xl">
+                    {suspect.emoji}
+                  </span>
+                </TooltipWrapper>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Compare label pill between the two characters */}
+        {selected && compared && (() => {
+          const fromPos = nodePos.find(p => p.id === selected)!;
+          const toPos = nodePos.find(p => p.id === compared)!;
+          const midXPct = ((fromPos.x + toPos.x) / 2 / SVG_SIZE) * 100;
+          const midYPct = ((fromPos.y + toPos.y) / 2 / SVG_SIZE) * 100;
+          const sharedRel = mystery.dossiers[selected]?.relationships.find(r => r.to === compared)
+            ?? mystery.dossiers[compared]?.relationships.find(r => r.to === selected);
+          return (
+            <div
+              className="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 rounded-full border border-gold/40 bg-surface/90 px-2 py-0.5"
+              style={{ left: `${midXPct}%`, top: `${midYPct}%` }}
+            >
+              <p className="microlabel text-gold">{sharedRel?.kind ?? "no direct tie"}</p>
             </div>
           );
-        })}
+        })()}
       </div>
-
-      {/* Compare label pill between the two characters */}
-      {selected && compared && (() => {
-        const fromPos = nodePos.find(p => p.id === selected)!;
-        const toPos = nodePos.find(p => p.id === compared)!;
-        const midXPct = ((fromPos.x + toPos.x) / 2 / SVG_SIZE) * 100;
-        const midYPct = ((fromPos.y + toPos.y) / 2 / SVG_SIZE) * 100;
-        const sharedRel = mystery.dossiers[selected]?.relationships.find(r => r.to === compared)
-          ?? mystery.dossiers[compared]?.relationships.find(r => r.to === selected);
-        return (
-          <div
-            className="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 rounded-full border border-gold/40 bg-surface/90 px-2 py-0.5"
-            style={{ left: `${midXPct}%`, top: `${midYPct}%` }}
-          >
-            <p className="microlabel text-gold">{sharedRel?.kind ?? "no direct tie"}</p>
-          </div>
-        );
-      })()}
 
       {/* Selected character label */}
       {selected && (
