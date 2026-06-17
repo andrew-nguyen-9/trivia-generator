@@ -2,6 +2,10 @@
 
 import { HOURS, ROOMS, type MysteryCase } from "@/lib/mystery";
 
+function displayRoom(r: string): string {
+  return r.replace(/^the /, "The ");
+}
+
 export default function MysteryAccusationForm({
   mystery,
   whoGuess,
@@ -43,7 +47,7 @@ export default function MysteryAccusationForm({
             </option>
             {ROOMS.map((room) => (
               <option key={room} value={room}>
-                {room}
+                {displayRoom(room)}
               </option>
             ))}
           </select>
