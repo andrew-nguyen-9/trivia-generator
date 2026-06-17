@@ -1,9 +1,58 @@
 "use client";
 
+import { useState } from "react";
 import { HOURS, ROOMS, type MysteryCase } from "@/lib/mystery";
 
 function displayRoom(r: string): string {
   return r.replace(/^the /, "The ");
+}
+
+function DropdownSelect({
+  value,
+  onChange,
+  placeholder,
+  options,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  placeholder: string;
+  options: { label: string; value: string }[];
+}) {
+  const [open, setOpen] = useState(false);
+  const selected = options.find((o) => o.value === value);
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className="flex w-full items-center justify-between gap-2 rounded-xl border border-line bg-bg/40 px-3 py-2 text-left text-sm text-ink transition hover:border-gold/30"
+      >
+        <span className={selected ? "text-ink" : "text-muted"}>
+          {selected?.label ?? placeholder}
+        </span>
+        <span className="text-muted text-xs">▾</span>
+      </button>
+      {open && (
+        <div className="absolute left-0 top-full z-50 mt-1 w-full overflow-hidden rounded-xl border border-line bg-surface shadow-xl">
+          {options.map((o) => (
+            <button
+              key={o.value}
+              type="button"
+              className={`w-full px-3 py-2 text-left text-sm transition hover:bg-gold/10 ${
+                o.value === value ? "text-gold" : "text-ink"
+              }`}
+              onClick={() => {
+                onChange(o.value);
+                setOpen(false);
+              }}
+            >
+              {o.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default function MysteryAccusationForm({
@@ -31,43 +80,47 @@ export default function MysteryAccusationForm({
       <div className="grid grid-cols-3 gap-3">
         <div>
           <p className="microlabel mb-1 text-muted">who</p>
-          <div className="rounded-xl border border-line bg-bg/40 px-3 py-2 text-sm text-ink/80">
-            {whoGuess.length > 0 ? `${whoGuess.length} marked PRIME` : "tag suspects PRIME"}
+          <div className="min-h-[2.5rem] rounded-xl border border-line bg-bg/40 px-3 py-2">
+            {whoGuess.length > 0 ? (
+              <div className="flex flex-wrap gap-1">
+                {whoGuess.map((id) => {
+                  const s = mystery.suspects.find((s) => s.id === id);
+                  return (
+                    <span
+                      key={id}
+                      className="rounded-full bg-amber-500/20 px-2 py-0.5 text-xs text-amber-300"
+                    >
+                      {s?.emoji}{" "}
+                      {s?.id
+                        .split("-")
+                        .map((p) => p[0].toUpperCase() + p.slice(1))
+                        .join(" ")}
+                    </span>
+                  );
+                })}
+              </div>
+            ) : (
+              <span className="text-sm italic text-muted">Tag suspects PRIME</span>
+            )}
           </div>
         </div>
         <div>
           <p className="microlabel mb-1 text-muted">where</p>
-          <select
+          <DropdownSelect
             value={whereGuess ?? ""}
-            onChange={(e) => onWhereChange(e.target.value)}
-            className="w-full rounded-xl border border-line bg-bg/40 px-3 py-2 text-sm text-ink"
-          >
-            <option value="" disabled>
-              room
-            </option>
-            {ROOMS.map((room) => (
-              <option key={room} value={room}>
-                {displayRoom(room)}
-              </option>
-            ))}
-          </select>
+            onChange={onWhereChange}
+            placeholder="Select room"
+            options={ROOMS.map((r) => ({ label: displayRoom(r), value: r }))}
+          />
         </div>
         <div>
           <p className="microlabel mb-1 text-muted">when</p>
-          <select
-            value={whenGuess ?? ""}
-            onChange={(e) => onWhenChange(Number(e.target.value))}
-            className="w-full rounded-xl border border-line bg-bg/40 px-3 py-2 text-sm text-ink"
-          >
-            <option value="" disabled>
-              hour
-            </option>
-            {HOURS.map((hour, i) => (
-              <option key={hour} value={i}>
-                {hour}
-              </option>
-            ))}
-          </select>
+          <DropdownSelect
+            value={whenGuess !== null ? String(whenGuess) : ""}
+            onChange={(v) => onWhenChange(Number(v))}
+            placeholder="Select hour"
+            options={HOURS.map((h, i) => ({ label: h, value: String(i) }))}
+          />
         </div>
       </div>
       <button

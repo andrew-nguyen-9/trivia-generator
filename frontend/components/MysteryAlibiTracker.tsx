@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { HOURS, deductionMatrix, type MysteryCase } from "@/lib/mystery";
 import type { MysteryContext } from "@/lib/mysteryTypes";
 import MysteryStatusPill, { type SuspectTag } from "./MysteryStatusPill";
@@ -49,6 +49,8 @@ export default function MysteryAlibiTracker({
   onCycleTag,
   onAutoMark,
   autoMarkUsed,
+  notesMap,
+  onNoteChange,
 }: {
   mystery: MysteryCase;
   context: MysteryContext;
@@ -57,7 +59,10 @@ export default function MysteryAlibiTracker({
   onCycleTag: (id: string) => void;
   onAutoMark: () => void;
   autoMarkUsed: boolean;
+  notesMap: Record<string, string>;
+  onNoteChange: (key: string, val: string) => void;
 }) {
+  const [editing, setEditing] = useState<string | null>(null);
   const matrix = useMemo(
     () => deductionMatrix(mystery, cluesRevealed),
     [mystery, cluesRevealed]
@@ -152,6 +157,9 @@ export default function MysteryAlibiTracker({
                         (a) => a.roomId === room && a.hour === hour
                       )
                     : undefined;
+                  const noteKey = `${suspect.id}-${hour}`;
+                  const note = notesMap[noteKey] ?? "";
+                  const alibiText = note || alibiEntry?.alibi || null;
                   return (
                     <td key={hour} className="px-2 py-2 align-top">
                       <div className="flex min-w-[100px] flex-col gap-1">
@@ -167,9 +175,31 @@ export default function MysteryAlibiTracker({
                           <span
                             className={`mt-1 h-2 w-2 flex-shrink-0 rounded-full ${DOT_CLASS[dot]}`}
                           />
-                          <span className="rounded bg-surface/40 px-1.5 py-0.5 text-xs text-ink/70">
-                            {alibiEntry ? alibiEntry.alibi : "???"}
-                          </span>
+                          {editing === noteKey ? (
+                            <input
+                              autoFocus
+                              className="w-full rounded bg-surface/80 px-1.5 py-0.5 text-xs text-ink outline-none ring-1 ring-amber-400/40"
+                              value={note}
+                              onChange={(e) => onNoteChange(noteKey, e.target.value)}
+                              onBlur={() => setEditing(null)}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter" || e.key === "Escape") setEditing(null);
+                              }}
+                              placeholder={alibiEntry?.alibi ?? "add note…"}
+                            />
+                          ) : (
+                            <span
+                              className={`cursor-pointer rounded px-1.5 py-0.5 text-xs ${
+                                alibiText
+                                  ? "bg-surface/40 text-ink/70"
+                                  : "bg-surface/20 italic text-muted/50 hover:bg-surface/40"
+                              }`}
+                              onClick={() => setEditing(noteKey)}
+                              title="Click to annotate"
+                            >
+                              {alibiText ?? "???"}
+                            </span>
+                          )}
                         </div>
                       </div>
                     </td>

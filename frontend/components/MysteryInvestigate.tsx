@@ -49,7 +49,12 @@ export default function MysteryInvestigate({
   const [toasts, setToasts] = useState<Achievement[]>([]);
   const [context, setContext] = useState<MysteryContext>({ byCharacter: {}, loaded: false });
   const [autoMarkUsed, setAutoMarkUsed] = useState(false);
+  const [notesMap, setNotesMap] = useState<Record<string, string>>({});
   const startedAt = useRef(Date.now());
+
+  function handleNoteChange(key: string, val: string) {
+    setNotesMap((prev) => ({ ...prev, [key]: val }));
+  }
 
   useEffect(() => {
     const rnd = mulberry32(seedFromDate(mystery.date));
@@ -176,6 +181,8 @@ export default function MysteryInvestigate({
           onCycleTag={cycleTag}
           onAutoMark={handleAutoMark}
           autoMarkUsed={autoMarkUsed}
+          notesMap={notesMap}
+          onNoteChange={handleNoteChange}
         />
       );
     }
