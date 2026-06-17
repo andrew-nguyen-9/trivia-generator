@@ -16,6 +16,7 @@ describe("score", () => {
       cluesRevealed: 1,
       elapsedSeconds: 0,
       tableTags,
+      autoMarkUsed: false,
     };
     const result = score(c, attempt);
     expect(result.won).toBe(true);
@@ -34,6 +35,7 @@ describe("score", () => {
       cluesRevealed: 4,
       elapsedSeconds: 100,
       tableTags: {},
+      autoMarkUsed: false,
     };
     const result = score(c, attempt);
     expect(result.breakdown.cluePenalty).toBe(80 * 3);
@@ -51,6 +53,7 @@ describe("score", () => {
       cluesRevealed: 7,
       elapsedSeconds: 100_000,
       tableTags: {},
+      autoMarkUsed: false,
     };
     const result = score(c, attempt);
     expect(result.total).toBe(0);
@@ -66,6 +69,7 @@ describe("score", () => {
       cluesRevealed: 1,
       elapsedSeconds: 0,
       tableTags: {},
+      autoMarkUsed: false,
     };
     expect(score(c, attempt).won).toBe(false);
   });
@@ -81,6 +85,7 @@ describe("shareText", () => {
       cluesRevealed: 3,
       elapsedSeconds: 65,
       tableTags: {},
+      autoMarkUsed: false,
     };
     const result = score(c, attempt);
     const text = shareText(c, attempt, result);
@@ -105,6 +110,7 @@ describe("shareText", () => {
       cluesRevealed: 7,
       elapsedSeconds: 30,
       tableTags: {},
+      autoMarkUsed: false,
     };
     const result = score(c, attempt);
     const text = shareText(c, attempt, result);
