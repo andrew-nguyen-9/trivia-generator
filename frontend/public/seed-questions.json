@@ -7,10 +7,10 @@
    "prompt": "_____ is the capital of India.",
    "correct": "New Delhi",
    "choices": [
-    "Cairo",
+    "Islamabad",
     "New Delhi",
-    "Beijing",
-    "Tokyo"
+    "Mexico City",
+    "Washington, D.C."
    ],
    "image_url": "https://flagcdn.com/in.svg",
    "source_url": "https://www.openstreetmap.org/relation/304716"
@@ -22,9 +22,9 @@
    "prompt": "_____ is the capital of China.",
    "correct": "Beijing",
    "choices": [
-    "Mexico City",
     "Manila",
-    "Islamabad",
+    "Addis Ababa",
+    "Abuja",
     "Beijing"
    ],
    "image_url": "https://flagcdn.com/cn.svg",
@@ -38,9 +38,9 @@
    "correct": "Washington, D.C.",
    "choices": [
     "Washington, D.C.",
-    "Islamabad",
-    "Mexico City",
-    "Bras\u00edlia"
+    "Abuja",
+    "Manila",
+    "Dhaka"
    ],
    "image_url": "https://flagcdn.com/us.svg",
    "source_url": "https://www.openstreetmap.org/relation/148838#map=2/20.6/-85.8"
@@ -52,10 +52,10 @@
    "prompt": "_____ is the capital of Indonesia.",
    "correct": "Jakarta",
    "choices": [
-    "Islamabad",
-    "Beijing",
+    "Abuja",
+    "Mexico City",
     "Jakarta",
-    "Washington, D.C."
+    "Islamabad"
    ],
    "image_url": "https://flagcdn.com/id.svg",
    "source_url": "https://www.openstreetmap.org/relation/21335"
@@ -68,9 +68,9 @@
    "correct": "Islamabad",
    "choices": [
     "Islamabad",
-    "Manila",
-    "Abuja",
-    "Cairo"
+    "Addis Ababa",
+    "New Delhi",
+    "Washington, D.C."
    ],
    "image_url": "https://flagcdn.com/pk.svg",
    "source_url": "https://www.openstreetmap.org/relation/307573"
@@ -83,9 +83,9 @@
    "correct": "Bras\u00edlia",
    "choices": [
     "Bras\u00edlia",
+    "Mexico City",
     "Beijing",
-    "Addis Ababa",
-    "Abuja"
+    "New Delhi"
    ],
    "image_url": "https://flagcdn.com/br.svg",
    "source_url": "https://www.openstreetmap.org/relation/59470"
@@ -98,7 +98,7 @@
    "correct": "Dhaka",
    "choices": [
     "Washington, D.C.",
-    "Abuja",
+    "Beijing",
     "Dhaka",
     "Cairo"
    ],
@@ -113,8 +113,8 @@
    "correct": "Abuja",
    "choices": [
     "Abuja",
-    "Mexico City",
-    "New Delhi",
+    "Manila",
+    "Moscow",
     "Jakarta"
    ],
    "image_url": "https://flagcdn.com/ng.svg",
@@ -127,10 +127,10 @@
    "prompt": "_____ is the capital of Japan.",
    "correct": "Tokyo",
    "choices": [
-    "New Delhi",
-    "Dhaka",
+    "Moscow",
+    "Jakarta",
     "Tokyo",
-    "Abuja"
+    "Addis Ababa"
    ],
    "image_url": "https://flagcdn.com/jp.svg",
    "source_url": "https://www.openstreetmap.org/relation/382313"
@@ -142,9 +142,9 @@
    "prompt": "_____ is the capital of Mexico.",
    "correct": "Mexico City",
    "choices": [
+    "Addis Ababa",
     "Abuja",
-    "Moscow",
-    "Dhaka",
+    "Jakarta",
     "Mexico City"
    ],
    "image_url": "https://flagcdn.com/mx.svg",
@@ -158,8 +158,8 @@
    "correct": "Moscow",
    "choices": [
     "Moscow",
-    "Beijing",
-    "Manila",
+    "Mexico City",
+    "Addis Ababa",
     "Jakarta"
    ],
    "image_url": "https://flagcdn.com/ru.svg",
@@ -172,10 +172,10 @@
    "prompt": "_____ is the capital of Egypt.",
    "correct": "Cairo",
    "choices": [
-    "Abuja",
+    "New Delhi",
     "Cairo",
-    "Moscow",
-    "Manila"
+    "Bras\u00edlia",
+    "Addis Ababa"
    ],
    "image_url": "https://flagcdn.com/eg.svg",
    "source_url": "https://www.openstreetmap.org/relation/1473947"
@@ -188,9 +188,9 @@
    "correct": "Manila",
    "choices": [
     "Manila",
-    "Dhaka",
+    "Tokyo",
     "Cairo",
-    "New Delhi"
+    "Moscow"
    ],
    "image_url": "https://flagcdn.com/ph.svg",
    "source_url": "https://www.openstreetmap.org/relation/443174"
@@ -202,8 +202,8 @@
    "prompt": "_____ is the capital of Ethiopia.",
    "correct": "Addis Ababa",
    "choices": [
-    "Dhaka",
-    "Manila",
+    "Tokyo",
+    "New Delhi",
     "Jakarta",
     "Addis Ababa"
    ],
@@ -316,6 +316,15 @@
    "prompt": "This subject is a species of sea slug or dorid nudibranch.",
    "correct": "Hypselodoris placida",
    "source_url": "https://en.wikipedia.org/wiki/Hypselodoris%20placida"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 1,
+   "prompt": "This subject is a Sunni mosque, located in Pilibhit, in the Bareilly division of the state of Uttar Pradesh, India.",
+   "correct": "Jama Masjid, Pilibhit",
+   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Jamiamasjid_pilibhit02.JPG/330px-Jamiamasjid_pilibhit02.JPG",
+   "source_url": "https://en.wikipedia.org/wiki/Jama_Masjid%2C_Pilibhit"
   },
   {
    "qtype": "clue",
@@ -455,6 +464,15 @@
   },
   {
    "qtype": "clue",
+   "category": "history",
+   "difficulty": 1,
+   "prompt": "This subject is an administrative ward of the Ilala Municipical Council of the Dar es Salaam Region in Tanzania.",
+   "correct": "Kipawa, Ilala",
+   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/Dar_es_Salaam_Airport.jpg/330px-Dar_es_Salaam_Airport.jpg",
+   "source_url": "https://en.wikipedia.org/wiki/Kipawa%2C_Ilala"
+  },
+  {
+   "qtype": "clue",
    "category": "wildcard",
    "difficulty": 1,
    "prompt": "This subject'this subject is a 1965 French-Italian international co-production spy film directed by Raoul Andr\u00e9 and starring Eddie Constantine in a sequel to Jeff Gordon, Secret Agent (1963)..",
@@ -555,12 +573,72 @@
   },
   {
    "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 1,
+   "prompt": "This subject (24 December 1798 \u2013 25 August 1856) was an English cricketer and team manager who played from 1826 to 1855.",
+   "correct": "William Clarke (cricketer, born 1798)",
+   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f1/William_Clarke_cricketer.jpg/330px-William_Clarke_cricketer.jpg",
+   "source_url": "https://en.wikipedia.org/wiki/William%20Clarke%20%28cricketer%2C%20born%201798%29"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 1,
+   "prompt": "This subject (Rattus tunneyi) is a small rat endemic to Australia.",
+   "correct": "Pale field rat",
+   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/Rattus_tunneyi_collecting_seed_from_Macrozamia_pauli-guilielmi.jpg/330px-Rattus_tunneyi_collecting_seed_from_Macrozamia_pauli-guilielmi.jpg",
+   "source_url": "https://en.wikipedia.org/wiki/Pale%20field%20rat"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 1,
+   "prompt": "The 2015 this subject was a professional tennis tournament played on hard courts.",
+   "correct": "2015 China International Guangzhou",
+   "source_url": "https://en.wikipedia.org/wiki/2015%20China%20International%20Guangzhou"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 1,
+   "prompt": "This subject (Georgian: \u10d0\u10dc\u10e3\u10ee\u10d5\u10d8\u10e1 \u10d4\u10d9\u10da\u10d4\u10e1\u10d8\u10d0, romanized: anukhvis ek'lesia) is a ruined medieval church on the right bank of Psirtskha river at the village of this subject in Gudauta District in Abkhazia, a breakaway region of Georgia.",
+   "correct": "Anukhva church",
+   "source_url": "https://en.wikipedia.org/wiki/Anukhva%20church"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 1,
+   "prompt": "This subject [buk\u0254\u02c8vinka] is a settlement in the administrative district of Gmina Lubycza Kr\u00f3lewska, within Tomasz\u00f3w County, Lublin Voivodeship, in eastern Poland, close to the border with Ukraine..",
+   "correct": "Bukowinka, Lublin Voivodeship",
+   "source_url": "https://en.wikipedia.org/wiki/Bukowinka%2C%20Lublin%20Voivodeship"
+  },
+  {
+   "qtype": "clue",
    "category": "history",
    "difficulty": 1,
    "prompt": "This subject was a Chinese politician and the former governor of Heilongjiang.",
    "correct": "Zhang Zuoji",
    "image_url": "https://upload.wikimedia.org/wikipedia/en/5/5c/Zhang_Zuoji.jpg",
    "source_url": "https://en.wikipedia.org/wiki/Zhang_Zuoji"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 1,
+   "prompt": "This subject  is a Canadian politician elected to the Legislative Assembly of Ontario in the 2022 provincial election.",
+   "correct": "Brian Riddell",
+   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Brian_Riddell_2025.png/330px-Brian_Riddell_2025.png",
+   "source_url": "https://en.wikipedia.org/wiki/Brian%20Riddell"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 1,
+   "prompt": "This subject [p\u0254\u02c8r\u0254sw\u0268] is a village in the administrative district of Gmina Choroszcz, within Bia\u0142ystok County, Podlaskie Voivodeship, in north-eastern Poland..",
+   "correct": "Poros\u0142y",
+   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/Poros%C5%82y_gm._Choroszcz.JPG/330px-Poros%C5%82y_gm._Choroszcz.JPG",
+   "source_url": "https://en.wikipedia.org/wiki/Poros%C5%82y"
   },
   {
    "qtype": "clue",
@@ -638,6 +716,15 @@
    "qtype": "clue",
    "category": "wildcard",
    "difficulty": 2,
+   "prompt": "This subject is a rural locality of the Shire of Dardanup in the South West region of Western Australia.",
+   "correct": "Ferguson, Western Australia",
+   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/St_Aidan_Church_gn.jpg/330px-St_Aidan_Church_gn.jpg",
+   "source_url": "https://en.wikipedia.org/wiki/Ferguson%2C_Western_Australia"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 2,
    "prompt": "This subject!, released on 8 September 2012, was the 2012\u20132013 robotics competition for FIRST Tech Challenge.",
    "correct": "Ring It Up!",
    "image_url": "https://upload.wikimedia.org/wikipedia/en/f/ff/FTC_Ring_It_Up_2012-2013_3D_Logo.png",
@@ -656,19 +743,19 @@
    "qtype": "clue",
    "category": "wildcard",
    "difficulty": 2,
-   "prompt": "This subject is a Sunni mosque, located in Pilibhit, in the Bareilly division of the state of Uttar Pradesh, India.",
-   "correct": "Jama Masjid, Pilibhit",
-   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Jamiamasjid_pilibhit02.JPG/330px-Jamiamasjid_pilibhit02.JPG",
-   "source_url": "https://en.wikipedia.org/wiki/Jama_Masjid%2C_Pilibhit"
+   "prompt": "\"this subject\" is a song by American country music singer Gabby Barrett.",
+   "correct": "Glory Days (Gabby Barrett song)",
+   "image_url": "https://upload.wikimedia.org/wikipedia/en/e/ef/GabbyBarrettGloryDays.jpg",
+   "source_url": "https://en.wikipedia.org/wiki/Glory_Days_(Gabby_Barrett_song)"
   },
   {
    "qtype": "clue",
    "category": "wildcard",
    "difficulty": 2,
-   "prompt": "\"this subject\" is a song by American country music singer Gabby Barrett.",
-   "correct": "Glory Days (Gabby Barrett song)",
-   "image_url": "https://upload.wikimedia.org/wikipedia/en/e/ef/GabbyBarrettGloryDays.jpg",
-   "source_url": "https://en.wikipedia.org/wiki/Glory_Days_(Gabby_Barrett_song)"
+   "prompt": "This subject.",
+   "correct": "Rural Municipality of Eldon No. 471",
+   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/SK_RM_471_Eldon.svg/330px-SK_RM_471_Eldon.svg.png",
+   "source_url": "https://en.wikipedia.org/wiki/Rural_Municipality_of_Eldon_No._471"
   },
   {
    "qtype": "clue",
@@ -701,10 +788,55 @@
    "qtype": "clue",
    "category": "wildcard",
    "difficulty": 2,
+   "prompt": "This subject is a Punjabi comedy film directed by Virender Singh and produced by Bharat Arora, Arvinder Singh and Gurprit Singh Gujral.",
+   "correct": "Paisa Yaar N Panga",
+   "image_url": "https://upload.wikimedia.org/wikipedia/en/8/88/Paisa_Yaar_N_Panga_poster.jpg",
+   "source_url": "https://en.wikipedia.org/wiki/Paisa_Yaar_N_Panga"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 2,
+   "prompt": "This subject is a village and municipality in this subject \u0160tiavnica District, in this subject Bystrica Region of central Slovakia.",
+   "correct": "Bansk\u00e1 Bel\u00e1",
+   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Banska_Bela_001.jpg/330px-Banska_Bela_001.jpg",
+   "source_url": "https://en.wikipedia.org/wiki/Bansk%C3%A1_Bel%C3%A1"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 2,
+   "prompt": "This subject was an American judge and the eighth reporter of decisions of the United States Supreme Court, serving as reporter from 1875 to 1883..",
+   "correct": "William Tod Otto",
+   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/WilliamTodOtto.jpg/330px-WilliamTodOtto.jpg",
+   "source_url": "https://en.wikipedia.org/wiki/William_Tod_Otto"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 2,
    "prompt": "This subject is a town in Radziej\u00f3w County, Kuyavian-Pomeranian Voivodeship, Poland, with 4,463 inhabitants (2004)..",
    "correct": "Piotrk\u00f3w Kujawski",
    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Piotrkow_Kuj_kosciol.jpg/330px-Piotrkow_Kuj_kosciol.jpg",
    "source_url": "https://en.wikipedia.org/wiki/Piotrk%C3%B3w_Kujawski"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 2,
+   "prompt": "This subject is a 1915 American silent film version of the Ferenc Moln\u00e1r play, adapted by Thomas Ince.",
+   "correct": "The Devil (1915 film)",
+   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/The_Devil_%281915%29_-_Ad.jpg/330px-The_Devil_%281915%29_-_Ad.jpg",
+   "source_url": "https://en.wikipedia.org/wiki/The_Devil_(1915_film)"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 2,
+   "prompt": "This subject (1889\u20131937) was an American-Jewish journalist, poet, suffragette, and civil rights activist, born in Philadelphia.",
+   "correct": "Martha Gruening",
+   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Martha_Gruening_-_Smith_College_ca_1909.jpg/330px-Martha_Gruening_-_Smith_College_ca_1909.jpg",
+   "source_url": "https://en.wikipedia.org/wiki/Martha_Gruening"
   },
   {
    "qtype": "clue",
@@ -744,6 +876,15 @@
   },
   {
    "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 2,
+   "prompt": "This subject is a concrete arch dam across the Summer Hill Creek in the central west region of New South Wales, Australia.",
+   "correct": "Suma Park Dam",
+   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/Suma_Park_Dam.jpg/330px-Suma_Park_Dam.jpg",
+   "source_url": "https://en.wikipedia.org/wiki/Suma_Park_Dam"
+  },
+  {
+   "qtype": "clue",
    "category": "history",
    "difficulty": 2,
    "prompt": "This subject Lee this subject was an American politician who served as a member of the New Mexico House of Representatives from the 6th district.",
@@ -764,10 +905,37 @@
    "qtype": "clue",
    "category": "wildcard",
    "difficulty": 2,
+   "prompt": "This subject-this subject is this subject that can move freely in all directions.",
+   "correct": "Infinite-axis telescope",
+   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/Trackball_Telescope.jpg/330px-Trackball_Telescope.jpg",
+   "source_url": "https://en.wikipedia.org/wiki/Infinite-axis_telescope"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 2,
    "prompt": "This subject is a family of moths in the superfamily Noctuoidea.",
    "correct": "Euteliidae",
    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/Paectes_tumida_male1.jpg/330px-Paectes_tumida_male1.jpg",
    "source_url": "https://en.wikipedia.org/wiki/Euteliidae"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 2,
+   "prompt": "This subject is a German politician from the Alternative for Germany party.",
+   "correct": "Markus Wagner",
+   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Markus_Wagner%2C_Spitzenkandidat.jpg/330px-Markus_Wagner%2C_Spitzenkandidat.jpg",
+   "source_url": "https://en.wikipedia.org/wiki/Markus_Wagner"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 2,
+   "prompt": "This subject\u2013this subject is a historic farmhouse at 17 Pemberton Road in the Vincentown section of Southampton Township of Burlington County, New Jersey.",
+   "correct": "Bishop\u2013Irick Farmstead",
+   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Bishop-_Irick_Farmstead_%289%29.JPG/330px-Bishop-_Irick_Farmstead_%289%29.JPG",
+   "source_url": "https://en.wikipedia.org/wiki/Bishop%E2%80%93Irick_Farmstead"
   },
   {
    "qtype": "clue",
@@ -818,15 +986,6 @@
    "qtype": "clue",
    "category": "wildcard",
    "difficulty": 2,
-   "prompt": "This subject (24 December 1798 \u2013 25 August 1856) was an English cricketer and team manager who played from 1826 to 1855.",
-   "correct": "William Clarke (cricketer, born 1798)",
-   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f1/William_Clarke_cricketer.jpg/330px-William_Clarke_cricketer.jpg",
-   "source_url": "https://en.wikipedia.org/wiki/William%20Clarke%20%28cricketer%2C%20born%201798%29"
-  },
-  {
-   "qtype": "clue",
-   "category": "wildcard",
-   "difficulty": 2,
    "prompt": "The 2018\u201319 this subject was this subject's 93rd in existence, their 36th consecutive this subject in the top flight of Spanish basketball and 19th consecutive this subject in the EuroLeague..",
    "correct": "2018\u201319 FC Barcelona B\u00e0squet season",
    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/38/Final_Lliga_Catalana_ACB_2018_%28Foto_M.A._Chazo_FCBQ%29_%2843858859544%29.jpg/330px-Final_Lliga_Catalana_ACB_2018_%28Foto_M.A._Chazo_FCBQ%29_%2843858859544%29.jpg",
@@ -836,26 +995,28 @@
    "qtype": "clue",
    "category": "wildcard",
    "difficulty": 2,
-   "prompt": "This subject (Rattus tunneyi) is a small rat endemic to Australia.",
-   "correct": "Pale field rat",
-   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/Rattus_tunneyi_collecting_seed_from_Macrozamia_pauli-guilielmi.jpg/330px-Rattus_tunneyi_collecting_seed_from_Macrozamia_pauli-guilielmi.jpg",
-   "source_url": "https://en.wikipedia.org/wiki/Pale%20field%20rat"
+   "prompt": "The 2020 this subject was this subject match of the 2019\u201320 this subject, the 29th season of this subject League's main club football tournament organised by UAFA, and the 2nd season since it was renamed from this subject Championship to this subject.",
+   "correct": "2020 Arab Club Champions Cup final",
+   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Stade_Prince_Moulay_Abdellah.jpg/330px-Stade_Prince_Moulay_Abdellah.jpg",
+   "source_url": "https://en.wikipedia.org/wiki/2020_Arab_Club_Champions_Cup_final"
   },
   {
    "qtype": "clue",
    "category": "wildcard",
    "difficulty": 2,
-   "prompt": "The 2015 this subject was a professional tennis tournament played on hard courts.",
-   "correct": "2015 China International Guangzhou",
-   "source_url": "https://en.wikipedia.org/wiki/2015%20China%20International%20Guangzhou"
+   "prompt": "This subject is an unincorporated community in Buchanan County, Virginia, United States.",
+   "correct": "Whitewood, Virginia",
+   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Whitewood_virginia.jpg/330px-Whitewood_virginia.jpg",
+   "source_url": "https://en.wikipedia.org/wiki/Whitewood%2C_Virginia"
   },
   {
    "qtype": "clue",
    "category": "wildcard",
    "difficulty": 2,
-   "prompt": "This subject (Georgian: \u10d0\u10dc\u10e3\u10ee\u10d5\u10d8\u10e1 \u10d4\u10d9\u10da\u10d4\u10e1\u10d8\u10d0, romanized: anukhvis ek'lesia) is a ruined medieval church on the right bank of Psirtskha river at the village of this subject in Gudauta District in Abkhazia, a breakaway region of Georgia.",
-   "correct": "Anukhva church",
-   "source_url": "https://en.wikipedia.org/wiki/Anukhva%20church"
+   "prompt": "This subject (AK-75) was a Crater-class cargo ship in the service of the US Navy in World War II.",
+   "correct": "USS Cassiopeia",
+   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/USS_Cassiopeia_%28AK-75%29.jpg/330px-USS_Cassiopeia_%28AK-75%29.jpg",
+   "source_url": "https://en.wikipedia.org/wiki/USS_Cassiopeia"
   },
   {
    "qtype": "clue",
@@ -870,9 +1031,10 @@
    "qtype": "clue",
    "category": "wildcard",
    "difficulty": 2,
-   "prompt": "This subject [buk\u0254\u02c8vinka] is a settlement in the administrative district of Gmina Lubycza Kr\u00f3lewska, within Tomasz\u00f3w County, Lublin Voivodeship, in eastern Poland, close to the border with Ukraine..",
-   "correct": "Bukowinka, Lublin Voivodeship",
-   "source_url": "https://en.wikipedia.org/wiki/Bukowinka%2C%20Lublin%20Voivodeship"
+   "prompt": "This subject was an army general in the Royal Yugoslav Army who commanded the 4th Army during the German-led invasion of Yugoslavia of April 1941 during World War\u00a0II.",
+   "correct": "Petar Nedeljkovi\u0107",
+   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Petar_Nedeljkovi%C4%87.jpg/330px-Petar_Nedeljkovi%C4%87.jpg",
+   "source_url": "https://en.wikipedia.org/wiki/Petar_Nedeljkovi%C4%87"
   },
   {
    "qtype": "clue",
@@ -896,28 +1058,10 @@
    "qtype": "clue",
    "category": "wildcard",
    "difficulty": 2,
-   "prompt": "This subject  is a Canadian politician elected to the Legislative Assembly of Ontario in the 2022 provincial election.",
-   "correct": "Brian Riddell",
-   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Brian_Riddell_2025.png/330px-Brian_Riddell_2025.png",
-   "source_url": "https://en.wikipedia.org/wiki/Brian%20Riddell"
-  },
-  {
-   "qtype": "clue",
-   "category": "wildcard",
-   "difficulty": 2,
    "prompt": "This subject is a 79-mile (127\u00a0km) Blue-Blazed hiking this subject \"system\" that traverses the western ridge of the central Connecticut Valley.",
    "correct": "Tunxis Trail",
    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/TunxisCompounceCascadeTrailCussgutterBrook.JPG/330px-TunxisCompounceCascadeTrailCussgutterBrook.JPG",
    "source_url": "https://en.wikipedia.org/wiki/Tunxis_Trail"
-  },
-  {
-   "qtype": "clue",
-   "category": "wildcard",
-   "difficulty": 2,
-   "prompt": "This subject [p\u0254\u02c8r\u0254sw\u0268] is a village in the administrative district of Gmina Choroszcz, within Bia\u0142ystok County, Podlaskie Voivodeship, in north-eastern Poland..",
-   "correct": "Poros\u0142y",
-   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/Poros%C5%82y_gm._Choroszcz.JPG/330px-Poros%C5%82y_gm._Choroszcz.JPG",
-   "source_url": "https://en.wikipedia.org/wiki/Poros%C5%82y"
   },
   {
    "qtype": "clue",
@@ -1002,6 +1146,24 @@
   },
   {
    "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 3,
+   "prompt": "This subject, Culture and Gender is a book length social science essay collection that analyzes views that describe \"this subject\" as inferior to \"culture\".",
+   "correct": "Nature, Culture and Gender",
+   "image_url": "https://upload.wikimedia.org/wikipedia/en/5/56/Nature%2C_Culture_and_Gender.jpg",
+   "source_url": "https://en.wikipedia.org/wiki/Nature%2C_Culture_and_Gender"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 3,
+   "prompt": "This subject is a civil parish in West Northamptonshire, England.",
+   "correct": "Catesby, Northamptonshire",
+   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/Charwelton-Catesby_Tunnel_-_geograph.org.uk_-_924136.jpg/330px-Charwelton-Catesby_Tunnel_-_geograph.org.uk_-_924136.jpg",
+   "source_url": "https://en.wikipedia.org/wiki/Catesby%2C_Northamptonshire"
+  },
+  {
+   "qtype": "clue",
    "category": "history",
    "difficulty": 3,
    "prompt": "HD 29678, also known as HR 1491, is a solitary star located in the northern circumpolar constellation Camelopardalis.",
@@ -1013,10 +1175,19 @@
    "qtype": "clue",
    "category": "wildcard",
    "difficulty": 3,
-   "prompt": "This subject is a Punjabi comedy film directed by Virender Singh and produced by Bharat Arora, Arvinder Singh and Gurprit Singh Gujral.",
-   "correct": "Paisa Yaar N Panga",
-   "image_url": "https://upload.wikimedia.org/wikipedia/en/8/88/Paisa_Yaar_N_Panga_poster.jpg",
-   "source_url": "https://en.wikipedia.org/wiki/Paisa_Yaar_N_Panga"
+   "prompt": "This subject was a Royal Navy 18-gun Cruizer-class brig-sloop, launched in 1805 at Topsham, near Exeter.",
+   "correct": "HMS Wolverine (1805)",
+   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ad/HM_Brig_Wolverene_beating_the_Squadron_RMG_PU6064.jpg/330px-HM_Brig_Wolverene_beating_the_Squadron_RMG_PU6064.jpg",
+   "source_url": "https://en.wikipedia.org/wiki/HMS_Wolverine_(1805)"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 3,
+   "prompt": "This subject is an island in Bod\u00f8 Municipality in Nordland county, Norway.",
+   "correct": "Straum\u00f8ya",
+   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Straum%C3%B8y_just_south_of_Bod%C3%B8_seen_from_the_air.jpg/330px-Straum%C3%B8y_just_south_of_Bod%C3%B8_seen_from_the_air.jpg",
+   "source_url": "https://en.wikipedia.org/wiki/Straum%C3%B8ya"
   },
   {
    "qtype": "clue",
@@ -1031,10 +1202,19 @@
    "qtype": "clue",
    "category": "wildcard",
    "difficulty": 3,
-   "prompt": "This subject is a village and municipality in this subject \u0160tiavnica District, in this subject Bystrica Region of central Slovakia.",
-   "correct": "Bansk\u00e1 Bel\u00e1",
-   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Banska_Bela_001.jpg/330px-Banska_Bela_001.jpg",
-   "source_url": "https://en.wikipedia.org/wiki/Bansk%C3%A1_Bel%C3%A1"
+   "prompt": "This subject, also Ostritz or simply this subject is a railway station near the village of this subject, Zgorzelec County, within the Lower Silesian Voivodeship in south-western Poland.",
+   "correct": "Krzewina Zgorzelecka railway station",
+   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Bahnhof_Krzewina_Zgorzelecka.jpg/330px-Bahnhof_Krzewina_Zgorzelecka.jpg",
+   "source_url": "https://en.wikipedia.org/wiki/Krzewina_Zgorzelecka_railway_station"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 3,
+   "prompt": "This subject is a DVD release by rock band Therapy? on Eagle Vision, a subsidiary of Eagle Rock Entertainment, on 27 October 2003.",
+   "correct": "Scopophobia (video)",
+   "image_url": "https://upload.wikimedia.org/wikipedia/en/5/56/Scopophobia_%28video%29.jpg",
+   "source_url": "https://en.wikipedia.org/wiki/Scopophobia_(video)"
   },
   {
    "qtype": "clue",
@@ -1076,15 +1256,6 @@
    "qtype": "clue",
    "category": "wildcard",
    "difficulty": 3,
-   "prompt": "This subject was an American judge and the eighth reporter of decisions of the United States Supreme Court, serving as reporter from 1875 to 1883..",
-   "correct": "William Tod Otto",
-   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/WilliamTodOtto.jpg/330px-WilliamTodOtto.jpg",
-   "source_url": "https://en.wikipedia.org/wiki/William_Tod_Otto"
-  },
-  {
-   "qtype": "clue",
-   "category": "wildcard",
-   "difficulty": 3,
    "prompt": "This subject Etete S.D.B.",
    "correct": "Miguel Angel Nguema Bee",
    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/Coat_of_arms_of_Miguel_Angel_Nguema_Bee.svg/330px-Coat_of_arms_of_Miguel_Angel_Nguema_Bee.svg.png",
@@ -1094,181 +1265,10 @@
    "qtype": "clue",
    "category": "wildcard",
    "difficulty": 3,
-   "prompt": "This subject (1889\u20131937) was an American-Jewish journalist, poet, suffragette, and civil rights activist, born in Philadelphia.",
-   "correct": "Martha Gruening",
-   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Martha_Gruening_-_Smith_College_ca_1909.jpg/330px-Martha_Gruening_-_Smith_College_ca_1909.jpg",
-   "source_url": "https://en.wikipedia.org/wiki/Martha_Gruening"
-  },
-  {
-   "qtype": "clue",
-   "category": "wildcard",
-   "difficulty": 3,
    "prompt": "Diplomatic this subject between this subject and this subject were established in 1956 under the leadership of prime minister S.",
    "correct": "Soviet Union\u2013Sri Lanka relations",
    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Soviet_Union_Sri_Lanka_Locator.png/330px-Soviet_Union_Sri_Lanka_Locator.png",
    "source_url": "https://en.wikipedia.org/wiki/Soviet_Union%E2%80%93Sri_Lanka_relations"
-  },
-  {
-   "qtype": "clue",
-   "category": "wildcard",
-   "difficulty": 3,
-   "prompt": "This subject is a concrete arch dam across the Summer Hill Creek in the central west region of New South Wales, Australia.",
-   "correct": "Suma Park Dam",
-   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/Suma_Park_Dam.jpg/330px-Suma_Park_Dam.jpg",
-   "source_url": "https://en.wikipedia.org/wiki/Suma_Park_Dam"
-  },
-  {
-   "qtype": "clue",
-   "category": "wildcard",
-   "difficulty": 3,
-   "prompt": "This subject is a village near Mavelikara railway station in Mavelikara taluk.",
-   "correct": "Kallumala",
-   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/Kallumals_college_junction.jpg/330px-Kallumals_college_junction.jpg",
-   "source_url": "https://en.wikipedia.org/wiki/Kallumala"
-  },
-  {
-   "qtype": "clue",
-   "category": "wildcard",
-   "difficulty": 3,
-   "prompt": "This subject is a small this subject located on the south coast of British Columbia in Surrey.",
-   "correct": "Serpentine Wildlife Management Area",
-   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/A_pair_of_cormorants_%288384697387%29.jpg/330px-A_pair_of_cormorants_%288384697387%29.jpg",
-   "source_url": "https://en.wikipedia.org/wiki/Serpentine_Wildlife_Management_Area"
-  },
-  {
-   "qtype": "clue",
-   "category": "wildcard",
-   "difficulty": 3,
-   "prompt": "This subject is a genus of corals in the family Caryophylliidae.",
-   "correct": "Trochocyathus",
-   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Scheibenkoralle_Trochocyathus_sp.jpg/330px-Scheibenkoralle_Trochocyathus_sp.jpg",
-   "source_url": "https://en.wikipedia.org/wiki/Trochocyathus"
-  },
-  {
-   "qtype": "clue",
-   "category": "wildcard",
-   "difficulty": 3,
-   "prompt": "This subject is a town and commune in M'Sila Province, Algeria.",
-   "correct": "Ouled Sidi Brahim",
-   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/DZ-_28_-_Ouled_Sidi_Brahim.svg/330px-DZ-_28_-_Ouled_Sidi_Brahim.svg.png",
-   "source_url": "https://en.wikipedia.org/wiki/Ouled_Sidi_Brahim"
-  },
-  {
-   "qtype": "clue",
-   "category": "wildcard",
-   "difficulty": 3,
-   "prompt": "HD 73882 is a visual binary system with the components separated by 0.6\u2033 and a combined spectral class of O8.",
-   "correct": "HD 73882",
-   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/NXVelLightCurve.png/330px-NXVelLightCurve.png",
-   "source_url": "https://en.wikipedia.org/wiki/HD_73882"
-  },
-  {
-   "qtype": "clue",
-   "category": "wildcard",
-   "difficulty": 3,
-   "prompt": "This subject was a British novelist, poet, newspaper columnist and article writer with strong associations to North Yorkshire..",
-   "correct": "Dorothy Cowlin",
-   "image_url": "https://upload.wikimedia.org/wikipedia/en/6/66/Dorothy_Cowlin.png",
-   "source_url": "https://en.wikipedia.org/wiki/Dorothy_Cowlin"
-  },
-  {
-   "qtype": "clue",
-   "category": "wildcard",
-   "difficulty": 3,
-   "prompt": "This subject\u2013this subject is a historic farmhouse at 17 Pemberton Road in the Vincentown section of Southampton Township of Burlington County, New Jersey.",
-   "correct": "Bishop\u2013Irick Farmstead",
-   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Bishop-_Irick_Farmstead_%289%29.JPG/330px-Bishop-_Irick_Farmstead_%289%29.JPG",
-   "source_url": "https://en.wikipedia.org/wiki/Bishop%E2%80%93Irick_Farmstead"
-  },
-  {
-   "qtype": "clue",
-   "category": "wildcard",
-   "difficulty": 3,
-   "prompt": "This subject is a municipality located in the Brazilian state of Sergipe.",
-   "correct": "Porto da Folha",
-   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Porto_da_Folha_map.png/330px-Porto_da_Folha_map.png",
-   "source_url": "https://en.wikipedia.org/wiki/Porto_da_Folha"
-  },
-  {
-   "qtype": "clue",
-   "category": "wildcard",
-   "difficulty": 3,
-   "prompt": "This subject or this subject of Santa Maria is a Catholic church dedicated to the Virgin Mary, located in Santa Maria municipality, Rio Grande do Sul, in the south of Brazil.",
-   "correct": "Basilica Shrine of Our Lady Mediatrix of All Graces",
-   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f8/Bas%C3%ADlica_de_Nossa_Senhora_Medianeira.jpg/330px-Bas%C3%ADlica_de_Nossa_Senhora_Medianeira.jpg",
-   "source_url": "https://en.wikipedia.org/wiki/Basilica_Shrine_of_Our_Lady_Mediatrix_of_All_Graces"
-  },
-  {
-   "qtype": "clue",
-   "category": "wildcard",
-   "difficulty": 3,
-   "prompt": "This subject\u2014this subject refer to the current and historical relationship between this subject and this subject.",
-   "correct": "Denmark\u2013Myanmar relations",
-   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Myanmar_Denmark_Locator.png/330px-Myanmar_Denmark_Locator.png",
-   "source_url": "https://en.wikipedia.org/wiki/Denmark%E2%80%93Myanmar_relations"
-  },
-  {
-   "qtype": "clue",
-   "category": "wildcard",
-   "difficulty": 3,
-   "prompt": "This subject JP was a New Zealand businessman and politician who served as the mayor of Wellington from 1885 to 1886 and 1890 to 1891..",
-   "correct": "Arthur Winton Brown",
-   "image_url": "https://upload.wikimedia.org/wikipedia/commons/9/90/Arthur_Winton_Brown.jpg",
-   "source_url": "https://en.wikipedia.org/wiki/Arthur_Winton_Brown"
-  },
-  {
-   "qtype": "clue",
-   "category": "wildcard",
-   "difficulty": 3,
-   "prompt": "This subject was an American burlesque actress.",
-   "correct": "Rose Sydell",
-   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Rose_Sydell.jpg/330px-Rose_Sydell.jpg",
-   "source_url": "https://en.wikipedia.org/wiki/Rose_Sydell"
-  },
-  {
-   "qtype": "clue",
-   "category": "wildcard",
-   "difficulty": 3,
-   "prompt": "This subject is a county park located in Montclair, New Jersey, United States.",
-   "correct": "Anderson Park (New Jersey)",
-   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Anderson_Park%2C_Essex_County_Park_Sign_IMG_20140830_135647.jpg/330px-Anderson_Park%2C_Essex_County_Park_Sign_IMG_20140830_135647.jpg",
-   "source_url": "https://en.wikipedia.org/wiki/Anderson_Park_(New_Jersey)"
-  },
-  {
-   "qtype": "clue",
-   "category": "wildcard",
-   "difficulty": 3,
-   "prompt": "This subject is an unincorporated community in Buchanan County, Virginia, United States.",
-   "correct": "Whitewood, Virginia",
-   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Whitewood_virginia.jpg/330px-Whitewood_virginia.jpg",
-   "source_url": "https://en.wikipedia.org/wiki/Whitewood%2C_Virginia"
-  },
-  {
-   "qtype": "clue",
-   "category": "wildcard",
-   "difficulty": 3,
-   "prompt": "This subject was an army general in the Royal Yugoslav Army who commanded the 4th Army during the German-led invasion of Yugoslavia of April 1941 during World War\u00a0II.",
-   "correct": "Petar Nedeljkovi\u0107",
-   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Petar_Nedeljkovi%C4%87.jpg/330px-Petar_Nedeljkovi%C4%87.jpg",
-   "source_url": "https://en.wikipedia.org/wiki/Petar_Nedeljkovi%C4%87"
-  },
-  {
-   "qtype": "clue",
-   "category": "wildcard",
-   "difficulty": 3,
-   "prompt": "The Seventy-Fifth this subject convened from January 11, 1961, to January 9, 1963, in regular session.",
-   "correct": "75th Wisconsin Legislature",
-   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/Wis-capitol.jpg/330px-Wis-capitol.jpg",
-   "source_url": "https://en.wikipedia.org/wiki/75th_Wisconsin_Legislature"
-  },
-  {
-   "qtype": "clue",
-   "category": "wildcard",
-   "difficulty": 3,
-   "prompt": "This subject is an administrative district (raion), one of the thirty-three in Volgograd Oblast, Russia.",
-   "correct": "Leninsky District, Volgograd Oblast",
-   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Hay_meadows_in_the_floodplain_of_the_Volga-Akhtubinskaya.JPG/330px-Hay_meadows_in_the_floodplain_of_the_Volga-Akhtubinskaya.JPG",
-   "source_url": "https://en.wikipedia.org/wiki/Leninsky_District%2C_Volgograd_Oblast"
   },
   {
    "qtype": "where",
