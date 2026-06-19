@@ -7,10 +7,10 @@
    "prompt": "_____ is the capital of India.",
    "correct": "New Delhi",
    "choices": [
-    "Tokyo",
+    "Washington, D.C.",
     "New Delhi",
-    "Beijing",
-    "Moscow"
+    "Addis Ababa",
+    "Abuja"
    ],
    "image_url": "https://flagcdn.com/in.svg",
    "source_url": "https://www.openstreetmap.org/relation/304716"
@@ -22,9 +22,9 @@
    "prompt": "_____ is the capital of China.",
    "correct": "Beijing",
    "choices": [
-    "Bras\u00edlia",
-    "Addis Ababa",
-    "Cairo",
+    "Jakarta",
+    "Islamabad",
+    "New Delhi",
     "Beijing"
    ],
    "image_url": "https://flagcdn.com/cn.svg",
@@ -38,9 +38,9 @@
    "correct": "Washington, D.C.",
    "choices": [
     "Washington, D.C.",
-    "Cairo",
-    "Bras\u00edlia",
-    "Dhaka"
+    "New Delhi",
+    "Jakarta",
+    "Mexico City"
    ],
    "image_url": "https://flagcdn.com/us.svg",
    "source_url": "https://www.openstreetmap.org/relation/148838#map=2/20.6/-85.8"
@@ -52,10 +52,10 @@
    "prompt": "_____ is the capital of Indonesia.",
    "correct": "Jakarta",
    "choices": [
-    "Islamabad",
-    "Beijing",
+    "Dhaka",
+    "Addis Ababa",
     "Jakarta",
-    "Moscow"
+    "Washington, D.C."
    ],
    "image_url": "https://flagcdn.com/id.svg",
    "source_url": "https://www.openstreetmap.org/relation/21335"
@@ -68,9 +68,9 @@
    "correct": "Islamabad",
    "choices": [
     "Islamabad",
-    "Addis Ababa",
-    "Manila",
-    "Moscow"
+    "Abuja",
+    "Moscow",
+    "Bras\u00edlia"
    ],
    "image_url": "https://flagcdn.com/pk.svg",
    "source_url": "https://www.openstreetmap.org/relation/307573"
@@ -83,9 +83,9 @@
    "correct": "Bras\u00edlia",
    "choices": [
     "Bras\u00edlia",
-    "Beijing",
-    "Mexico City",
-    "Manila"
+    "Addis Ababa",
+    "Tokyo",
+    "Moscow"
    ],
    "image_url": "https://flagcdn.com/br.svg",
    "source_url": "https://www.openstreetmap.org/relation/59470"
@@ -97,10 +97,10 @@
    "prompt": "_____ is the capital of Bangladesh.",
    "correct": "Dhaka",
    "choices": [
-    "Moscow",
-    "Mexico City",
+    "Washington, D.C.",
+    "Tokyo",
     "Dhaka",
-    "New Delhi"
+    "Abuja"
    ],
    "image_url": "https://flagcdn.com/bd.svg",
    "source_url": "https://www.openstreetmap.org/relation/184640"
@@ -113,9 +113,9 @@
    "correct": "Abuja",
    "choices": [
     "Abuja",
-    "Bras\u00edlia",
     "Jakarta",
-    "Mexico City"
+    "Cairo",
+    "Beijing"
    ],
    "image_url": "https://flagcdn.com/ng.svg",
    "source_url": "https://www.openstreetmap.org/relation/192787"
@@ -127,10 +127,10 @@
    "prompt": "_____ is the capital of Japan.",
    "correct": "Tokyo",
    "choices": [
-    "Jakarta",
-    "Abuja",
+    "Cairo",
+    "Manila",
     "Tokyo",
-    "Manila"
+    "Islamabad"
    ],
    "image_url": "https://flagcdn.com/jp.svg",
    "source_url": "https://www.openstreetmap.org/relation/382313"
@@ -142,9 +142,9 @@
    "prompt": "_____ is the capital of Mexico.",
    "correct": "Mexico City",
    "choices": [
-    "Addis Ababa",
-    "Cairo",
-    "Abuja",
+    "Moscow",
+    "Dhaka",
+    "Manila",
     "Mexico City"
    ],
    "image_url": "https://flagcdn.com/mx.svg",
@@ -158,9 +158,9 @@
    "correct": "Moscow",
    "choices": [
     "Moscow",
-    "Beijing",
     "Addis Ababa",
-    "Washington, D.C."
+    "Abuja",
+    "Beijing"
    ],
    "image_url": "https://flagcdn.com/ru.svg",
    "source_url": "https://www.openstreetmap.org/relation/60189#map=3/65.15/105.29"
@@ -172,10 +172,10 @@
    "prompt": "_____ is the capital of Egypt.",
    "correct": "Cairo",
    "choices": [
-    "Manila",
+    "Moscow",
     "Cairo",
-    "Tokyo",
-    "Addis Ababa"
+    "Bras\u00edlia",
+    "Islamabad"
    ],
    "image_url": "https://flagcdn.com/eg.svg",
    "source_url": "https://www.openstreetmap.org/relation/1473947"
@@ -188,9 +188,9 @@
    "correct": "Manila",
    "choices": [
     "Manila",
-    "Abuja",
-    "Moscow",
-    "Jakarta"
+    "Beijing",
+    "Washington, D.C.",
+    "Cairo"
    ],
    "image_url": "https://flagcdn.com/ph.svg",
    "source_url": "https://www.openstreetmap.org/relation/443174"
@@ -202,9 +202,9 @@
    "prompt": "_____ is the capital of Ethiopia.",
    "correct": "Addis Ababa",
    "choices": [
-    "Abuja",
-    "Manila",
-    "Washington, D.C.",
+    "Beijing",
+    "Islamabad",
+    "Tokyo",
     "Addis Ababa"
    ],
    "image_url": "https://flagcdn.com/et.svg",
@@ -304,6 +304,15 @@
    "qtype": "clue",
    "category": "wildcard",
    "difficulty": 1,
+   "prompt": "The 2023 this subject represented this subject University as a member of the Southern Conference (SoCon) during the 2023 NCAA Division I FCS this subject season.",
+   "correct": "2023 Mercer Bears football team",
+   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Mercer_Bears_wordmark.svg/330px-Mercer_Bears_wordmark.svg.png",
+   "source_url": "https://en.wikipedia.org/wiki/2023_Mercer_Bears_football_team"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 1,
    "prompt": "This subject is a Sunni mosque, located in Pilibhit, in the Bareilly division of the state of Uttar Pradesh, India.",
    "correct": "Jama Masjid, Pilibhit",
    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Jamiamasjid_pilibhit02.JPG/330px-Jamiamasjid_pilibhit02.JPG",
@@ -322,6 +331,15 @@
    "qtype": "clue",
    "category": "wildcard",
    "difficulty": 1,
+   "prompt": "\u039a-this subject (this subject-this subject) is a neurotoxin that is part of this subject family.",
+   "correct": "Kappa-Bungarotoxin",
+   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/84/Bungarus_multicinctus.jpg/330px-Bungarus_multicinctus.jpg",
+   "source_url": "https://en.wikipedia.org/wiki/Kappa-Bungarotoxin"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 1,
    "prompt": "This subject is an American retired pair skater.",
    "correct": "Tiffany Vise",
    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/2011_Skate_America_Tiffany_VISE_Don_BALDWIN.jpg/330px-2011_Skate_America_Tiffany_VISE_Don_BALDWIN.jpg",
@@ -331,10 +349,28 @@
    "qtype": "clue",
    "category": "wildcard",
    "difficulty": 1,
+   "prompt": "2-this subject, also known as estra-1,3,5(10)-triene-2,3,16\u03b1,17\u03b2-tetrol, is an endogenous catechol estrogen and metabolite of estriol.",
+   "correct": "2-Hydroxyestriol",
+   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/2-Hydroxyestriol.svg/330px-2-Hydroxyestriol.svg.png",
+   "source_url": "https://en.wikipedia.org/wiki/2-Hydroxyestriol"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 1,
    "prompt": "This subject is a town in Radziej\u00f3w County, Kuyavian-Pomeranian Voivodeship, Poland, with 4,463 inhabitants (2004)..",
    "correct": "Piotrk\u00f3w Kujawski",
    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Piotrkow_Kuj_kosciol.jpg/330px-Piotrkow_Kuj_kosciol.jpg",
    "source_url": "https://en.wikipedia.org/wiki/Piotrk%C3%B3w_Kujawski"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 1,
+   "prompt": "This subject is an unincorporated community and census-designated place (CDP) in Missaukee County in the U.S.",
+   "correct": "Jennings, Michigan",
+   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Jennings_%28Missaukee%29%2C_MI.jpg/330px-Jennings_%28Missaukee%29%2C_MI.jpg",
+   "source_url": "https://en.wikipedia.org/wiki/Jennings%2C_Michigan"
   },
   {
    "qtype": "clue",
@@ -385,6 +421,15 @@
    "qtype": "clue",
    "category": "wildcard",
    "difficulty": 1,
+   "prompt": "This subject was an Oblate priest who might be considered multi-faceted in his career.",
+   "correct": "Louis Babel",
+   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Louis_Babel.png/330px-Louis_Babel.png",
+   "source_url": "https://en.wikipedia.org/wiki/Louis_Babel"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 1,
    "prompt": "This subject is a genus of megalonychid ground sloth from the Late Miocene Ituzaing\u00f3 Formation of Entre Rios Province, Argentina.",
    "correct": "Ortotherium",
    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/Ortotherium_laticurvatum_type_MLP_M_62.jpg/330px-Ortotherium_laticurvatum_type_MLP_M_62.jpg",
@@ -398,6 +443,15 @@
    "correct": "Illick's Mill",
    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bd/Illick%27s_Mill_Oct_11.JPG/330px-Illick%27s_Mill_Oct_11.JPG",
    "source_url": "https://en.wikipedia.org/wiki/Illick's_Mill"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 1,
+   "prompt": "This subject is a species of sea snail, a marine gastropod mollusk in the family Cancellariidae, the nutmeg snails..",
+   "correct": "Scalptia contabulata",
+   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/Naturalis_Biodiversity_Center_-_RMNH.MOL.217954_-_Scalptia_contabulata_%28Sowerby%2C_1832%29_-_Cancellariidae_-_Mollusc_shell.jpeg/330px-Naturalis_Biodiversity_Center_-_RMNH.MOL.217954_-_Scalptia_contabulata_%28Sowerby%2C_1832%29_-_Cancellariidae_-_Mollusc_shell.jpeg",
+   "source_url": "https://en.wikipedia.org/wiki/Scalptia_contabulata"
   },
   {
    "qtype": "clue",
@@ -419,6 +473,15 @@
   },
   {
    "qtype": "clue",
+   "category": "history",
+   "difficulty": 1,
+   "prompt": "This subject was a Chinese politician and the former governor of Heilongjiang.",
+   "correct": "Zhang Zuoji",
+   "image_url": "https://upload.wikimedia.org/wikipedia/en/5/5c/Zhang_Zuoji.jpg",
+   "source_url": "https://en.wikipedia.org/wiki/Zhang_Zuoji"
+  },
+  {
+   "qtype": "clue",
    "category": "wildcard",
    "difficulty": 1,
    "prompt": "This subject or formally the 59th Council of Ministers was announced after the appointment of this subject Vejjajiva as Prime Minister of Thailand on the 17 December 2008.",
@@ -434,6 +497,15 @@
    "correct": "Philippa Mareri",
    "image_url": "https://upload.wikimedia.org/wikipedia/commons/4/45/Filippa_Mareri.jpg",
    "source_url": "https://en.wikipedia.org/wiki/Philippa_Mareri"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 1,
+   "prompt": "This subject is a 79-mile (127\u00a0km) Blue-Blazed hiking this subject \"system\" that traverses the western ridge of the central Connecticut Valley.",
+   "correct": "Tunxis Trail",
+   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/TunxisCompounceCascadeTrailCussgutterBrook.JPG/330px-TunxisCompounceCascadeTrailCussgutterBrook.JPG",
+   "source_url": "https://en.wikipedia.org/wiki/Tunxis_Trail"
   },
   {
    "qtype": "clue",
@@ -520,24 +592,6 @@
    "qtype": "clue",
    "category": "wildcard",
    "difficulty": 2,
-   "prompt": "\u039a-this subject (this subject-this subject) is a neurotoxin that is part of this subject family.",
-   "correct": "Kappa-Bungarotoxin",
-   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/84/Bungarus_multicinctus.jpg/330px-Bungarus_multicinctus.jpg",
-   "source_url": "https://en.wikipedia.org/wiki/Kappa-Bungarotoxin"
-  },
-  {
-   "qtype": "clue",
-   "category": "wildcard",
-   "difficulty": 2,
-   "prompt": "2-this subject, also known as estra-1,3,5(10)-triene-2,3,16\u03b1,17\u03b2-tetrol, is an endogenous catechol estrogen and metabolite of estriol.",
-   "correct": "2-Hydroxyestriol",
-   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/2-Hydroxyestriol.svg/330px-2-Hydroxyestriol.svg.png",
-   "source_url": "https://en.wikipedia.org/wiki/2-Hydroxyestriol"
-  },
-  {
-   "qtype": "clue",
-   "category": "wildcard",
-   "difficulty": 2,
    "prompt": "This subject is a Punjabi comedy film directed by Virender Singh and produced by Bharat Arora, Arvinder Singh and Gurprit Singh Gujral.",
    "correct": "Paisa Yaar N Panga",
    "image_url": "https://upload.wikimedia.org/wikipedia/en/8/88/Paisa_Yaar_N_Panga_poster.jpg",
@@ -565,10 +619,37 @@
    "qtype": "clue",
    "category": "wildcard",
    "difficulty": 2,
+   "prompt": "This subject is a Czech ski jumper who has competed since 2002.",
+   "correct": "Luk\u00e1\u0161 Hlava",
+   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f1/FIS_Ski_Jumping_World_Cup_2014_-_Engelberg_-_20141221_-_Lukas_Hlava.jpg/330px-FIS_Ski_Jumping_World_Cup_2014_-_Engelberg_-_20141221_-_Lukas_Hlava.jpg",
+   "source_url": "https://en.wikipedia.org/wiki/Luk%C3%A1%C5%A1_Hlava"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 2,
+   "prompt": "Stephen George this subject was an American right-handed pitcher in Major League Baseball who played for five teams from 1950 to 1966, primarily the Philadelphia Phillies and Washington Senators..",
+   "correct": "Steve Ridzik",
+   "image_url": "https://upload.wikimedia.org/wikipedia/commons/d/da/Steve_Ridzik.jpg",
+   "source_url": "https://en.wikipedia.org/wiki/Steve_Ridzik"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 2,
    "prompt": "This subject was an American judge and the eighth reporter of decisions of the United States Supreme Court, serving as reporter from 1875 to 1883..",
    "correct": "William Tod Otto",
    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/WilliamTodOtto.jpg/330px-WilliamTodOtto.jpg",
    "source_url": "https://en.wikipedia.org/wiki/William_Tod_Otto"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 2,
+   "prompt": "This subject Etete S.D.B.",
+   "correct": "Miguel Angel Nguema Bee",
+   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/Coat_of_arms_of_Miguel_Angel_Nguema_Bee.svg/330px-Coat_of_arms_of_Miguel_Angel_Nguema_Bee.svg.png",
+   "source_url": "https://en.wikipedia.org/wiki/Miguel_Angel_Nguema_Bee"
   },
   {
    "qtype": "clue",
@@ -581,12 +662,48 @@
   },
   {
    "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 2,
+   "prompt": "Diplomatic this subject between this subject and this subject were established in 1956 under the leadership of prime minister S.",
+   "correct": "Soviet Union\u2013Sri Lanka relations",
+   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Soviet_Union_Sri_Lanka_Locator.png/330px-Soviet_Union_Sri_Lanka_Locator.png",
+   "source_url": "https://en.wikipedia.org/wiki/Soviet_Union%E2%80%93Sri_Lanka_relations"
+  },
+  {
+   "qtype": "clue",
    "category": "history",
    "difficulty": 2,
    "prompt": "This subject is a German politician as a member of the Christian Democratic Union of Germany (CDU) party.",
    "correct": "Alexandra Mehnert",
    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/1721921871984_20240624_MEHNERT_Alexandra_DE_001.jpg/330px-1721921871984_20240624_MEHNERT_Alexandra_DE_001.jpg",
    "source_url": "https://en.wikipedia.org/wiki/Alexandra_Mehnert"
+  },
+  {
+   "qtype": "clue",
+   "category": "history",
+   "difficulty": 2,
+   "prompt": "This subject Lee this subject was an American politician who served as a member of the New Mexico House of Representatives from the 6th district.",
+   "correct": "Eliseo Alcon",
+   "image_url": "https://upload.wikimedia.org/wikipedia/en/d/d1/Eliseo_Alcon.png",
+   "source_url": "https://en.wikipedia.org/wiki/Eliseo_Alcon"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 2,
+   "prompt": "This subject is a small this subject located on the south coast of British Columbia in Surrey.",
+   "correct": "Serpentine Wildlife Management Area",
+   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/A_pair_of_cormorants_%288384697387%29.jpg/330px-A_pair_of_cormorants_%288384697387%29.jpg",
+   "source_url": "https://en.wikipedia.org/wiki/Serpentine_Wildlife_Management_Area"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 2,
+   "prompt": "This subject is a town and commune in M'Sila Province, Algeria.",
+   "correct": "Ouled Sidi Brahim",
+   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/DZ-_28_-_Ouled_Sidi_Brahim.svg/330px-DZ-_28_-_Ouled_Sidi_Brahim.svg.png",
+   "source_url": "https://en.wikipedia.org/wiki/Ouled_Sidi_Brahim"
   },
   {
    "qtype": "clue",
@@ -601,10 +718,28 @@
    "qtype": "clue",
    "category": "wildcard",
    "difficulty": 2,
-   "prompt": "This subject was an Oblate priest who might be considered multi-faceted in his career.",
-   "correct": "Louis Babel",
-   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Louis_Babel.png/330px-Louis_Babel.png",
-   "source_url": "https://en.wikipedia.org/wiki/Louis_Babel"
+   "prompt": "This subject is a municipality located in the Brazilian state of Sergipe.",
+   "correct": "Porto da Folha",
+   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Porto_da_Folha_map.png/330px-Porto_da_Folha_map.png",
+   "source_url": "https://en.wikipedia.org/wiki/Porto_da_Folha"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 2,
+   "prompt": "This subject\u2014this subject refer to the current and historical relationship between this subject and this subject.",
+   "correct": "Denmark\u2013Myanmar relations",
+   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Myanmar_Denmark_Locator.png/330px-Myanmar_Denmark_Locator.png",
+   "source_url": "https://en.wikipedia.org/wiki/Denmark%E2%80%93Myanmar_relations"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 2,
+   "prompt": "This subject JP was a New Zealand businessman and politician who served as the mayor of Wellington from 1885 to 1886 and 1890 to 1891..",
+   "correct": "Arthur Winton Brown",
+   "image_url": "https://upload.wikimedia.org/wikipedia/commons/9/90/Arthur_Winton_Brown.jpg",
+   "source_url": "https://en.wikipedia.org/wiki/Arthur_Winton_Brown"
   },
   {
    "qtype": "clue",
@@ -646,10 +781,19 @@
    "qtype": "clue",
    "category": "wildcard",
    "difficulty": 2,
-   "prompt": "This subject is a 79-mile (127\u00a0km) Blue-Blazed hiking this subject \"system\" that traverses the western ridge of the central Connecticut Valley.",
-   "correct": "Tunxis Trail",
-   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/TunxisCompounceCascadeTrailCussgutterBrook.JPG/330px-TunxisCompounceCascadeTrailCussgutterBrook.JPG",
-   "source_url": "https://en.wikipedia.org/wiki/Tunxis_Trail"
+   "prompt": "This subject is an administrative district (raion), one of the thirty-three in Volgograd Oblast, Russia.",
+   "correct": "Leninsky District, Volgograd Oblast",
+   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Hay_meadows_in_the_floodplain_of_the_Volga-Akhtubinskaya.JPG/330px-Hay_meadows_in_the_floodplain_of_the_Volga-Akhtubinskaya.JPG",
+   "source_url": "https://en.wikipedia.org/wiki/Leninsky_District%2C_Volgograd_Oblast"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 2,
+   "prompt": "This subject is one of the eleven townships of this subject, Ohio, United States.",
+   "correct": "Laurel Township, Hocking County, Ohio",
+   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/86/Rock_House_XI.JPG/330px-Rock_House_XI.JPG",
+   "source_url": "https://en.wikipedia.org/wiki/Laurel_Township%2C_Hocking_County%2C_Ohio"
   },
   {
    "qtype": "clue",
@@ -734,12 +878,39 @@
   },
   {
    "qtype": "clue",
+   "category": "history",
+   "difficulty": 3,
+   "prompt": "HD 29678, also known as HR 1491, is a solitary star located in the northern circumpolar constellation Camelopardalis.",
+   "correct": "HD 29678",
+   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/64/Camelopardalis_constellation_map.svg/330px-Camelopardalis_constellation_map.svg.png",
+   "source_url": "https://en.wikipedia.org/wiki/HD_29678"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 3,
+   "prompt": "This subject was an anti-religious magazine in the Buryat-Mongolian language in the Mongolian script.",
+   "correct": "Erdem ba Shazhan",
+   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/%D0%AD%D1%80%D0%B4%D1%8D%D0%BC_%D0%B1%D0%B0_%D1%88%D0%B0%D0%B6%D0%B0%D0%BD.jpg/330px-%D0%AD%D1%80%D0%B4%D1%8D%D0%BC_%D0%B1%D0%B0_%D1%88%D0%B0%D0%B6%D0%B0%D0%BD.jpg",
+   "source_url": "https://en.wikipedia.org/wiki/Erdem_ba_Shazhan"
+  },
+  {
+   "qtype": "clue",
    "category": "wildcard",
    "difficulty": 3,
    "prompt": "This subject, also Ostritz or simply this subject is a railway station near the village of this subject, Zgorzelec County, within the Lower Silesian Voivodeship in south-western Poland.",
    "correct": "Krzewina Zgorzelecka railway station",
    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Bahnhof_Krzewina_Zgorzelecka.jpg/330px-Bahnhof_Krzewina_Zgorzelecka.jpg",
    "source_url": "https://en.wikipedia.org/wiki/Krzewina_Zgorzelecka_railway_station"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 3,
+   "prompt": "This subject is a DVD release by rock band Therapy? on Eagle Vision, a subsidiary of Eagle Rock Entertainment, on 27 October 2003.",
+   "correct": "Scopophobia (video)",
+   "image_url": "https://upload.wikimedia.org/wikipedia/en/5/56/Scopophobia_%28video%29.jpg",
+   "source_url": "https://en.wikipedia.org/wiki/Scopophobia_(video)"
   },
   {
    "qtype": "clue",
@@ -754,19 +925,28 @@
    "qtype": "clue",
    "category": "wildcard",
    "difficulty": 3,
-   "prompt": "This subject Etete S.D.B.",
-   "correct": "Miguel Angel Nguema Bee",
-   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/Coat_of_arms_of_Miguel_Angel_Nguema_Bee.svg/330px-Coat_of_arms_of_Miguel_Angel_Nguema_Bee.svg.png",
-   "source_url": "https://en.wikipedia.org/wiki/Miguel_Angel_Nguema_Bee"
+   "prompt": "This subject Ravi this subject is an American critical care physician and anesthesiologist.",
+   "correct": "Sapna Kudchadkar",
+   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/Sapna_Kudchadkar.jpg/330px-Sapna_Kudchadkar.jpg",
+   "source_url": "https://en.wikipedia.org/wiki/Sapna_Kudchadkar"
   },
   {
    "qtype": "clue",
    "category": "wildcard",
    "difficulty": 3,
-   "prompt": "Diplomatic this subject between this subject and this subject were established in 1956 under the leadership of prime minister S.",
-   "correct": "Soviet Union\u2013Sri Lanka relations",
-   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Soviet_Union_Sri_Lanka_Locator.png/330px-Soviet_Union_Sri_Lanka_Locator.png",
-   "source_url": "https://en.wikipedia.org/wiki/Soviet_Union%E2%80%93Sri_Lanka_relations"
+   "prompt": "This subject is a former this subject building at 1 this subject Road in this subject, Connecticut.",
+   "correct": "Milford Point Hotel",
+   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/MilfordCT_FormerMilfordPointHotel.jpg/330px-MilfordCT_FormerMilfordPointHotel.jpg",
+   "source_url": "https://en.wikipedia.org/wiki/Milford_Point_Hotel"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 3,
+   "prompt": "This subject\u2011this subject, 2020 SCC 17, is a Supreme Court of Canada decision that held this subject-this subject was validly enacted by Parliament under criminal law power of section 91(27) of the Constitution Act, 1867.",
+   "correct": "Reference re Genetic Non\u2011Discrimination Act",
+   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/Supreme_court_of_Canada_in_summer.jpg/330px-Supreme_court_of_Canada_in_summer.jpg",
+   "source_url": "https://en.wikipedia.org/wiki/Reference_re_Genetic_Non%E2%80%91Discrimination_Act"
   },
   {
    "qtype": "clue",
@@ -790,10 +970,10 @@
    "qtype": "clue",
    "category": "wildcard",
    "difficulty": 3,
-   "prompt": "This subject is a small this subject located on the south coast of British Columbia in Surrey.",
-   "correct": "Serpentine Wildlife Management Area",
-   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/A_pair_of_cormorants_%288384697387%29.jpg/330px-A_pair_of_cormorants_%288384697387%29.jpg",
-   "source_url": "https://en.wikipedia.org/wiki/Serpentine_Wildlife_Management_Area"
+   "prompt": "This subject is a village near Mavelikara railway station in Mavelikara taluk.",
+   "correct": "Kallumala",
+   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/Kallumals_college_junction.jpg/330px-Kallumals_college_junction.jpg",
+   "source_url": "https://en.wikipedia.org/wiki/Kallumala"
   },
   {
    "qtype": "clue",
@@ -808,10 +988,19 @@
    "qtype": "clue",
    "category": "wildcard",
    "difficulty": 3,
-   "prompt": "This subject is a town and commune in M'Sila Province, Algeria.",
-   "correct": "Ouled Sidi Brahim",
-   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/DZ-_28_-_Ouled_Sidi_Brahim.svg/330px-DZ-_28_-_Ouled_Sidi_Brahim.svg.png",
-   "source_url": "https://en.wikipedia.org/wiki/Ouled_Sidi_Brahim"
+   "prompt": "This subject is a genus of woodlice, placed in its own family, Mesoniscidae, and section, Microcheta.",
+   "correct": "Mesoniscus",
+   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/31/Szemercses_vakaszka.jpg/330px-Szemercses_vakaszka.jpg",
+   "source_url": "https://en.wikipedia.org/wiki/Mesoniscus"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 3,
+   "prompt": "This subject is a pedestrianised thoroughfare in the English town of Reading, Berkshire.",
+   "correct": "Queen Victoria Street, Reading",
+   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/92/Queen_Victoria_Street%2C_Reading_%281%29.jpg/330px-Queen_Victoria_Street%2C_Reading_%281%29.jpg",
+   "source_url": "https://en.wikipedia.org/wiki/Queen_Victoria_Street%2C_Reading"
   },
   {
    "qtype": "clue",
@@ -826,10 +1015,37 @@
    "qtype": "clue",
    "category": "wildcard",
    "difficulty": 3,
+   "prompt": "This subject competed at the 2016 this subject in Lillehammer, Norway from 12 to 21 February 2016.",
+   "correct": "Colombia at the 2016 Winter Youth Olympics",
+   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Flag_of_Colombia.svg/330px-Flag_of_Colombia.svg.png",
+   "source_url": "https://en.wikipedia.org/wiki/Colombia_at_the_2016_Winter_Youth_Olympics"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 3,
+   "prompt": "This subject is an active lighthouse located on the north coast of the island of Madeira, Portugal.",
+   "correct": "Farol da Ponta de S\u00e3o Jorge",
+   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/2010-03-03_14_03_06_Portugal-S%C3%A3o_Jorge.jpg/330px-2010-03-03_14_03_06_Portugal-S%C3%A3o_Jorge.jpg",
+   "source_url": "https://en.wikipedia.org/wiki/Farol_da_Ponta_de_S%C3%A3o_Jorge"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 3,
    "prompt": "This subject was a British novelist, poet, newspaper columnist and article writer with strong associations to North Yorkshire..",
    "correct": "Dorothy Cowlin",
    "image_url": "https://upload.wikimedia.org/wikipedia/en/6/66/Dorothy_Cowlin.png",
    "source_url": "https://en.wikipedia.org/wiki/Dorothy_Cowlin"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 3,
+   "prompt": "The 2009\u201310 this subject'this subject represented the University of this subject in the 2009\u201310 NCAA Division I this subject season.",
+   "correct": "2009\u201310 Oklahoma Sooners women's basketball team",
+   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/Oklahoma_Sooners_logo.svg/330px-Oklahoma_Sooners_logo.svg.png",
+   "source_url": "https://en.wikipedia.org/wiki/2009%E2%80%9310_Oklahoma_Sooners_women's_basketball_team"
   },
   {
    "qtype": "clue",
@@ -844,19 +1060,28 @@
    "qtype": "clue",
    "category": "wildcard",
    "difficulty": 3,
-   "prompt": "This subject JP was a New Zealand businessman and politician who served as the mayor of Wellington from 1885 to 1886 and 1890 to 1891..",
-   "correct": "Arthur Winton Brown",
-   "image_url": "https://upload.wikimedia.org/wikipedia/commons/9/90/Arthur_Winton_Brown.jpg",
-   "source_url": "https://en.wikipedia.org/wiki/Arthur_Winton_Brown"
+   "prompt": "Rev.",
+   "correct": "A. A. Burleigh",
+   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/Rev._A._A._Burleigh.png/330px-Rev._A._A._Burleigh.png",
+   "source_url": "https://en.wikipedia.org/wiki/A._A._Burleigh"
   },
   {
    "qtype": "clue",
    "category": "wildcard",
    "difficulty": 3,
-   "prompt": "This subject is an administrative district (raion), one of the thirty-three in Volgograd Oblast, Russia.",
-   "correct": "Leninsky District, Volgograd Oblast",
-   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Hay_meadows_in_the_floodplain_of_the_Volga-Akhtubinskaya.JPG/330px-Hay_meadows_in_the_floodplain_of_the_Volga-Akhtubinskaya.JPG",
-   "source_url": "https://en.wikipedia.org/wiki/Leninsky_District%2C_Volgograd_Oblast"
+   "prompt": "This subject was an American burlesque actress.",
+   "correct": "Rose Sydell",
+   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Rose_Sydell.jpg/330px-Rose_Sydell.jpg",
+   "source_url": "https://en.wikipedia.org/wiki/Rose_Sydell"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 3,
+   "prompt": "The family von der this subject is the name of one of the oldest German noble family from Brandenburg, whose members occupied significant positions in the Kingdom of Prussia and later within the German Empire..",
+   "correct": "Marwitz",
+   "image_url": "https://upload.wikimedia.org/wikipedia/commons/a/af/Marwitz_arms.jpg",
+   "source_url": "https://en.wikipedia.org/wiki/Marwitz"
   },
   {
    "qtype": "clue",
@@ -866,15 +1091,6 @@
    "correct": "Atlanta Conservatory of Music",
    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Atlanta_Conservatory_of_Music_and_The_Cable_Piano_Company_in_Atlanta_Georgia.jpg/330px-Atlanta_Conservatory_of_Music_and_The_Cable_Piano_Company_in_Atlanta_Georgia.jpg",
    "source_url": "https://en.wikipedia.org/wiki/Atlanta_Conservatory_of_Music"
-  },
-  {
-   "qtype": "clue",
-   "category": "wildcard",
-   "difficulty": 3,
-   "prompt": "This subject is one of the eleven townships of this subject, Ohio, United States.",
-   "correct": "Laurel Township, Hocking County, Ohio",
-   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/86/Rock_House_XI.JPG/330px-Rock_House_XI.JPG",
-   "source_url": "https://en.wikipedia.org/wiki/Laurel_Township%2C_Hocking_County%2C_Ohio"
   },
   {
    "qtype": "clue",
@@ -961,6 +1177,24 @@
    "qtype": "clue",
    "category": "wildcard",
    "difficulty": 4,
+   "prompt": "This subject 2 this subject is a collaborative album by Peter Jefferies and Jono Lonie, released in 1987 through Flying Nun Records.",
+   "correct": "At Swim 2 Birds",
+   "image_url": "https://upload.wikimedia.org/wikipedia/en/d/d3/Peter_Jefferies_-_Jono_Lonie.jpeg",
+   "source_url": "https://en.wikipedia.org/wiki/At_Swim_2_Birds"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 4,
+   "prompt": "This subject, also known as this subject Buet, located at 5 rue de la Pomme, in Toulouse, France, is a Renaissance this subject particulier (palace) of the 16th century..",
+   "correct": "H\u00f4tel de Guillaume de Bernuy",
+   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Buet-2.jpg/330px-Buet-2.jpg",
+   "source_url": "https://en.wikipedia.org/wiki/H%C3%B4tel_de_Guillaume_de_Bernuy"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 4,
    "prompt": "This subject, also known as the cockatoo fish, cocky, joey, this subject cocky or sea carp, is a species of marine ray finned fish, one of the marblefishes belonging to the family Aplodactylidae.",
    "correct": "Rock cale",
    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/ff/AplodactylusLophodonRLS2.jpg/330px-AplodactylusLophodonRLS2.jpg",
@@ -970,10 +1204,19 @@
    "qtype": "clue",
    "category": "wildcard",
    "difficulty": 4,
-   "prompt": "This subject is a DVD release by rock band Therapy? on Eagle Vision, a subsidiary of Eagle Rock Entertainment, on 27 October 2003.",
-   "correct": "Scopophobia (video)",
-   "image_url": "https://upload.wikimedia.org/wikipedia/en/5/56/Scopophobia_%28video%29.jpg",
-   "source_url": "https://en.wikipedia.org/wiki/Scopophobia_(video)"
+   "prompt": "This subject was a Swiss photographer and photojournalist.",
+   "correct": "Monique Jacot",
+   "image_url": "https://upload.wikimedia.org/wikipedia/commons/4/4e/Monique_Jacot_by_Erling_Mandelmann.jpg",
+   "source_url": "https://en.wikipedia.org/wiki/Monique_Jacot"
+  },
+  {
+   "qtype": "clue",
+   "category": "wildcard",
+   "difficulty": 4,
+   "prompt": "This subject, Ain't Love Good is a studio album by American country singer Jean Shepard.",
+   "correct": "Mercy, Ain't Love Good",
+   "image_url": "https://upload.wikimedia.org/wikipedia/en/7/79/Jean_Shepard--Mercy_Ain%27t_Love_Good.jpg",
+   "source_url": "https://en.wikipedia.org/wiki/Mercy%2C_Ain't_Love_Good"
   },
   {
    "qtype": "clue",
@@ -995,12 +1238,12 @@
   },
   {
    "qtype": "clue",
-   "category": "wildcard",
+   "category": "history",
    "difficulty": 4,
-   "prompt": "This subject Ravi this subject is an American critical care physician and anesthesiologist.",
-   "correct": "Sapna Kudchadkar",
-   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/Sapna_Kudchadkar.jpg/330px-Sapna_Kudchadkar.jpg",
-   "source_url": "https://en.wikipedia.org/wiki/Sapna_Kudchadkar"
+   "prompt": "Dr.",
+   "correct": "Dr. John A. Brown House",
+   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/John_A_Brown_House_DE.JPG/330px-John_A_Brown_House_DE.JPG",
+   "source_url": "https://en.wikipedia.org/wiki/Dr._John_A._Brown_House"
   },
   {
    "qtype": "clue",
@@ -1015,10 +1258,10 @@
    "qtype": "clue",
    "category": "wildcard",
    "difficulty": 4,
-   "prompt": "This subject\u2011this subject, 2020 SCC 17, is a Supreme Court of Canada decision that held this subject-this subject was validly enacted by Parliament under criminal law power of section 91(27) of the Constitution Act, 1867.",
-   "correct": "Reference re Genetic Non\u2011Discrimination Act",
-   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/Supreme_court_of_Canada_in_summer.jpg/330px-Supreme_court_of_Canada_in_summer.jpg",
-   "source_url": "https://en.wikipedia.org/wiki/Reference_re_Genetic_Non%E2%80%91Discrimination_Act"
+   "prompt": "This subject is a glacial tarn in the Ruby Mountains, in Elko County in the northeastern part of the state of Nevada.",
+   "correct": "North Furlong Lake (Nevada)",
+   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/FurlongLakeNV.jpg/330px-FurlongLakeNV.jpg",
+   "source_url": "https://en.wikipedia.org/wiki/North_Furlong_Lake_(Nevada)"
   },
   {
    "qtype": "clue",
@@ -1046,249 +1289,6 @@
    "correct": "Helen Hull Law",
    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/HelenHullLaw1929.png/330px-HelenHullLaw1929.png",
    "source_url": "https://en.wikipedia.org/wiki/Helen_Hull_Law"
-  },
-  {
-   "qtype": "clue",
-   "category": "wildcard",
-   "difficulty": 4,
-   "prompt": "This subject is a pedestrianised thoroughfare in the English town of Reading, Berkshire.",
-   "correct": "Queen Victoria Street, Reading",
-   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/92/Queen_Victoria_Street%2C_Reading_%281%29.jpg/330px-Queen_Victoria_Street%2C_Reading_%281%29.jpg",
-   "source_url": "https://en.wikipedia.org/wiki/Queen_Victoria_Street%2C_Reading"
-  },
-  {
-   "qtype": "clue",
-   "category": "wildcard",
-   "difficulty": 4,
-   "prompt": "This subject was an international speedway rider who rode in the inaugural Speedway World Championship in 1936 as a reserve.",
-   "correct": "Norman Parker (speedway rider)",
-   "image_url": "https://upload.wikimedia.org/wikipedia/en/9/95/Norman_Parker_motorcycle_speedway_rider_in_1951.jpg",
-   "source_url": "https://en.wikipedia.org/wiki/Norman_Parker_(speedway_rider)"
-  },
-  {
-   "qtype": "clue",
-   "category": "wildcard",
-   "difficulty": 4,
-   "prompt": "This subject is an active lighthouse located on the north coast of the island of Madeira, Portugal.",
-   "correct": "Farol da Ponta de S\u00e3o Jorge",
-   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/2010-03-03_14_03_06_Portugal-S%C3%A3o_Jorge.jpg/330px-2010-03-03_14_03_06_Portugal-S%C3%A3o_Jorge.jpg",
-   "source_url": "https://en.wikipedia.org/wiki/Farol_da_Ponta_de_S%C3%A3o_Jorge"
-  },
-  {
-   "qtype": "clue",
-   "category": "wildcard",
-   "difficulty": 4,
-   "prompt": "Rev.",
-   "correct": "A. A. Burleigh",
-   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/Rev._A._A._Burleigh.png/330px-Rev._A._A._Burleigh.png",
-   "source_url": "https://en.wikipedia.org/wiki/A._A._Burleigh"
-  },
-  {
-   "qtype": "clue",
-   "category": "wildcard",
-   "difficulty": 4,
-   "prompt": "\"this subject, this subject, wie bist du zugegen\" is a Christian hymn with German text, translated in 1969 from a 1965 Dutch hymn by Huub Oosterhuis, \"Heer, onze Heer\".",
-   "correct": "Herr, unser Herr, wie bist du zugegen",
-   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/Pater_Huub_Oosterhuis%2C_studentenpastor_St._Ignatius_College_5_Oosterhuis_spreekt%2C_Bestanddeelnr_922-1557.jpg/330px-Pater_Huub_Oosterhuis%2C_studentenpastor_St._Ignatius_College_5_Oosterhuis_spreekt%2C_Bestanddeelnr_922-1557.jpg",
-   "source_url": "https://en.wikipedia.org/wiki/Herr%2C_unser_Herr%2C_wie_bist_du_zugegen"
-  },
-  {
-   "qtype": "clue",
-   "category": "geography",
-   "difficulty": 5,
-   "prompt": "This place has a population of 102,334,403.",
-   "correct": "Egypt",
-   "image_url": "https://flagcdn.com/eg.svg",
-   "source_url": "https://www.openstreetmap.org/relation/1473947"
-  },
-  {
-   "qtype": "clue",
-   "category": "geography",
-   "difficulty": 5,
-   "prompt": "Cairo is the capital of this place.",
-   "correct": "Egypt",
-   "image_url": "https://flagcdn.com/eg.svg",
-   "source_url": "https://www.openstreetmap.org/relation/1473947"
-  },
-  {
-   "qtype": "clue",
-   "category": "geography",
-   "difficulty": 5,
-   "prompt": "Manila is the capital of this place.",
-   "correct": "Philippines",
-   "image_url": "https://flagcdn.com/ph.svg",
-   "source_url": "https://www.openstreetmap.org/relation/443174"
-  },
-  {
-   "qtype": "clue",
-   "category": "geography",
-   "difficulty": 5,
-   "prompt": "This place has a population of 109,581,085.",
-   "correct": "Philippines",
-   "image_url": "https://flagcdn.com/ph.svg",
-   "source_url": "https://www.openstreetmap.org/relation/443174"
-  },
-  {
-   "qtype": "clue",
-   "category": "geography",
-   "difficulty": 5,
-   "prompt": "This place covers 1,002,450 km\u00b2.",
-   "correct": "Egypt",
-   "image_url": "https://flagcdn.com/eg.svg",
-   "source_url": "https://www.openstreetmap.org/relation/1473947"
-  },
-  {
-   "qtype": "clue",
-   "category": "geography",
-   "difficulty": 5,
-   "prompt": "This place covers 342,353 km\u00b2.",
-   "correct": "Philippines",
-   "image_url": "https://flagcdn.com/ph.svg",
-   "source_url": "https://www.openstreetmap.org/relation/443174"
-  },
-  {
-   "qtype": "clue",
-   "category": "geography",
-   "difficulty": 5,
-   "prompt": "This place covers 1,104,300 km\u00b2.",
-   "correct": "Ethiopia",
-   "image_url": "https://flagcdn.com/et.svg",
-   "source_url": "https://www.openstreetmap.org/relation/192800"
-  },
-  {
-   "qtype": "clue",
-   "category": "geography",
-   "difficulty": 5,
-   "prompt": "Addis Ababa is the capital of this place.",
-   "correct": "Ethiopia",
-   "image_url": "https://flagcdn.com/et.svg",
-   "source_url": "https://www.openstreetmap.org/relation/192800"
-  },
-  {
-   "qtype": "clue",
-   "category": "wildcard",
-   "difficulty": 5,
-   "prompt": "This subject is an unincorporated community in this subject, Virginia, United States.",
-   "correct": "Pigeon Hill, Clarke County, Virginia",
-   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Map_of_Virginia_highlighting_Clarke_County.svg/330px-Map_of_Virginia_highlighting_Clarke_County.svg.png",
-   "source_url": "https://en.wikipedia.org/wiki/Pigeon_Hill%2C_Clarke_County%2C_Virginia"
-  },
-  {
-   "qtype": "clue",
-   "category": "wildcard",
-   "difficulty": 5,
-   "prompt": "This subject was a Swiss photographer and photojournalist.",
-   "correct": "Monique Jacot",
-   "image_url": "https://upload.wikimedia.org/wikipedia/commons/4/4e/Monique_Jacot_by_Erling_Mandelmann.jpg",
-   "source_url": "https://en.wikipedia.org/wiki/Monique_Jacot"
-  },
-  {
-   "qtype": "clue",
-   "category": "wildcard",
-   "difficulty": 5,
-   "prompt": "This subject is a village in this subject, this subject Oblast, Ukraine.",
-   "correct": "Karapchiv, Chernivtsi Raion, Chernivtsi Oblast",
-   "image_url": "https://upload.wikimedia.org/wikipedia/commons/b/b0/Karapchiv_glyb_prapor.png",
-   "source_url": "https://en.wikipedia.org/wiki/Karapchiv%2C_Chernivtsi_Raion%2C_Chernivtsi_Oblast"
-  },
-  {
-   "qtype": "clue",
-   "category": "wildcard",
-   "difficulty": 5,
-   "prompt": "This subject comprises a group of parallel, linear wetlands, with a collective this subject of 59\u00a0km2, on the Swan Coastal Plain of south-west Western Australia between the cities of Mandurah and Bunbury.",
-   "correct": "Yalgorup Important Bird Area",
-   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/Australian_shelduck_male_arp.jpg/330px-Australian_shelduck_male_arp.jpg",
-   "source_url": "https://en.wikipedia.org/wiki/Yalgorup_Important_Bird_Area"
-  },
-  {
-   "qtype": "clue",
-   "category": "wildcard",
-   "difficulty": 5,
-   "prompt": "This subject, Ain't Love Good is a studio album by American country singer Jean Shepard.",
-   "correct": "Mercy, Ain't Love Good",
-   "image_url": "https://upload.wikimedia.org/wikipedia/en/7/79/Jean_Shepard--Mercy_Ain%27t_Love_Good.jpg",
-   "source_url": "https://en.wikipedia.org/wiki/Mercy%2C_Ain't_Love_Good"
-  },
-  {
-   "qtype": "clue",
-   "category": "wildcard",
-   "difficulty": 5,
-   "prompt": "This subject is a village in K\u0117dainiai district municipality, in Kaunas County, in central Lithuania.",
-   "correct": "\u0160ilainiai, Pel\u0117dnagiai",
-   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/%C5%A0ilainiai_%28Pel%C4%97dnagi%C5%B3%29%2C_2.JPG/330px-%C5%A0ilainiai_%28Pel%C4%97dnagi%C5%B3%29%2C_2.JPG",
-   "source_url": "https://en.wikipedia.org/wiki/%C5%A0ilainiai%2C_Pel%C4%97dnagiai"
-  },
-  {
-   "qtype": "clue",
-   "category": "wildcard",
-   "difficulty": 5,
-   "prompt": "William Edward this subject, also known as this subject and Eduardo this subject, was an American paralympic wrestler and associate general counsel.",
-   "correct": "Ed Bordley",
-   "image_url": "https://upload.wikimedia.org/wikipedia/commons/f/f0/Ed_Bordley.webp",
-   "source_url": "https://en.wikipedia.org/wiki/Ed_Bordley"
-  },
-  {
-   "qtype": "clue",
-   "category": "wildcard",
-   "difficulty": 5,
-   "prompt": "This subject (LGGA) is the national Guiding organization of this subject.",
-   "correct": "Lesotho Girl Guides Association",
-   "image_url": "https://upload.wikimedia.org/wikipedia/en/c/ca/Lesotho_Girl_Guides_Association.png",
-   "source_url": "https://en.wikipedia.org/wiki/Lesotho_Girl_Guides_Association"
-  },
-  {
-   "qtype": "clue",
-   "category": "history",
-   "difficulty": 5,
-   "prompt": "Lot 53 is a township in Kings County, Prince Edward Island, Canada.",
-   "correct": "Lot 53, Prince Edward Island",
-   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/Map_of_Prince_Edward_Island_highlighting_Lot_53.png/330px-Map_of_Prince_Edward_Island_highlighting_Lot_53.png",
-   "source_url": "https://en.wikipedia.org/wiki/Lot_53%2C_Prince_Edward_Island"
-  },
-  {
-   "qtype": "clue",
-   "category": "wildcard",
-   "difficulty": 5,
-   "prompt": "The Roman Catholic this subject is a diocese located in the city this subject in the ecclesiastical province of Bel\u00e9m this subject in Brazil..",
-   "correct": "Diocese of Bragan\u00e7a do Par\u00e1",
-   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Obelisco_e_Catedral_Bragan%C3%A7a.JPG/330px-Obelisco_e_Catedral_Bragan%C3%A7a.JPG",
-   "source_url": "https://en.wikipedia.org/wiki/Diocese_of_Bragan%C3%A7a_do_Par%C3%A1"
-  },
-  {
-   "qtype": "clue",
-   "category": "wildcard",
-   "difficulty": 5,
-   "prompt": "This subject is a Czech long-distance runner.",
-   "correct": "Jan Kreisinger",
-   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Jan_Kreisinger_%28Czech_Republic%29_-_London_2012_Mens_Marathon.jpg/330px-Jan_Kreisinger_%28Czech_Republic%29_-_London_2012_Mens_Marathon.jpg",
-   "source_url": "https://en.wikipedia.org/wiki/Jan_Kreisinger"
-  },
-  {
-   "qtype": "clue",
-   "category": "wildcard",
-   "difficulty": 5,
-   "prompt": "This subject is a species of combtooth blenny found in the Atlantic ocean, in the Americas it ranges from Cape Canaveral, Florida to Santa Catarina in Brazil and the eastern Atlantic it is found off Sao Tome and Principe in the Gulf of Guinea..",
-   "correct": "Hypleurochilus pseudoaequipinnis",
-   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Hypleurochilus_pseudoaequipinnis_242508713_%28cropped%29.jpg/330px-Hypleurochilus_pseudoaequipinnis_242508713_%28cropped%29.jpg",
-   "source_url": "https://en.wikipedia.org/wiki/Hypleurochilus_pseudoaequipinnis"
-  },
-  {
-   "qtype": "clue",
-   "category": "wildcard",
-   "difficulty": 5,
-   "prompt": "This subject, known as Porota, was an Argentine human rights activist.",
-   "correct": "Mercedes Col\u00e1s de Mero\u00f1o",
-   "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f8/Madre_de_la_Plaza_de_Mayo_-_2008.jpg/330px-Madre_de_la_Plaza_de_Mayo_-_2008.jpg",
-   "source_url": "https://en.wikipedia.org/wiki/Mercedes_Col%C3%A1s_de_Mero%C3%B1o"
-  },
-  {
-   "qtype": "clue",
-   "category": "wildcard",
-   "difficulty": 5,
-   "prompt": "Mauritz Christiaan Willem Egmond \"this subject\" this subject was a South African international rugby union player who played as a wing..",
-   "correct": "Mosey van Buuren",
-   "image_url": "https://upload.wikimedia.org/wikipedia/commons/6/69/MoseyVanBuuren.jpg",
-   "source_url": "https://en.wikipedia.org/wiki/Mosey_van_Buuren"
   },
   {
    "qtype": "where",
