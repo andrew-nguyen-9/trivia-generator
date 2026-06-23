@@ -22,6 +22,20 @@ The v2 framework is documented in `docs/v2/`. Phases, in order:
   2.12 Gauntlet · 2.13 SEO · 2.14 Accessibility · 2.15 Light/Dark ·
   2.16 Performance · 2.17 Mobile · 2.18 Cross-Browser · 2.19 Site Pages.
 
+### 2.2.2 — Real seal + the living deck
+- **The real Secret Order seal everywhere**: regenerated every logo/favicon asset
+  (hero, card back, room headers, `icon.png`, apple-touch, OG) from `.logo/` — the
+  detailed engraved gold seal, transparent-cut. No more white silhouette.
+- **The deck is now a deck**: a stacked carousel (cycle the top card to the bottom)
+  that **fans out** on demand; pick a card to **pull it out and zoom** it (portalled
+  overlay) with an Enter button. Mystery is the Ace.
+- **Pips scale with rank**: fewer pips render larger; the Ace gets one grand central
+  emblem in a gilt ring; corner indices read like real cards (bottom-right reversed).
+- **Gold is one cursor-driven light** — removed the static sheen; a single global
+  highlight follows the pointer across all gilt.
+- More ornate fronts (double gold frame, corner filigree) and backs (denser damask,
+  gilt ring, the seal).
+
 ### 2.2.1 — Card aesthetic
 - Game cards are now real playing cards: a **parchment front** with corner indices
   (rank + suit) and the game's **gold emblem multiplied into canonical pips** by its
