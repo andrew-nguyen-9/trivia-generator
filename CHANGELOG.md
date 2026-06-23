@@ -22,6 +22,17 @@ The v2 framework is documented in `docs/v2/`. Phases, in order:
   2.12 Gauntlet · 2.13 SEO · 2.14 Accessibility · 2.15 Light/Dark ·
   2.16 Performance · 2.17 Mobile · 2.18 Cross-Browser · 2.19 Site Pages.
 
+### 2.2.0 — Brand + Design System + Card-Deck Home
+- Reframed the brand from "after-dark" to **the Secret Order** (mystery/intrigue):
+  README title, home hero copy, and the GitHub repo description.
+- Rebuilt the home as a **deck of unique cards** (`CardDeck` + `GameCard`): one
+  engraved card per game (suit + Secret Order character + emblem), the Mystery as
+  a feature showpiece, with card-trick motion — deal-in stagger, flip-on-hover/focus,
+  and a shuffle that re-deals via layout animation.
+- Reduced-motion path: static, flat cards, no flip or perpetual motion (2.14 stub).
+- Codified the seal's motif vocabulary as namespaced `deck-*` card-face CSS; retired
+  the old `RoomCard`.
+
 ### 2.1.0 — Pipeline Resurrection
 - Shared `bank-writer` concurrency group across `etl_daily.yml` + `wiki_hard.yml`
   and `git pull --rebase` before push — kills the silent push-race.

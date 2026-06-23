@@ -1,4 +1,4 @@
-# PARLOR — an after-dark house of trivia games
+# PARLOR — a secret order's house of trivia games
 
 Ten trivia rooms over one question bank, forged nightly from **Wikipedia**,
 **Deezer**, **Sleeper/ESPN**, and **TMDB**. Third project in the family after
