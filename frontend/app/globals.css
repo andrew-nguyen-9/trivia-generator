@@ -147,35 +147,47 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-/* ── The deck (Phase 2.2 home): engraved playing-card faces that flip ──────────
-   Namespaced `deck-*` so the board's generic `.flip-*` (class-toggled) is never
-   flipped by hover. The card flips on hover OR keyboard focus (focus-within),
-   so it's fully keyboard-operable. */
+/* ── The deck (home): a stacked carousel that fans out, with parchment fronts
+   and a sealed ornate back. Namespaced `deck-*`. ───────────────────────────── */
+.deck-stage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30rem;
+}
 .deck-scene {
   perspective: 1600px;
 }
-.deck-card {
-  position: relative;
-  width: 100%;
+/* a card slot — also the <button> wrapper, so reset button chrome. inset+margin
+   auto centres each slot in the stage; Framer offsets x/y/rotate from there. */
+.deck-slot {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: clamp(152px, 42vw, 196px);
   aspect-ratio: 5 / 7;
-  transform-style: preserve-3d;
-  transition: transform 0.55s cubic-bezier(0.2, 0.8, 0.2, 1);
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  outline: none;
 }
-.deck-scene:hover .deck-card,
-.deck-scene:focus-within .deck-card {
-  transform: rotateY(180deg);
+.deck-slot:focus-visible {
+  box-shadow: 0 0 0 3px rgba(201, 162, 74, 0.7);
+  border-radius: 0.9rem;
 }
+
 .deck-face {
   position: absolute;
   inset: 0;
-  backface-visibility: hidden;
   display: flex;
   flex-direction: column;
   border-radius: 0.9rem;
   padding: 0.85rem 0.9rem;
   overflow: hidden;
 }
-/* engraved inner frame, drawn on both faces */
+/* double engraved inner frame, drawn on both faces */
 .deck-face::before {
   content: "";
   position: absolute;
@@ -184,80 +196,112 @@ body {
   pointer-events: none;
 }
 
-/* FRONT — a parchment playing-card face: gold pips, corner indices, a cartouche. */
+/* FRONT — parchment, ornate gold border, pips + corner indices + cartouche. */
 .deck-front {
   background:
-    radial-gradient(125% 95% at 50% 0%, #f7f1da 0%, #ece0bd 62%, #ddcfa0 100%);
+    radial-gradient(70% 55% at 50% 42%, #fbf6e4 0%, #efe3c0 60%, #e2d3a6 100%);
   color: #43141f;
-  border: 1px solid rgba(168, 122, 46, 0.55);
-  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(168, 122, 46, 0.7);
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.45), inset 0 0 30px rgba(168, 122, 46, 0.12);
 }
 .deck-front::before {
-  border: 1px solid rgba(168, 122, 46, 0.5);
-  box-shadow: inset 0 0 0 1px rgba(168, 122, 46, 0.18);
+  border: 1px solid rgba(168, 122, 46, 0.55);
+  box-shadow: inset 0 0 0 1px rgba(168, 122, 46, 0.22), inset 0 0 0 4px rgba(255, 255, 255, 0.25);
 }
 
-/* BACK — the seal on an intricate, tessellated gold-on-oxblood pattern. */
+/* BACK — the detailed seal on a tessellated gold-on-oxblood damask. */
 .deck-back-art {
-  transform: rotateY(180deg);
   align-items: center;
   justify-content: center;
   background-color: #1c0b14;
   background-image:
-    repeating-linear-gradient(45deg, rgba(201, 162, 74, 0.14) 0 1px, transparent 1px 10px),
-    repeating-linear-gradient(-45deg, rgba(201, 162, 74, 0.14) 0 1px, transparent 1px 10px),
-    repeating-linear-gradient(45deg, rgba(110, 31, 43, 0.35) 0 1px, transparent 1px 20px),
-    radial-gradient(circle at 50% 50%, rgba(110, 31, 43, 0.55), transparent 62%);
-  border: 1px solid rgba(201, 162, 74, 0.45);
+    repeating-linear-gradient(45deg, rgba(201, 162, 74, 0.16) 0 1px, transparent 1px 9px),
+    repeating-linear-gradient(-45deg, rgba(201, 162, 74, 0.16) 0 1px, transparent 1px 9px),
+    repeating-linear-gradient(45deg, rgba(110, 31, 43, 0.4) 0 1px, transparent 1px 18px),
+    repeating-linear-gradient(-45deg, rgba(110, 31, 43, 0.4) 0 1px, transparent 1px 18px),
+    radial-gradient(circle at 50% 50%, rgba(110, 31, 43, 0.6), transparent 64%);
+  border: 1px solid rgba(201, 162, 74, 0.55);
+  box-shadow: inset 0 0 0 2px rgba(201, 162, 74, 0.18);
 }
 .deck-back-art::before {
-  border: 1px solid rgba(201, 162, 74, 0.4);
-  box-shadow: inset 0 0 0 1px rgba(201, 162, 74, 0.15);
+  border: 1px solid rgba(201, 162, 74, 0.45);
+  box-shadow: inset 0 0 0 1px rgba(201, 162, 74, 0.18);
 }
 .deck-back-seal {
-  width: 46%;
+  width: 58%;
   height: auto;
-  filter: drop-shadow(0 0 10px rgba(110, 31, 43, 0.7));
+  filter: drop-shadow(0 0 12px rgba(245, 197, 66, 0.35));
 }
 .deck-back-ring {
   position: absolute;
-  inset: 16px;
+  inset: 14px;
   border-radius: 0.5rem;
-  border: 1px solid rgba(201, 162, 74, 0.3);
-  box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(201, 162, 74, 0.4);
+  box-shadow: inset 0 0 22px rgba(0, 0, 0, 0.6), inset 0 0 0 3px rgba(201, 162, 74, 0.08);
   pointer-events: none;
 }
 
-/* Pip field: emblems placed at canonical playing-card coordinates (set inline). */
+/* corner filigree (both faces) */
+.deck-corner-flourish {
+  position: absolute;
+  z-index: 2;
+  font-size: 0.85rem;
+  color: rgba(168, 122, 46, 0.6);
+  pointer-events: none;
+}
+.deck-back-art .deck-corner-flourish {
+  color: rgba(201, 162, 74, 0.5);
+}
+.deck-corner-tl { left: 0.55rem; top: 0.5rem; }
+.deck-corner-tr { right: 0.55rem; top: 0.5rem; }
+.deck-corner-bl { left: 0.55rem; bottom: 0.5rem; }
+.deck-corner-br { right: 0.55rem; bottom: 0.5rem; }
+
+/* Pip field + the Ace emblem share one cursor-driven gold (set in --mx/--my). */
+.deck-pip,
+.deck-ace-emblem {
+  background-image: radial-gradient(
+    circle at var(--mx, 50%) var(--my, 32%),
+    #fff3c4 0%,
+    #c08c2a 12%,
+    #8a5a1e 45%
+  );
+  background-attachment: fixed;
+  background-size: cover;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  line-height: 1;
+}
 .deck-pips {
   position: absolute;
-  inset: 1.6rem 0.9rem;
+  inset: 1.7rem 0.9rem;
   pointer-events: none;
 }
 .deck-pip {
   position: absolute;
   transform: translate(-50%, -50%);
-  line-height: 1;
-  font-size: clamp(1.1rem, 3.2vw, 1.7rem);
-  /* Deeper, near-solid antique gold so pips read on parchment, plus the same
-     cursor highlight as the rest of the gilt. */
-  background-image:
-    radial-gradient(
-      circle at var(--mx, 50%) var(--my, 28%),
-      rgba(255, 248, 214, 0.95),
-      rgba(255, 248, 214, 0) 11%
-    ),
-    linear-gradient(175deg, #b9862c 0%, #9a6a22 55%, #7c4f1a 100%);
-  background-attachment: fixed, scroll;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
 }
-/* The Ace / feature emblem and corner indices share the big-emblem sizing. */
-.deck-emblem {
-  font-size: clamp(2.75rem, 7vw, 4rem);
-  line-height: 1;
+
+/* The Ace — one grand central emblem inside a gilt ring. */
+.deck-ace {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.deck-ace-ring {
+  position: absolute;
+  width: 62%;
+  aspect-ratio: 1;
+  border-radius: 9999px;
+  border: 2px solid rgba(168, 122, 46, 0.45);
+  box-shadow: inset 0 0 0 4px rgba(168, 122, 46, 0.14), 0 0 18px rgba(168, 122, 46, 0.18);
+}
+.deck-ace-emblem {
+  position: relative;
 }
 
 /* Central nameplate cartouche sits above the pips. */
@@ -267,36 +311,69 @@ body {
   margin: auto;
   padding: 0.35rem 0.7rem;
   text-align: center;
-  background: rgba(247, 241, 218, 0.82);
-  border-top: 1px solid rgba(168, 122, 46, 0.55);
-  border-bottom: 1px solid rgba(168, 122, 46, 0.55);
-  backdrop-filter: blur(1px);
+  background: rgba(248, 242, 220, 0.86);
+  border-top: 1px solid rgba(168, 122, 46, 0.6);
+  border-bottom: 1px solid rgba(168, 122, 46, 0.6);
+  box-shadow: 0 0 14px rgba(248, 242, 220, 0.5);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  /* stub: no 3D flip; the face/back are toggled flat via the [data-reduced] path
-     in GameCard, and the global rule above already neutralizes the transition. */
-  .deck-card {
-    transition: none !important;
-  }
+/* Zoomed selection */
+.deck-zoom-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: rgba(8, 2, 5, 0.82);
+  backdrop-filter: blur(3px);
+}
+.deck-zoom-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+}
+.deck-zoom-card {
+  position: relative;
+  width: clamp(230px, 72vw, 300px);
+  aspect-ratio: 5 / 7;
+}
+.deck-enter-btn {
+  border-radius: 9999px;
+  border: 1px solid rgba(201, 162, 74, 0.7);
+  background: linear-gradient(180deg, rgba(201, 162, 74, 0.22), rgba(110, 31, 43, 0.22));
+  padding: 0.6rem 1.4rem;
+  font-family: var(--font-display), Georgia, serif;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.8rem;
+  color: #f0e6cf;
+  transition: all 0.2s;
+}
+.deck-enter-btn:hover {
+  border-color: rgba(230, 200, 120, 0.9);
+  box-shadow: 0 0 24px rgba(201, 162, 74, 0.3);
 }
 
 /* ── Secret-order flourishes ─────────────────────────────────────────────── */
 
-/* Gilt foil: gold leaf for headings/seals/emblems, with a cursor-reactive sheen.
-   The base gold sweep is element-local; a single highlight layer is pinned to the
-   viewport at the pointer (--mx/--my from GoldSheen), so one light source sweeps
-   across every gilt element as the mouse moves. Defaults keep it static (SSR /
-   reduced-motion / no pointer). */
+/* Gilt foil: one global, cursor-driven light source — no static sheen. A single
+   viewport-pinned radial (--mx/--my from GoldSheen) is bright gold at the pointer
+   and falls to antique gold away from it, so all gilt on the page is lit from the
+   same moving point. Defaults centre it (SSR / reduced-motion / no pointer). */
 .gilt {
-  background-image:
-    radial-gradient(
-      circle at var(--mx, 50%) var(--my, 28%),
-      rgba(255, 251, 230, 0.95),
-      rgba(255, 251, 230, 0) 12%
-    ),
-    linear-gradient(160deg, #8a6d2f 0%, #c9a24a 38%, #f0dca0 52%, #a87a2e 70%, #6e1f2b 110%);
-  background-attachment: fixed, scroll;
+  background-image: radial-gradient(
+    circle at var(--mx, 50%) var(--my, 32%),
+    #fff6d2 0%,
+    #f0d488 12%,
+    #d4ac52 30%,
+    #b8862e 70%
+  );
+  background-attachment: fixed;
+  background-size: cover;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;

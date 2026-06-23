@@ -1,6 +1,6 @@
 import Marquee from "@/components/Marquee";
-import CardDeck from "@/components/CardDeck";
-import type { Game } from "@/components/GameCard";
+import Deck from "@/components/Deck";
+import type { Game } from "@/components/CardFace";
 import { isDbConfigured } from "@/lib/db";
 
 const TICKER = [
@@ -24,8 +24,7 @@ const GAMES: Game[] = [
     accent: "history",
     character: "the Order",
     emblem: "◉", // the all-seeing eye
-    rank: 1, // the Ace — the feature
-    feature: true,
+    rank: 1, // the Ace
     blurb:
       "A new case every night. Read the dossiers, follow the clues, and name the culprit before the candle gutters out.",
   },
@@ -166,7 +165,7 @@ export default function Home() {
 
       <Marquee items={TICKER} />
 
-      <CardDeck games={GAMES} />
+      <Deck games={GAMES} />
 
       <footer className="relative z-10 border-t border-line px-4 py-10 sm:px-8">
         <div className="mb-3 flex items-center gap-3">
