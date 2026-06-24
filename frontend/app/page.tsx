@@ -81,7 +81,7 @@ const GAMES: Game[] = [
       "Drop a pin where it happened. Scored by the kilometer — no tile servers, no mercy.",
   },
   {
-    href: "/daily",
+    href: "/gauntlet",
     name: "The Gauntlet",
     accent: "wildcard",
     character: "the Adventurer",

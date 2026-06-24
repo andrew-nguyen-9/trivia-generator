@@ -88,9 +88,14 @@ carries **exactly one** character reference — a card face, a ghost's voice, a 
 a portrait — tying back to that cast. The Mystery owns the canon; each game spec in
 `GAMES.md` names its tie-in. Tracking checklist:
 
-- [ ] 2.3 Board · [ ] 2.4 Clock · [ ] 2.5 Wedges · [ ] 2.6 Streak · [ ] 2.7 Map ·
-  [ ] 2.8 Thread · [ ] 2.9 Séance · [ ] 2.10 Ladder · [ ] 2.12 Gauntlet
-- [ ] 2.11 Mystery defines the roster + the rule
+- [x] 2.3 Board (the Host) · [x] 2.4 Clock (the Clockkeeper) · [x] 2.5 Wedges
+  (the Ghost) · [x] 2.6 Streak (the Witch) · [x] 2.7 Map (the Cartographer) ·
+  [x] 2.8 Thread (the Weaver) · [x] 2.9 Séance (the Medium) · [x] 2.10 Ladder
+  (the Trickster) · [x] 2.12 Gauntlet (the Adventurer)
+- [x] 2.11 Mystery defines the roster + the rule (the Order)
+
+Each card in `app/page.tsx` `GAMES[]` carries exactly one `character`; the deck
+is the single source for the tie-in.
 
 ## Claude Design integration
 

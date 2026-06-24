@@ -1,3 +1,4 @@
+import { fileURLToPath } from "node:url";
 import bundleAnalyzer from "@next/bundle-analyzer";
 
 const withBundleAnalyzer = bundleAnalyzer({
@@ -6,6 +7,9 @@ const withBundleAnalyzer = bundleAnalyzer({
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Pin the trace root to this app. A stray parent-dir lockfile otherwise makes
+  // Next infer the monorepo root and the build-trace step fails (ENOENT .nft.json).
+  outputFileTracingRoot: fileURLToPath(new URL(".", import.meta.url)),
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "upload.wikimedia.org" },

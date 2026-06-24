@@ -2,9 +2,12 @@ import GauntletGame from "@/components/GauntletGame";
 import RoomShell from "@/components/RoomShell";
 import { getQuestionsByType } from "@/lib/queries";
 import { daySeed, pickRotating } from "@/lib/rng";
+import { roomMetadata } from "@/lib/rooms";
 import type { Question } from "@/lib/types";
 
 export const revalidate = 3600;
+
+export const metadata = roomMetadata("/gauntlet");
 
 // PARLOR GAUNTLET #1 = launch day
 const EPOCH = Date.UTC(2026, 5, 12) / 86400000;

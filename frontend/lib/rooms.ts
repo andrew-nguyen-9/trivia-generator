@@ -78,7 +78,7 @@ export const GAME_ROOMS: RoomMeta[] = [
     kind: "game",
   },
   {
-    path: "/daily",
+    path: "/gauntlet",
     name: "The Gauntlet",
     title: "The Gauntlet — one run a day",
     description:
