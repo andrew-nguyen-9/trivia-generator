@@ -119,7 +119,71 @@ body {
   animation: clock-swing 2.4s ease-in-out infinite;
 }
 
+/* ── THE STREAK: the Witch's candle ─────────────────────────────────────────
+   Pure decoration. --flame (0..1) is set inline from flameBrightness(streak);
+   the bloom's size/opacity scale with it. Everything here sits BEHIND the Q&A
+   layer (lower z-index) and never tints text, so legibility is untouched. */
+@keyframes flame-dance {
+  0%, 100% { transform: translateX(-50%) scaleY(1)    scaleX(1);    }
+  35%      { transform: translateX(-50%) scaleY(1.08) scaleX(0.94); }
+  70%      { transform: translateX(-50%) scaleY(0.96) scaleX(1.05); }
+}
+.streak-flame {
+  /* the teardrop flame body */
+  filter: blur(0.4px);
+  transform-origin: bottom center;
+  animation: flame-dance 1.1s ease-in-out infinite;
+  opacity: calc(0.45 + 0.55 * var(--flame, 0.2));
+}
+.streak-bloom {
+  /* warm halo that intensifies with the streak — radial, behind the candle */
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(245, 197, 66, calc(0.10 + 0.55 * var(--flame, 0.2))) 0%,
+    rgba(201, 122, 42, calc(0.05 + 0.25 * var(--flame, 0.2))) 38%,
+    transparent 70%
+  );
+  filter: blur(8px);
+  transform: scale(calc(0.7 + 0.6 * var(--flame, 0.2)));
+  transition: transform 0.6s ease, background 0.6s ease;
+}
+
+/* ── THE STREAK: darkness finish ────────────────────────────────────────────
+   On end the viewport fades to near-black with a single radial glow tracking
+   the cursor (--gx/--gy set in a pointermove handler). It's a FIXED overlay
+   BELOW the results card (z-index), so the finish text reads at full contrast. */
+.streak-dark {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      36vmax 36vmax at var(--gx, 50%) var(--gy, 50%),
+      rgba(245, 197, 66, 0.22) 0%,
+      rgba(110, 31, 43, 0.16) 30%,
+      transparent 62%
+    ),
+    rgba(8, 3, 6, 0.92);
+  animation: streak-darken 0.9s ease forwards;
+}
+@keyframes streak-darken {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  /* freeze the flame at a steady mid brightness; disable the darken sweep */
+  .streak-flame { animation: none !important; opacity: 0.7 !important; }
+  .streak-bloom { transform: scale(1) !important; }
+  .streak-dark  { animation: none !important; opacity: 1 !important; }
+
+  .glow,
+  .animate-marquee,
+  .page-enter,
+  .gold-text {
+    animation: none !important;
+  }
   .glow,
   .animate-marquee,
   .page-enter,
