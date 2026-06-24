@@ -109,6 +109,16 @@ body {
   border-color: #b8902e44;
 }
 
+/* ── Grandfather-clock pendulum (THE CLOCK) ── */
+@keyframes clock-swing {
+  0%, 100% { transform: rotate(7deg); }
+  50%      { transform: rotate(-7deg); }
+}
+
+.clock-pendulum {
+  animation: clock-swing 2.4s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .glow,
   .animate-marquee,
