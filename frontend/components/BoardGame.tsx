@@ -116,12 +116,28 @@ export default function BoardGame({
     setClueRevealed(false);
 
     if (mode === "easy") {
-      const correct = columns[c].cells[r].correct;
-      const pool = columns
-        .flatMap((col) => col.cells.map((cell) => cell.correct))
-        .filter((x) => x !== correct);
-      const distractors = [...pool].sort(() => Math.random() - 0.5).slice(0, 3);
-      setChoices([...distractors, correct].sort(() => Math.random() - 0.5));
+      const cell = columns[c].cells[r];
+      const correct = cell.correct;
+      // Prefer the forge's same-category distractors (sampled from the whole
+      // category, so they read as plausible alternatives). Fall back to other
+      // answers in THIS column (also same category), then any board answer —
+      // always deduped so the options can't collapse into repeats.
+      if (cell.choices && cell.choices.length >= 2) {
+        setChoices(cell.choices);
+      } else {
+        const seen = new Set([correct.trim().toLowerCase()]);
+        const pool: string[] = [];
+        const sameCol = columns[c].cells.map((x) => x.correct);
+        const rest = columns.flatMap((col) => col.cells.map((x) => x.correct));
+        for (const ans of [...sameCol, ...rest]) {
+          const k = ans.trim().toLowerCase();
+          if (seen.has(k)) continue;
+          seen.add(k);
+          pool.push(ans);
+        }
+        const distractors = pool.sort(() => Math.random() - 0.5).slice(0, 3);
+        setChoices([...distractors, correct].sort(() => Math.random() - 0.5));
+      }
     }
   }
 
@@ -451,14 +467,14 @@ export default function BoardGame({
                   >
                     {judgeResult ? "✓ Correct!" : "✗ Missed it"}
                   </p>
-                  {!judgeResult && (
-                    <p className="mt-1 text-muted">
-                      The answer:{" "}
-                      <span className="font-black text-ink">
-                        What is {openQ.correct}?
-                      </span>
-                    </p>
-                  )}
+                  {/* Always restate the answer — right or wrong, the player
+                      should leave the clue knowing it. */}
+                  <p className="mt-1 text-muted">
+                    The answer:{" "}
+                    <span className="font-black text-ink">
+                      What is {openQ.correct}?
+                    </span>
+                  </p>
                   {openQ.source_url && (
                     <a
                       href={openQ.source_url}
