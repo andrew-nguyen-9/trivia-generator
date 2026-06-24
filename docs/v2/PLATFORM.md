@@ -158,7 +158,15 @@ Reduce cache/CPU/GPU/API load; make it fast everywhere.
   before/after.
 - **Done-when**: documented Lighthouse perf gains, no gameplay regressions.
 
-## 2.17 — Mobile
+## 2.17 — Mobile ◐ (code shipped; playwright gate pending)
+
+> Shipped: the new logic-grid rooms now meet the 44px touch-target floor on phones
+> — Séance cells are `h-11 w-11` on mobile (shrinking to `sm:h-9` for mouse); the
+> Ladder grid was already 44px. Both rooms use `flex-wrap` HUDs, single-column
+> clue stacks on small screens, and `overflow-x-auto` matrices; the deck already
+> reflows (clamp widths + responsive `deck-spread` grid + `touch-action: pan-y`).
+> **Remaining (needs the harness):** the full `playwright` mobile-emulation sweep
+> across every room.
 
 Touch-first: adequate touch targets, responsive room layouts, the card deck reflowed
 for small screens, gesture support (swipe/drag where natural). **Done-when**: every

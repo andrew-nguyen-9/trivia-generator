@@ -304,7 +304,7 @@ function Grid({
                     <button
                       onClick={() => onCell(cat, seat, val)}
                       aria-label={`seat ${seat + 1}, ${v}: ${m === 2 ? "bound" : m === 1 ? "snuffed" : "unmarked"}`}
-                      className="flex h-9 w-9 items-center justify-center rounded-md border text-base transition hover:border-brass focus:outline-none focus-visible:ring-2"
+                      className="flex h-11 w-11 items-center justify-center rounded-md border text-base transition hover:border-brass focus:outline-none focus-visible:ring-2 sm:h-9 sm:w-9"
                       style={{
                         borderColor: m === 2 ? ACCENT : "var(--line,#2a2333)",
                         background: m === 2 ? `${ACCENT}26` : "transparent",
