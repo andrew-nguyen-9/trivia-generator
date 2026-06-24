@@ -10,7 +10,7 @@
 create table if not exists facts (
   id            uuid primary key default gen_random_uuid(),
   content_hash  text not null unique,           -- sha256 of (source, subject, fact_text) → idempotent upserts
-  source        text not null check (source in ('wikipedia','deezer','sleeper','espn','tmdb','restcountries','opentdb','manual')),
+  source        text not null check (source in ('wikipedia','deezer','sleeper','espn','tmdb','restcountries','opentdb','manual','curated')),
   category      text not null check (category in ('history','music','sports','screen','geography','wildcard')),
   subject       text not null,                  -- "Lollapalooza", "Patrick Mahomes", "Pulp Fiction"
   fact_text     text not null,                  -- human-readable, citeable sentence
