@@ -16,8 +16,10 @@ out/
 
 # data artifacts — bronze JSONL is COMMITTED on purpose (repo-as-database
 # mode: data/raw/*.jsonl is the accumulating fact store, compacted by
-# content_hash). Only the local DuckDB build artifact stays out.
+# content_hash). Only the local DuckDB build artifact + regenerable API
+# caches (e.g. the 15 MB Sleeper player dict) stay out.
 data/*.duckdb
+data/cache/
 
 # dbt
 transform/target/

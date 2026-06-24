@@ -86,6 +86,20 @@ Concrete knobs the runbook above refers to:
   inline step in wiki_hard) opens — or comments on the existing — issue labelled
   `pipeline-failure`, so repeat failures don't spam.
 
+#### Source health (per-source starvation, audited 2026-06-24)
+
+While the pipeline was frozen, the publish/commit step never ran, so the
+keyless ingests that *do* work (Deezer, Sleeper/ESPN) had **never committed any
+bronze** — the live bank was music 5 / sports 0 / screen 2 out of 475. Each
+ingest is `continue-on-error: true`, and the only floor is the forge's total
+`--min-questions`, which history alone clears — so a single dead source decays
+silently. Mitigations: back-seeded `data/raw/deezer.jsonl` (100) +
+`data/raw/sports.jsonl` (50) so the next forge isn't starved; the nightly will
+now accumulate both. **Still open: screen/TMDB** — `screen_ingest.py` is gated
+on `secrets.TMDB_API_KEY`; with no key it never runs and `screen` stays at ~2
+(Gallery room runs near-empty). Add the key, or treat screen as a soft category.
+Future hardening: a per-category floor in the health gate, not just a total.
+
 ### Done-when
 
 A `workflow_dispatch` run goes green and commits a fresh bank; a deliberately broken
