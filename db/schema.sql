@@ -119,6 +119,21 @@ create policy "public read questions" on questions for select using (true);
 drop policy if exists "public read daily_sets" on daily_sets;
 create policy "public read daily_sets" on daily_sets for select using (true);
 
+-- ── seance_puzzles: pre-generated daily logic puzzles (Phase 2.9). ──
+-- Date-keyed archive, written ahead by scripts/generate-seance.ts, read-only
+-- from the frontend. No seed fallback — absent row ⇒ the room is dark.
+create table if not exists seance_puzzles (
+  play_date   date primary key,
+  weekday     int  not null,
+  spirit      text not null,
+  seed        bigint not null,
+  payload     jsonb not null,   -- full SeancePuzzle (see frontend/lib/seance.ts)
+  created_at  timestamptz not null default now()
+);
+alter table seance_puzzles enable row level security;
+drop policy if exists "public read seance" on seance_puzzles;
+create policy "public read seance" on seance_puzzles for select using (true);
+
 -- updated_at trigger
 create or replace function set_updated_at() returns trigger as $$
 begin

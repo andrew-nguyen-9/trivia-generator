@@ -5,6 +5,7 @@
 import seed from "../public/seed-questions.json";
 import { getDb } from "./db";
 import type { Category, Question, QType } from "./types";
+import type { SeancePuzzle } from "./seance";
 
 const SEED_BANK = (seed as { questions: Question[] }).questions;
 
@@ -25,6 +26,27 @@ export async function getQuestionsByType(qtype: QType): Promise<Question[]> {
     }
   }
   return SEED_BANK.filter((q) => q.qtype === qtype);
+}
+
+/**
+ * THE SÉANCE — fetch one day's pre-generated puzzle from the archive.
+ * Unlike every other room, there is NO seed-bank fallback: the puzzle is
+ * generated server-side and archived to Neon, so without a row (or without a
+ * DB) the room is dark. `date` (YYYY-MM-DD) enables archive-play of past days;
+ * defaults to today (UTC).
+ */
+export async function getSeancePuzzle(date?: string): Promise<SeancePuzzle | null> {
+  const sql = getDb();
+  if (!sql) return null;
+  const day = date ?? new Date().toISOString().slice(0, 10);
+  try {
+    const rows = await sql`
+      select payload from seance_puzzles where play_date = ${day} limit 1`;
+    if (rows.length > 0) return rows[0].payload as SeancePuzzle;
+  } catch {
+    // db hiccup → dark state, never throw (and never fall back to a fake puzzle)
+  }
+  return null;
 }
 
 export interface BoardColumn {
