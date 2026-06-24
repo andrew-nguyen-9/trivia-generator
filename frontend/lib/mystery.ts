@@ -8,10 +8,12 @@
 // "Case #N" for every player, forever, and regenerates from nothing but the date.
 //
 // Solvability: this is a real WHO + WHERE + WHEN logic puzzle.
-// - WHO: innocents' claimed location at the murder hour is always the truth
-//   (never the scene); culprits' claim is a lie (their true location at that
-//   hour is the scene). `deduceCulprits()` reads this off `Dossier.trueLocation`
-//   vs `Dossier.claimed` directly — no relationship-graph guessing involved.
+// - WHO: a corroboration puzzle read straight off the visible alibi grid. At the
+//   murder hour the innocent pair up (>=2 to a room, a corroborated truth) while
+//   each culprit claims a room nobody else claims (the uncorroborated lie), and
+//   nobody claims the scene. `deduceCulprits()` tallies that hour's `claimed`
+//   column and returns the lone occupants — no hidden field, no clue that names
+//   a name. (`Dossier.trueLocation` still records the ground truth for prose.)
 // - WHERE / WHEN: four of the seven clues each rule out a set of rooms or hours
 //   entirely (`Clue.eliminatesRooms` / `eliminatesHours`). Together they're
 //   constructed to eliminate every room but the true scene and every hour but
