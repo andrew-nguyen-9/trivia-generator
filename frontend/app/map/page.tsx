@@ -1,3 +1,4 @@
+import { roomMetadata } from "@/lib/rooms";
 import MapGame from "@/components/MapGame";
 import RoomShell from "@/components/RoomShell";
 import { getQuestionsByType } from "@/lib/queries";
@@ -5,6 +6,8 @@ import { daySeed, pickRotating } from "@/lib/rng";
 import { civRounds, pickCivilization } from "@/lib/civilizations";
 
 export const revalidate = 86400;
+
+export const metadata = roomMetadata("/map");
 
 export default async function MapPage() {
   const pool = await getQuestionsByType("where");

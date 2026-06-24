@@ -1,8 +1,11 @@
+import { roomMetadata } from "@/lib/rooms";
 import RoomShell from "@/components/RoomShell";
 import ThreadGame from "@/components/ThreadGame";
 import { getQuestionsByType } from "@/lib/queries";
 
 export const revalidate = 86400;
+
+export const metadata = roomMetadata("/thread");
 
 export default async function ThreadPage() {
   // THE THREAD plays a forged daily chain (qtype: thread). The clue pool is a

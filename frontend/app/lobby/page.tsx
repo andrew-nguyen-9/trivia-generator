@@ -1,7 +1,10 @@
+import { roomMetadata } from "@/lib/rooms";
 import { getQuestionsByType } from "@/lib/queries";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import RoomShell from "@/components/RoomShell";
 import LobbyGame from "@/components/LobbyGame";
+
+export const metadata = roomMetadata("/lobby");
 
 export default async function LobbyPage() {
   const hasBackend = isSupabaseConfigured();

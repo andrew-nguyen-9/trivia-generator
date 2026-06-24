@@ -1,3 +1,4 @@
+import { roomMetadata } from "@/lib/rooms";
 import DailyGame from "@/components/DailyGame";
 import RoomShell from "@/components/RoomShell";
 import { getQuestionsByType } from "@/lib/queries";
@@ -8,6 +9,8 @@ export const revalidate = 3600;
 
 // PARLOR DAILY #1 = launch day
 const EPOCH = Date.UTC(2026, 5, 12) / 86400000;
+
+export const metadata = roomMetadata("/daily");
 
 export default async function DailyPage() {
   const [mc, yr, hl, wh] = await Promise.all([

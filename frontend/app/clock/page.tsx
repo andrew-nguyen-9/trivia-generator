@@ -1,3 +1,4 @@
+import { roomMetadata } from "@/lib/rooms";
 import ClockGame from "@/components/ClockGame";
 import RoomShell from "@/components/RoomShell";
 import { getQuestionsByType } from "@/lib/queries";
@@ -5,6 +6,8 @@ import { daySeed, pickRotating } from "@/lib/rng";
 import { pickCalendar } from "@/lib/calendars";
 
 export const revalidate = 86400;
+
+export const metadata = roomMetadata("/clock");
 
 export default async function ClockPage() {
   const day = daySeed();

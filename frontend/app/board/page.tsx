@@ -1,3 +1,4 @@
+import { roomMetadata } from "@/lib/rooms";
 import BoardGame from "@/components/BoardGame";
 import RoomShell from "@/components/RoomShell";
 import { buildBoardColumns, getQuestionsByType } from "@/lib/queries";
@@ -5,6 +6,8 @@ import { daySeed, mulberry32 } from "@/lib/rng";
 import { pickTheme } from "@/lib/themes";
 
 export const revalidate = 3600;
+
+export const metadata = roomMetadata("/board");
 
 export default async function BoardPage() {
   const clues = await getQuestionsByType("clue");

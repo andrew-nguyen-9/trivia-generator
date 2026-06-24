@@ -1,9 +1,12 @@
+import { roomMetadata } from "@/lib/rooms";
 import RoomShell from "@/components/RoomShell";
 import WedgesGame from "@/components/WedgesGame";
 import { getQuestionsByType } from "@/lib/queries";
 import { daySeed } from "@/lib/rng";
 
 export const revalidate = 3600;
+
+export const metadata = roomMetadata("/wedges");
 
 export default async function WedgesPage() {
   const pool = await getQuestionsByType("multiple_choice");
