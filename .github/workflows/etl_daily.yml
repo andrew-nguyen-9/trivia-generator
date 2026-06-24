@@ -147,11 +147,32 @@ jobs:
           git pull --rebase --autostash origin main
           git push
 
+  # THE SÉANCE archive — independent of the question bank. Pre-generates the
+  # deterministic daily logic puzzles and upserts them to Neon (write role). No
+  # DB secret → the generate step is skipped (the room stays dark; no fallback).
+  seance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+        working-directory: frontend
+      - name: Generate + archive Séance puzzles (today + 14 days)
+        if: ${{ secrets.DATABASE_URL != '' }}
+        working-directory: frontend
+        run: npm run seance:generate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
   # Any failed job in the DAG trips this. Opens a pipeline-failure issue (or
   # comments on the open one, so repeated failures don't spam) — the observability
   # that was missing while the nightly silently died for a week.
   notify-failure:
-    needs: [extract, transform, publish]
+    needs: [extract, transform, publish, seance]
     if: failure()
     runs-on: ubuntu-latest
     permissions:

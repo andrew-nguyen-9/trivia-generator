@@ -132,25 +132,42 @@ type").
 - **Done-when**: a daily themed chain plays end-to-end with per-link explanations +
   the final thread question; sewing UI present; build green.
 
-## 2.9 — The Séance (FULL REDO)
+## 2.9 — The Séance (FULL REDO) — ✅ CHOSEN DESIGN
 
-> **Brainstorm first** (`superpowers:brainstorming`). Record the chosen design here
-> before building.
+> Built. The brainstorm picked the **daily constraint-logic puzzle** direction (a
+> "Scrying Matrix" zebra/logic-grid) over the spirit-board / mediumship sketches.
 
 - **Why redo**: v1 "who/what am I with costly clues" is thin and overlaps the
   Mystery/Ladder.
-- **Brainstorm directions** (to evaluate, not final):
-  - *Spirit board / Ouija*: spell answers letter-by-letter as "the spirit" guides;
-    wrong letters cost candle-wax.
-  - *Mediumship rounds*: contact a historical figure; ask yes/no questions to a
-    constrained oracle to deduce who, with a guess budget.
-  - *Channeling*: the spirit answers in riddle/period voice; decode to the modern
-    fact.
-- **Constraints**: deterministic daily; solvable; offline (no LLM at runtime — facts
-  + templated voice); shareable result; honors a11y/reduced-motion.
-- **Character tie-in**: the Medium of the Order.
-- **Done-when**: chosen design recorded in this section; new Séance playable; build +
-  any new tests green.
+- **Concept**: the medium stabilises a corrupted spirit message by resolving a
+  uniquely-solvable logic grid. N "seats" at the table × K occult attribute
+  categories (relic / sin / fate / …), each a bijection; clues (identity,
+  exclusion, ordering, neighbour, seat-pin) narrow to one configuration. **Pure
+  logic, not trivia** — no fact-provenance trail needed.
+- **Engine** (`frontend/lib/seance.ts`, pure + tested): builds the truth matrix
+  from the day seed, enumerates all true clues, then the **Subtraction Method**
+  (prune a clue → re-solve → keep only if still unique) yields a minimal,
+  uniquely-solvable set. Propagation + backtracking solver caps the solution
+  count at 2 for the uniqueness gate. Weekly **Spirit packs**
+  (`seanceFlavor.ts`) supply the cast; weekday sets grid size (Mon N=4 intro →
+  Sun N=7 "Exorcism").
+- **Determinism & archive**: generation is **not** client-side or offline.
+  `scripts/generate-seance.ts` (run in `etl_daily.yml`, write role) pre-computes
+  today + 14 days into the Neon **`seance_puzzles`** archive (date-keyed). The
+  frontend only **reads** (`getSeancePuzzle`, read-only role); no row / no DB →
+  dark state, **no seed fallback**. The table is the archive → debugging +
+  `/seance?date=YYYY-MM-DD` archive-play of any past night.
+- **UX**: tap-once = snuffed candle ✕ (exclusion), tap-twice = glowing rune ◯
+  (confirm) with auto row/column propagation; count-up "Ectoplasmic Decay"
+  timer; invalid submission → **Poltergeist Strike** (screen-shake + **+60s**);
+  **Whisper-mode** scratchpad layer (Fri–Sun); atmospheric vignette deepens with
+  time; win → emoji share + **Grimoire** (`lib/grimoire.ts`, localStorage
+  meta-progression of banished spirits).
+- **a11y**: ARIA grid + per-cell labels, native-button keyboard play,
+  `prefers-reduced-motion` freezes shake/vignette (deepened further in 2.14).
+- **Character tie-in**: the Medium of the Order (séance host).
+- **Done-when**: ✅ design recorded · new Séance playable · `seance.test.ts`
+  (uniqueness / determinism / minimality / weekday scaling) + build green.
 
 ## 2.10 — The Ladder (FULL REDO)
 
