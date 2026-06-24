@@ -12,15 +12,38 @@ All notable changes to PARLOR are documented here. Format follows
   via per-phase sub-branches (`phase/2.N-<slug>`); when every phase has landed, `v2`
   merges to `main` and tags **`v2.0.0`**. See `docs/v2/ROADMAP.md`.
 
-## [Unreleased] — v2
+## [2.0.0] — 2026-06-24 — the v2 era
 
-The v2 framework is documented in `docs/v2/`. Phases, in order:
+All v2 phases landed on the `v2` integration branch and merged to `main`. The
+per-phase `2.x` numbers below were the dev-time convention; the shipped release
+is **`v2.0.0`** (`frontend/package.json` reconciled 2.2.2 → 2.0.0 to match the
+release tag). The v2 framework is documented in `docs/v2/`. Phases, in order:
 
 - 2.1 Pipeline Resurrection · 2.2 Brand + Design System + Card-Deck Home ·
   2.3 Board · 2.4 Clock · 2.5 Wedges · 2.6 Streak · 2.7 Map · 2.8 Thread ·
   2.9 Séance (redo) · 2.10 Ladder (redo) · 2.11 Mystery (crown jewel) ·
   2.12 Gauntlet · 2.13 SEO · 2.14 Accessibility · 2.15 Light/Dark ·
-  2.16 Performance · 2.17 Mobile · 2.18 Cross-Browser · 2.19 Site Pages.
+  2.16 Performance · 2.17 Mobile · 2.18 Cross-Browser · 2.19 Site Pages ·
+  2.20 Gap-fill · 2.21 UI/UX a11y · 2.22 Bundle optimization · 2.23 Code review.
+
+### 2.20–2.23 — final hardening batch
+- **2.20 Gap-fill** — The Gauntlet was reachable only through the
+  `/daily`→`/gauntlet` redirect across the sitemap, JSON-LD, home deck, and
+  footer; repointed the route registry + nav at the real `/gauntlet` (200) and
+  gave it per-route metadata. Pinned `next.config` `outputFileTracingRoot` (a
+  stray parent-dir lockfile was failing the build-trace step with ENOENT).
+- **Pipeline** — back-seeded the silently-starved music + sports sources
+  (Deezer + Sleeper/ESPN had never committed bronze while the pipeline was
+  frozen); seed bank 475 → 561 (music 5→141, sports 0→85). Ignored the 15 MB
+  Sleeper player cache. (Screen/TMDB still gated on a missing `TMDB_API_KEY`.)
+- **2.21 UI/UX** — Board tiles carry an `aria-label` of "<category>, $<value>"
+  (were 25 indistinguishable "$200"); the question modal is a proper
+  `role=dialog` with `aria-modal` + `aria-labelledby` and moves focus on open;
+  the shared practice panel got dialog semantics + Escape-to-close.
+- **2.22 Optimization** — `/board` First Load JS **291 KB → 217 KB** (−74 KB):
+  it was bundling the 232 KB seed bank into the client. Extracted the pure
+  `buildBoardColumns` to seed-free `lib/board.ts`.
+- **2.23 Code review** — correctness pass clean; removed one dead import.
 
 ### 2.2.2 — Real seal + the living deck
 - **The real Secret Order seal everywhere**: regenerated every logo/favicon asset
