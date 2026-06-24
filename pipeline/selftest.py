@@ -130,6 +130,11 @@ def main() -> None:
     for q in qs:
         if q["qtype"] == "clue":
             check("clue does not leak the answer", q["correct"].lower() not in q["prompt"].lower())
+            # THE BOARD (2.3): every clue carries board theme tags incl. the
+            # 'library' fallback, so the board can group/select by daily theme.
+            themes = (q.get("meta") or {}).get("board_themes") or []
+            check("clue carries board theme tags", isinstance(themes, list) and "library" in themes,
+                  f"{themes}")
             break
 
     for q in qs:

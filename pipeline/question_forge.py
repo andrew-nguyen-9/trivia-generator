@@ -47,6 +47,31 @@ MIN_HL_GAP_RATIO = 0.25  # higher/lower pairs must differ by ≥25% — never a 
 MIN_SEANCE_CLUES = 3     # minimum facts per subject to forge a séance question
 LADDER_CANDIDATES = 6    # candidate pool size per ladder question
 
+# THE BOARD (2.3) daily themes. The forge tags each clue with a theme keyword so
+# the board can group/select by theme; the frontend picks the day's theme
+# deterministically by date (frontend/lib/themes.ts). Keyword → matching tokens
+# scanned (case-insensitive) in the clue text / subject. "library" is the
+# always-eligible fallback (every clue suits a library).
+BOARD_THEME_KEYWORDS: dict[str, tuple[str, ...]] = {
+    "egypt": ("egypt", "nile", "pharaoh", "pyramid", "cairo", "sphinx"),
+    "noir": ("noir", "detective", "murder", "crime", "shadow", "midnight"),
+    "voyage": ("sea", "ship", "ocean", "island", "voyage", "sail", "port", "coast"),
+    "cosmos": ("space", "star", "planet", "galaxy", "moon", "comet", "orbit"),
+    "carnival": ("circus", "carnival", "festival", "parade", "fair"),
+    "deep-sea": ("deep", "trench", "abyss", "submarine", "reef", "whale"),
+    "library": (),  # fallback — always matches
+}
+
+
+def tag_board_themes(text: str, subject: str) -> list[str]:
+    """Theme keywords a clue is eligible for (always includes the 'library'
+    fallback). Lets THE BOARD group clues by the day's theme; non-matching days
+    fall back to standard categories on the frontend."""
+    hay = f"{text} {subject}".lower()
+    tags = [k for k, toks in BOARD_THEME_KEYWORDS.items() if toks and any(t in hay for t in toks)]
+    tags.append("library")
+    return tags
+
 
 # ── difficulty ──────────────────────────────────────────────────────────────
 def assign_difficulty(facts: list[dict]) -> None:
@@ -203,6 +228,10 @@ def forge_clues(facts: list[dict]) -> list[dict]:
                 "correct": subject,
                 "image_url": f.get("image_url"),
                 "source_url": f.get("source_url"),
+                # THE BOARD theme tags (meta-only; not a stored column — the
+                # frontend derives the day's theme, this just lets a DB consumer
+                # group by it). See BOARD_THEME_KEYWORDS / lib/themes.ts.
+                "meta": {"board_themes": tag_board_themes(clue, subject)},
             }
         )
     return out

@@ -13,20 +13,31 @@ import { useProfile, type Achievement } from "@/lib/profile";
 import Confetti from "@/components/Confetti";
 import AchievementToast from "@/components/AchievementToast";
 import LeaderboardPanel from "@/components/LeaderboardPanel";
+import { BOARD_HOST, themedLabel, type BoardTheme } from "@/lib/themes";
+import { TEXT_SIZE_CLASS, useBoardSettings } from "@/lib/boardSettings";
 
 type CellState = "fresh" | "right" | "wrong";
 type GameMode = "easy" | "hard";
+
+// Prompt scale per text-size setting (the body chrome uses TEXT_SIZE_CLASS).
+const PROMPT_SIZE = { S: "text-xl sm:text-2xl", M: "text-2xl sm:text-3xl", L: "text-3xl sm:text-4xl" };
 
 export default function BoardGame({
   columns: dailyColumns,
   dailyDouble: dailyDD,
   clues,
+  theme,
 }: {
   columns: BoardColumn[];
   dailyDouble: [number, number];
   clues?: Question[];
+  theme: BoardTheme;
 }) {
-  const reduced = useReducedMotion();
+  const osReduced = useReducedMotion();
+  const { settings, update } = useBoardSettings();
+  const reduced = osReduced || settings.reducedMotion; // OS pref OR explicit toggle
+  const [showSettings, setShowSettings] = useState(false);
+  const [clueRevealed, setClueRevealed] = useState(false); // blur-clue sharpened?
   const { practiceMode, togglePractice, saved, saveQ, removeQ, isSaved } = usePractice();
   const { record } = useProfile();
   const [toasts, setToasts] = useState<Achievement[]>([]);
@@ -90,6 +101,7 @@ export default function BoardGame({
     setPicked(null);
     setJudgeResult(null);
     setTextAnswer("");
+    setClueRevealed(false);
 
     if (mode === "easy") {
       const correct = columns[c].cells[r].correct;
@@ -149,6 +161,28 @@ export default function BoardGame({
     <div>
       <AchievementToast queue={toasts} />
       {/* Header */}
+      {/* Host nameplate — the Secret Order character framing the board */}
+      <div
+        className="mb-4 flex items-center gap-3 rounded-xl border border-line bg-surface/60 p-3"
+        style={{ borderColor: `${theme.accent}55` }}
+      >
+        <div
+          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border text-2xl"
+          style={{ borderColor: theme.accent, color: theme.accent }}
+          aria-hidden
+        >
+          {theme.glyph}
+        </div>
+        <div className="leading-tight">
+          <div className="display text-lg" style={{ color: theme.accent }}>
+            {BOARD_HOST.name}
+          </div>
+          <div className="microlabel text-muted">
+            {BOARD_HOST.title} · tonight: {theme.name}
+          </div>
+        </div>
+      </div>
+
       <div className="mb-5 flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="display text-4xl sm:text-5xl">The Board</h1>
@@ -163,7 +197,17 @@ export default function BoardGame({
         </div>
 
         <div className="text-right">
-          <div className="mb-2 flex gap-1">
+          <div className="mb-2 flex items-center justify-end gap-1">
+            <button
+              onClick={() => setShowSettings((s) => !s)}
+              aria-label="settings"
+              aria-expanded={showSettings}
+              className={`mr-1 rounded-full border px-3 py-1 text-base transition ${
+                showSettings ? "border-gold text-gold" : "border-line text-muted hover:border-ink"
+              }`}
+            >
+              ⚙
+            </button>
             <button
               onClick={() => setMode("easy")}
               className={`microlabel rounded-full border px-3 py-1 transition ${
@@ -194,6 +238,56 @@ export default function BoardGame({
         </div>
       </div>
 
+      {/* Settings panel — persisted to localStorage, never to the DB */}
+      {showSettings && (
+        <div className="mb-5 rounded-xl border border-gold/40 bg-surface p-4">
+          <div className="microlabel mb-3 text-gold">settings</div>
+          <div className="flex flex-wrap gap-6">
+            <div>
+              <div className="microlabel mb-1 text-muted">text size</div>
+              <div className="flex gap-1">
+                {(["S", "M", "L"] as const).map((sz) => (
+                  <button
+                    key={sz}
+                    onClick={() => update({ textSize: sz })}
+                    className={`rounded-full border px-3 py-1 text-sm transition ${
+                      settings.textSize === sz
+                        ? "border-gold text-gold"
+                        : "border-line text-muted hover:border-ink"
+                    }`}
+                  >
+                    {sz}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <label className="flex cursor-pointer items-center gap-2">
+              <input
+                type="checkbox"
+                checked={settings.hints}
+                onChange={(e) => update({ hints: e.target.checked })}
+                className="accent-gold"
+              />
+              <span className="microlabel text-muted">image hints</span>
+            </label>
+            <label className="flex cursor-pointer items-center gap-2">
+              <input
+                type="checkbox"
+                checked={settings.reducedMotion}
+                onChange={(e) => update({ reducedMotion: e.target.checked })}
+                className="accent-gold"
+              />
+              <span className="microlabel text-muted">reduce motion</span>
+            </label>
+          </div>
+          {osReduced && (
+            <p className="microlabel mt-3 text-muted">
+              your system already requests reduced motion — honored.
+            </p>
+          )}
+        </div>
+      )}
+
       {/* Grid */}
       {columns.length < 5 ? (
         <p className="text-muted">
@@ -201,33 +295,51 @@ export default function BoardGame({
         </p>
       ) : (
         <div className="grid grid-cols-5 gap-2">
-          {columns.map((col) => (
-            <div
-              key={col.category}
-              className="microlabel flex min-h-12 items-center justify-center rounded-lg border border-line bg-surface p-2 text-center"
-              style={{ color: CATEGORY_HEX[col.category] }}
-            >
-              {CATEGORY_LABEL[col.category]}
-            </div>
-          ))}
+          {columns.map((col) => {
+            const hex = CATEGORY_HEX[col.category];
+            return (
+              <div
+                key={col.category}
+                className="microlabel flex min-h-14 flex-col items-center justify-center gap-0.5 rounded-lg border bg-surface p-2 text-center"
+                style={{
+                  color: hex,
+                  borderColor: `${theme.accent}55`,
+                  background: `linear-gradient(160deg, ${hex}1a, transparent)`,
+                }}
+              >
+                <span className="text-base opacity-70" style={{ color: theme.accent }} aria-hidden>
+                  {theme.glyph}
+                </span>
+                <span>{themedLabel(theme, col.category, CATEGORY_LABEL[col.category])}</span>
+              </div>
+            );
+          })}
           {[0, 1, 2, 3, 4].map((r) =>
             columns.map((col, c) => {
               const st = states[cellKey(c, r)];
               return (
-                <button
-                  key={cellKey(c, r)}
-                  disabled={Boolean(st)}
-                  onClick={() => openCell(c, r)}
-                  className={`tabular flex min-h-14 items-center justify-center rounded-lg border text-lg font-black transition sm:min-h-16 sm:text-2xl ${
-                    st
-                      ? st === "right"
-                        ? "border-sports/40 bg-surface text-sports/60"
-                        : "border-music/40 bg-surface text-music/60"
-                      : "border-line bg-surface text-history hover:border-history hover:bg-history/10"
-                  }`}
-                >
-                  {st ? (st === "right" ? "✓" : "✗") : `$${(r + 1) * 200}`}
-                </button>
+                <div key={cellKey(c, r)} className="flip-scene min-h-14 sm:min-h-16">
+                  <div className={`flip-inner h-full ${st ? "flipped" : ""}`}>
+                    {/* front — the dollar value, click to open */}
+                    <button
+                      disabled={Boolean(st)}
+                      onClick={() => openCell(c, r)}
+                      className="flip-face tabular absolute inset-0 flex items-center justify-center rounded-lg border border-line bg-surface text-lg font-black text-history transition hover:border-history hover:bg-history/10 sm:text-2xl"
+                    >
+                      ${(r + 1) * 200}
+                    </button>
+                    {/* back — the result, revealed by the card flip */}
+                    <div
+                      className={`flip-face flip-back tabular absolute inset-0 flex items-center justify-center rounded-lg border text-lg font-black sm:text-2xl ${
+                        st === "right"
+                          ? "border-sports/40 bg-surface text-sports/60"
+                          : "border-music/40 bg-surface text-music/60"
+                      }`}
+                    >
+                      {st === "right" ? "✓" : "✗"}
+                    </div>
+                  </div>
+                </div>
               );
             }),
           )}
@@ -265,7 +377,8 @@ export default function BoardGame({
                   className="microlabel"
                   style={{ color: CATEGORY_HEX[openQ.category] }}
                 >
-                  {CATEGORY_LABEL[openQ.category]} · ${cellValue(open[1], open[0])}
+                  {themedLabel(theme, openQ.category, CATEGORY_LABEL[openQ.category])} · $
+                  {cellValue(open[1], open[0])}
                 </span>
                 {isDD(open[0], open[1]) && (
                   <span className="microlabel animate-pulse text-history">
@@ -274,9 +387,40 @@ export default function BoardGame({
                 )}
               </div>
 
-              <p className="display mt-6 text-2xl leading-tight sm:text-3xl">
+              <p className={`display mt-6 leading-tight ${PROMPT_SIZE[settings.textSize]}`}>
                 {openQ.prompt}
               </p>
+
+              {/* Optional blur-reveal image clue (folded in from The Gallery).
+                  Gated by the hint setting; sharpens on click or hover. */}
+              {settings.hints && openQ.image_url && judgeResult === null && (
+                <div className="mt-5 flex justify-center">
+                  <button
+                    type="button"
+                    onClick={() => setClueRevealed(true)}
+                    onMouseEnter={() => setClueRevealed(true)}
+                    className="relative overflow-hidden rounded-2xl border border-line bg-bg"
+                    title={clueRevealed ? "" : "reveal image clue"}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={openQ.image_url}
+                      alt="image clue"
+                      className="h-40 w-auto max-w-full object-contain transition-[filter] duration-500 sm:h-48"
+                      style={{ filter: `blur(${clueRevealed || reduced ? 0 : 16}px)` }}
+                      draggable={false}
+                    />
+                    {!clueRevealed && !reduced && (
+                      <span
+                        className="pointer-events-none absolute bottom-2 right-3 microlabel"
+                        style={{ color: theme.accent }}
+                      >
+                        tap to sharpen…
+                      </span>
+                    )}
+                  </button>
+                </div>
+              )}
 
               {/* Post-judge result panel */}
               {judgeResult !== null ? (
@@ -329,7 +473,7 @@ export default function BoardGame({
                 </div>
               ) : mode === "easy" ? (
                 /* Easy — multiple choice */
-                <div className="mt-8 grid gap-3 sm:grid-cols-2">
+                <div className={`mt-8 grid gap-3 sm:grid-cols-2 ${TEXT_SIZE_CLASS[settings.textSize]}`}>
                   {choices.map((choice) => {
                     const isCorrect = choice === openQ.correct;
                     const isPicked = choice === picked;
