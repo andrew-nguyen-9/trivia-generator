@@ -1,15 +1,8 @@
 import Link from "next/link";
-import { CATEGORY_HEX } from "@/lib/types";
+import { CATEGORY_HEX, CATEGORY_GLYPH } from "@/lib/types";
 import type { Category } from "@/lib/types";
 
-const SUIT: Record<Category, string> = {
-  history: "♦",
-  music: "♥",
-  sports: "♣",
-  screen: "♠",
-  geography: "✦",
-  wildcard: "✧",
-};
+const SUIT = CATEGORY_GLYPH; // single source (a11y non-color channel)
 
 /** Room chrome: brass doorway frame, engraved nameplate, exit back to lobby. */
 export default function RoomShell({
