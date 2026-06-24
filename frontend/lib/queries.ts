@@ -69,29 +69,7 @@ export async function getLadderPuzzle(date?: string): Promise<LadderPuzzle | nul
   return null;
 }
 
-export interface BoardColumn {
-  category: Category;
-  cells: Question[]; // 5 clues, difficulty 1..5
-}
-
-/** Group clues into 5 columns × 5 difficulty rows for THE BOARD. */
-export function buildBoardColumns(
-  clues: Question[],
-  pick: (arr: Question[]) => Question,
-): BoardColumn[] {
-  const byCat = new Map<Category, Question[]>();
-  for (const q of clues) {
-    byCat.set(q.category, [...(byCat.get(q.category) ?? []), q]);
-  }
-  const columns: BoardColumn[] = [];
-  for (const [category, rows] of byCat) {
-    if (columns.length === 5) break;
-    const cells: Question[] = [];
-    for (let d = 1; d <= 5; d++) {
-      const tier = rows.filter((q) => q.difficulty === d);
-      cells.push(pick(tier.length ? tier : rows));
-    }
-    columns.push({ category, cells });
-  }
-  return columns;
-}
+// Board arrangement lives in lib/board.ts (seed-free) so client components can
+// import it without pulling this module's 232 KB seed bank. Re-exported here for
+// server callers that already import from queries.
+export { buildBoardColumns, type BoardColumn } from "./board";

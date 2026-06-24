@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { buildBoardColumns, type BoardColumn } from "@/lib/queries";
+import { buildBoardColumns, type BoardColumn } from "@/lib/board";
 import { CATEGORY_HEX, CATEGORY_LABEL, type Category, type Question } from "@/lib/types";
 import { liberalMatch } from "@/lib/fuzzy";
 import { usePractice } from "@/lib/usePractice";

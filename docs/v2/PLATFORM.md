@@ -161,6 +161,17 @@ robots resolve, every route has unique metadata, OG previews render.
 > converting dynamic-dimension content images to `next/image` (deferred — risky to
 > do without visual verification).
 
+> Shipped (2.22): the biggest single bundle win — `/board` was **291 KB First
+> Load / 79 KB route JS**, a ~76 KB outlier over every other room. Cause:
+> `BoardGame` (client) imported `buildBoardColumns` from `lib/queries`, which
+> statically imports the 232 KB seed bank — so the whole offline bank shipped to
+> every board visitor's browser for nothing (the board data is already fetched
+> server-side). Extracted the pure arranger to seed-free `lib/board.ts`; `/board`
+> is now **217 KB / 5.4 KB**, in line with the deck. Re-verified board play +
+> practice mode in-browser. Audit also confirmed already-good hygiene: WorldMap's
+> ~50-80 KB topojson is a lazy `import()`, Confetti is code-split, all daily rooms
+> carry ISR `revalidate`, and no other client component leaks a data blob.
+
 Reduce cache/CPU/GPU/API load; make it fast everywhere.
 
 - Audit Framer Motion usage (no perpetual off-screen animation — a11y + perf win).
