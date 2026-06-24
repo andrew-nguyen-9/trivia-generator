@@ -215,6 +215,39 @@ def forge_multiple_choice(facts: list[dict], rng: random.Random) -> list[dict]:
     return out
 
 
+def forge_trivia(facts: list[dict], rng: random.Random) -> list[dict]:
+    """Ready-made MC trivia (opentdb, QuizAPI via trivia_ingest): the source
+    already shipped a correct answer + its own incorrect answers. Keep those
+    distractors (they're hand-authored, better than synthesised siblings) and
+    emit a multiple_choice. Facts are tagged meta.trivia_q with meta.choices."""
+    out = []
+    for f in facts:
+        meta = f.get("meta") or {}
+        if not meta.get("trivia_q"):
+            continue
+        choices = [c for c in dict.fromkeys(meta.get("choices") or []) if c]
+        prompt = f.get("fact_text") or ""
+        answer = f["subject"]
+        if len(choices) < 3 or answer not in choices or not prompt:
+            continue
+        shuffled = list(choices)
+        rng.shuffle(shuffled)
+        out.append(
+            {
+                "content_hash": content_hash("multiple_choice", f["content_hash"]),
+                "qtype": "multiple_choice",
+                "category": f["category"],
+                "difficulty": f.get("_difficulty", 3),
+                "prompt": prompt,
+                "correct": answer,
+                "choices": shuffled,
+                "image_url": f.get("image_url"),
+                "source_url": f.get("source_url"),
+            }
+        )
+    return out
+
+
 def forge_where(facts: list[dict]) -> list[dict]:
     """THE MAP: the fact text says WHAT the place is; the skill is pinning it.
     The text naming the answer is fine — coordinates are the hidden truth."""
@@ -240,9 +273,48 @@ def forge_where(facts: list[dict]) -> list[dict]:
     return out
 
 
-def forge_clues(facts: list[dict]) -> list[dict]:
+def _clue_distractors(
+    subject: str, category: str, pool: dict[str, list[str]], rng: random.Random
+) -> list[str] | None:
+    """3 plausible wrong answers for a clue: other subjects from the SAME category,
+    deduped and excluding anything that collapses onto the answer. Same-category
+    keeps them similar in kind (a constellation sits next to constellations, not a
+    rapper) — the old board built choices from every category, so the right answer
+    stuck out. Returns None when the category can't field 3 distinct alternatives;
+    the board then falls back to its client-side picker."""
+    seen = {subject.strip().lower()}
+    candidates: list[str] = []
+    for s in pool.get(category, []):
+        k = s.strip().lower()
+        if k in seen:
+            continue
+        seen.add(k)
+        candidates.append(s)
+    if len(candidates) < 3:
+        return None
+    # Tighten similarity: prefer same-category subjects of a like *shape* —
+    # close in word count and length — so a one-word name draws other one-word
+    # names, not "Arkansas Highway 183". Sample from the closest slice (not the
+    # single nearest) to keep variety. Pure entity-type matching would need
+    # typed facts; this shape heuristic gets most of the way for free.
+    words, length = len(subject.split()), len(subject)
+    candidates.sort(key=lambda s: (abs(len(s.split()) - words), abs(len(s) - length)))
+    near = candidates[: max(3, min(len(candidates), 12))]
+    distractors = rng.sample(near, 3)
+    choices = [*distractors, subject]
+    rng.shuffle(choices)
+    return choices
+
+
+def forge_clues(facts: list[dict], rng: random.Random | None = None) -> list[dict]:
     """Jeopardy-style: the fact sentence becomes the clue, the subject the answer.
     Only facts whose text doesn't leak the subject verbatim qualify."""
+    rng = rng or random.Random(0)
+    # per-category subject pool for same-category multiple-choice distractors
+    subjects_by_cat: dict[str, list[str]] = {}
+    for f in facts:
+        subjects_by_cat.setdefault(f["category"], []).append(f["subject"])
+
     out = []
     for f in facts:
         if (f.get("meta") or {}).get("melody"):
@@ -251,6 +323,7 @@ def forge_clues(facts: list[dict]) -> list[dict]:
         clue = mask_subject(f["fact_text"], subject, f)
         if clue is None:
             continue
+        choices = _clue_distractors(subject, f["category"], subjects_by_cat, rng)
         out.append(
             {
                 "content_hash": content_hash("clue", f["content_hash"]),
@@ -259,6 +332,9 @@ def forge_clues(facts: list[dict]) -> list[dict]:
                 "difficulty": f.get("_difficulty", 3),
                 "prompt": clue,
                 "correct": subject,
+                # same-category MC options for THE BOARD's easy mode; None ⇒ the
+                # board synthesizes its own. Dropped for free-text (hard) mode.
+                "choices": choices,
                 "image_url": f.get("image_url"),
                 "source_url": f.get("source_url"),
                 # carried for THE THREAD's notability gate; ignored by the DB
@@ -653,12 +729,13 @@ def load_facts_from_db(conn) -> list[dict]:
 def forge_all(facts: list[dict], seed: int = 0) -> list[dict]:
     rng = random.Random(seed)
     assign_difficulty(facts)
-    clues = forge_clues(facts)
+    clues = forge_clues(facts, rng)
     questions = (
         forge_year_guess(facts)
         + forge_audio(facts)
         + forge_higher_lower(facts, rng)
         + forge_multiple_choice(facts, rng)
+        + forge_trivia(facts, rng)
         + clues
         + forge_where(facts)
         + forge_seance(facts)

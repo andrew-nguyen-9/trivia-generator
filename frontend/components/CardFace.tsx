@@ -75,7 +75,7 @@ export default function CardFace({
         <span className="deck-corner-flourish deck-corner-br" aria-hidden>✦</span>
         <span className="deck-back-ring" aria-hidden />
         {/* The detailed Secret Order seal — never the white silhouette. */}
-        <img src="/logo-256.png" alt="" aria-hidden className="deck-back-seal eye-glow" />
+        <img src="/logo-256.png?v=2" alt="" aria-hidden className="deck-back-seal eye-glow" />
       </div>
     );
   }

@@ -39,7 +39,7 @@ export default function RoomShell({
             parlor
           </span>
           <img
-            src="/logo-96.png"
+            src="/logo-96.png?v=2"
             alt="The Parlor"
             width={28}
             height={31}
