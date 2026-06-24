@@ -71,6 +71,11 @@ export default function BoardGame({
   const columns = practiceColumns ?? dailyColumns;
   const dailyDouble = practiceDD ?? dailyDD;
 
+  // Move focus into the question dialog when it opens so keyboard/SR users land
+  // on the prompt instead of being stranded on the (now-disabled) tile behind
+  // the backdrop. role=dialog + aria-modal on the card does the announcing.
+  const dialogRef = useRef<HTMLDivElement>(null);
+
   const cellKey = (c: number, r: number) => `${c}:${r}`;
   const isDD = (c: number, r: number) => dailyDouble[0] === c && dailyDouble[1] === r;
   const cellValue = (r: number, c: number) => (r + 1) * 200 * (isDD(c, r) ? 2 : 1);
@@ -79,6 +84,10 @@ export default function BoardGame({
   const total = columns.length * 5;
   const openQ = open ? columns[open[0]].cells[open[1]] : null;
   const cleared = played === total && total > 0;
+
+  useEffect(() => {
+    if (open) dialogRef.current?.focus();
+  }, [open]);
 
   useEffect(() => {
     if (!cleared || recorded.current) return;
@@ -323,10 +332,14 @@ export default function BoardGame({
               return (
                 <div key={cellKey(c, r)} className="flip-scene min-h-14 sm:min-h-16">
                   <div className={`flip-inner h-full ${st ? "flipped" : ""}`}>
-                    {/* front — the dollar value, click to open */}
+                    {/* front — the dollar value, click to open. The visible
+                        label is just the value; the a11y name carries the
+                        category + state so keyboard/SR users aren't navigating
+                        25 identical "$200" tiles. */}
                     <button
                       disabled={Boolean(st)}
                       onClick={() => openCell(c, r)}
+                      aria-label={`${themedLabel(theme, col.category, CATEGORY_LABEL[col.category])}, $${(r + 1) * 200}${st ? ` — answered ${st === "right" ? "correctly" : "incorrectly"}` : ""}`}
                       className="flip-face tabular absolute inset-0 flex items-center justify-center rounded-lg border border-line bg-surface text-lg font-black text-history transition hover:border-history hover:bg-history/10 sm:text-2xl"
                     >
                       ${(r + 1) * 200}
@@ -369,10 +382,15 @@ export default function BoardGame({
             exit={{ opacity: 0 }}
           >
             <motion.div
+              ref={dialogRef}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="board-q-prompt"
+              tabIndex={-1}
               initial={reduced ? {} : { scale: 0.85, rotateY: 90 }}
               animate={{ scale: 1, rotateY: 0 }}
               transition={{ duration: 0.45 }}
-              className="w-full max-w-2xl rounded-2xl border border-line bg-surface p-8"
+              className="w-full max-w-2xl rounded-2xl border border-line bg-surface p-8 outline-none"
               style={{ borderColor: CATEGORY_HEX[openQ.category] }}
             >
               <div className="flex items-baseline justify-between">
@@ -390,7 +408,7 @@ export default function BoardGame({
                 )}
               </div>
 
-              <p className={`display mt-6 leading-tight ${PROMPT_SIZE[settings.textSize]}`}>
+              <p id="board-q-prompt" className={`display mt-6 leading-tight ${PROMPT_SIZE[settings.textSize]}`}>
                 {openQ.prompt}
               </p>
 
