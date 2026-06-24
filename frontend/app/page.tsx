@@ -141,7 +141,7 @@ export default function Home() {
         <div className="mt-auto">
           {/* Order seal — the flaming spade & all-seeing eye */}
           <img
-            src="/logo-256.png"
+            src="/logo-256.png?v=2"
             alt="The Parlor — a secret order"
             width={120}
             height={132}

@@ -22,7 +22,7 @@ export default function SiteFooter() {
         <div>
           <Link href="/" className="flex items-center gap-3 transition hover:opacity-80">
             <img
-              src="/logo-96.png"
+              src="/logo-96.png?v=2"
               alt="The Parlor"
               width={36}
               height={40}

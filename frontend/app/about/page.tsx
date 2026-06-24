@@ -40,7 +40,7 @@ export default function AboutPage() {
 
         <div className="mt-10 flex flex-col items-center text-center">
           <img
-            src="/logo-256.png"
+            src="/logo-256.png?v=2"
             alt="The Secret Order seal"
             width={104}
             height={114}

@@ -21,7 +21,9 @@ const DEFAULT_TITLE = `${SITE_NAME} — ${TAGLINE}`;
 const DEFAULT_DESC =
   "Ten rooms behind one velvet door — trivia forged nightly and a new murder mystery every dusk. Light a candle and pick a door.";
 // Square seal works as a "summary" card; explicit dims keep crawlers from guessing.
-const SEAL = { url: "/logo-512.png", width: 512, height: 512, alt: "The Secret Order seal" };
+// ?v=2 busts the year-long immutable cache that froze the old white seal on prod
+// (the file was regenerated under the same name). Bump on any future seal change.
+const SEAL = { url: "/logo-512.png?v=2", width: 512, height: 512, alt: "The Secret Order seal" };
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -38,7 +40,7 @@ export const metadata: Metadata = {
     "PARLOR",
     "guessing games",
   ],
-  icons: { icon: "/icon.png", apple: "/apple-touch-icon.png" },
+  icons: { icon: "/icon.png?v=2", apple: "/apple-touch-icon.png?v=2" },
   openGraph: {
     type: "website",
     siteName: SITE_NAME,
