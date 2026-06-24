@@ -12,7 +12,10 @@ name: etl_daily
 
 on:
   schedule:
-    - cron: "20 9 * * *" # 09:20 UTC daily
+    # Every 3h = 8 runs/day. The bank is still thin, so accumulate aggressively
+    # (each run pulls fresh opentdb/jService/Wikipedia questions). The ratecap job
+    # below hard-stops at 10 runs/day so manual dispatches can't blow past it.
+    - cron: "0 */3 * * *"
   workflow_dispatch: {}
 
 # Shared across etl_daily + wiki_hard: only ONE bank writer runs at a time, so the
@@ -23,7 +26,35 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # Hard ceiling: never run the heavy ETL more than 10×/day, whatever the trigger
+  # mix (8 scheduled + manual dispatches). Counts today's runs of this workflow;
+  # downstream jobs gate on `proceed`. A skipped gate is not a failure, so the
+  # notify-failure job stays quiet.
+  ratecap:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+    outputs:
+      proceed: ${{ steps.gate.outputs.proceed }}
+    steps:
+      - id: gate
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          today=$(date -u +%Y-%m-%d)
+          count=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow etl_daily.yml \
+            --created "$today" --limit 50 --json databaseId --jq 'length' 2>/dev/null || echo 0)
+          echo "runs today (incl. this one): $count"
+          if [ "$count" -gt 10 ]; then
+            echo "proceed=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::etl_daily already ran 10× today — skipping to respect the daily cap."
+          else
+            echo "proceed=true" >> "$GITHUB_OUTPUT"
+          fi
+
   extract:
+    needs: ratecap
+    if: ${{ needs.ratecap.outputs.proceed == 'true' }}
     runs-on: ubuntu-latest
     # `secrets` can't be used in a step `if:` — hoist to env, gate on env below.
     env:
@@ -70,6 +101,17 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
+      - name: Ingest trivia APIs (opentdb + jService + QuizAPI)
+        continue-on-error: true
+        run: python pipeline/trivia_ingest.py
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          QUIZAPI_KEY: ${{ secrets.QUIZAPI_KEY }}
+      - name: Ingest Wikipedia package (breadth top-up)
+        continue-on-error: true
+        run: python pipeline/wiki_pkg_ingest.py
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
       - name: Upload bronze layer
         uses: actions/upload-artifact@v4
         with:
@@ -155,6 +197,8 @@ jobs:
   # role). No DB secret → the generate step is skipped (rooms stay dark; there is
   # no offline/seed fallback for these two rooms by design).
   puzzles:
+    needs: ratecap
+    if: ${{ needs.ratecap.outputs.proceed == 'true' }}
     runs-on: ubuntu-latest
     # `secrets` can't be used in a step `if:` — hoist to env, gate on env below.
     env:

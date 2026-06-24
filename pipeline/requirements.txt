@@ -4,5 +4,6 @@ tenacity==9.0.0
 rich==13.9.4
 python-dotenv==1.2.2
 python-slugify==8.0.4
+wikipedia==1.4.0
 dbt-core==1.9.4
 dbt-duckdb==1.9.2

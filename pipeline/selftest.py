@@ -92,6 +92,15 @@ def synthetic_facts() -> list[dict]:
             fact_text=f"A landmark from the great voyage, known to every sailor who set sail.",
             popularity=20.0 + j, source_url="https://example.com",
         ))
+
+    # Ready-made MC trivia (trivia_ingest: opentdb/QuizAPI) → forge_trivia keeps
+    # the source's own distractors.
+    facts.append(make_fact(
+        source="opentdb", category="screen", subject="Inception",
+        fact_text="Which 2010 Christopher Nolan film unfolds as a dream within a dream?",
+        popularity=55.0, source_url="https://opentdb.com",
+        meta={"trivia_q": True, "choices": ["Inception", "Tenet", "Interstellar", "Memento"]},
+    ))
     return facts
 
 
@@ -151,6 +160,22 @@ def main() -> None:
             check("clue carries board theme tags", isinstance(themes, list) and "library" in themes,
                   f"{themes}")
             break
+
+    # 2.21 board distractors: clues get same-category multiple-choice options so
+    # the board's easy mode doesn't synthesize cross-category giveaways.
+    clue_choices = [q for q in qs if q["qtype"] == "clue" and q.get("choices")]
+    check("clues carry same-category choices", len(clue_choices) > 0,
+          f"{len(clue_choices)} clues with choices")
+    if clue_choices:
+        cc = clue_choices[0]
+        check("clue choices include the answer, 4 options",
+              cc["correct"] in cc["choices"] and len(cc["choices"]) == 4)
+
+    # forge_trivia keeps the source's hand-authored distractors verbatim.
+    trivia_mc = [q for q in qs if q["qtype"] == "multiple_choice" and q["correct"] == "Inception"]
+    check("forge_trivia emits MC keeping source distractors",
+          bool(trivia_mc) and set(trivia_mc[0]["choices"]) ==
+          {"Inception", "Tenet", "Interstellar", "Memento"})
 
     for q in qs:
         if q["qtype"] == "seance":
