@@ -7,7 +7,10 @@ import { playMelody, sfx } from "@/lib/sound";
 import { haptic } from "@/lib/haptics";
 import { useProfile, type Achievement } from "@/lib/profile";
 import { shuffled } from "@/lib/rng";
-import Confetti from "@/components/Confetti";
+import dynamic from "next/dynamic";
+// code-split: the win-only canvas confetti is fetched on demand, not in
+// the room's initial bundle (perf 2.16).
+const Confetti = dynamic(() => import("@/components/Confetti"), { ssr: false });
 import AchievementToast from "@/components/AchievementToast";
 import LeaderboardPanel from "@/components/LeaderboardPanel";
 

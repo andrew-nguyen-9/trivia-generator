@@ -10,12 +10,20 @@ import { project, unproject, type LatLng } from "@/lib/geo";
 // renders, so the Google Map path (which never mounts WorldMap) skips it entirely.
 let LAND_PATH_CACHE = "";
 
+// Equirectangular has no wrap handling, so a ring that crosses the antimeridian
+// (e.g. Antarctica, Chukotka, Fiji) has consecutive vertices whose longitude
+// jumps ~+180 → ~-180. Drawing an `L` between them sweeps a horizontal line
+// straight across the map — the "stray lines" bug. We break the subpath (start a
+// fresh `M`) whenever a step jumps more than half the world in x.
 function ringsToPath(coords: Position[][]): string {
   let d = "";
   for (const ring of coords) {
-    ring.forEach(([lng, lat], i) => {
+    let prevX: number | null = null;
+    ring.forEach(([lng, lat]) => {
       const { x, y } = project({ lat, lng });
-      d += `${i ? "L" : "M"}${x.toFixed(1)},${y.toFixed(1)}`;
+      const jumped = prevX !== null && Math.abs(x - prevX) > 180;
+      d += `${prevX === null || jumped ? "M" : "L"}${x.toFixed(1)},${y.toFixed(1)}`;
+      prevX = x;
     });
     d += "Z";
   }
@@ -59,6 +67,11 @@ export default function WorldMap({
     });
   }, []);
 
+  // keyboard crosshair (a11y 2.14): focus the map, arrow-keys move a reticle,
+  // Enter/Space drops the pin. Step is 5° (Shift = 1° fine adjust).
+  const [kb, setKb] = useState<LatLng>({ lat: 20, lng: 0 });
+  const [focused, setFocused] = useState(false);
+
   function handleClick(e: React.MouseEvent<SVGSVGElement>) {
     if (disabled || !svgRef.current) return;
     const rect = svgRef.current.getBoundingClientRect();
@@ -67,16 +80,38 @@ export default function WorldMap({
     onPick(unproject(x, y));
   }
 
+  function handleKey(e: React.KeyboardEvent<SVGSVGElement>) {
+    if (disabled) return;
+    const step = e.shiftKey ? 1 : 5;
+    let { lat, lng } = kb;
+    if (e.key === "ArrowUp") lat = Math.min(90, lat + step);
+    else if (e.key === "ArrowDown") lat = Math.max(-90, lat - step);
+    else if (e.key === "ArrowLeft") lng = Math.max(-180, lng - step);
+    else if (e.key === "ArrowRight") lng = Math.min(180, lng + step);
+    else if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      onPick(kb);
+      return;
+    } else return;
+    e.preventDefault();
+    setKb({ lat, lng });
+  }
+
   const g = guess ? project(guess) : null;
   const t = truth ? project(truth) : null;
+  const k = focused && !disabled ? project(kb) : null;
 
   return (
     <svg
       ref={svgRef}
       viewBox="0 0 360 180"
       onClick={handleClick}
-      role="img"
-      aria-label="world map — click to place your guess"
+      onKeyDown={handleKey}
+      onFocus={() => setFocused(true)}
+      onBlur={() => setFocused(false)}
+      tabIndex={disabled ? -1 : 0}
+      role="application"
+      aria-label="World map. Click to place your guess, or focus and use arrow keys to move the reticle and Enter to drop the pin."
       className={`w-full rounded-2xl border border-line bg-surface ${disabled ? "" : "cursor-crosshair"}`}
     >
       {landPath && (
@@ -98,6 +133,14 @@ export default function WorldMap({
           <circle cx={g.x} cy={g.y} r="2.4" fill="none" stroke="#f0ede6" strokeWidth="0.8" />
           <circle cx={g.x} cy={g.y} r="0.9" fill="#f0ede6" />
         </>
+      )}
+      {k && (
+        /* keyboard reticle (only while the map is focused) */
+        <g stroke={accent} strokeWidth="0.6" opacity="0.9">
+          <line x1={k.x - 4} y1={k.y} x2={k.x + 4} y2={k.y} />
+          <line x1={k.x} y1={k.y - 4} x2={k.x} y2={k.y + 4} />
+          <circle cx={k.x} cy={k.y} r="2" fill="none" />
+        </g>
       )}
       {t && (
         <>

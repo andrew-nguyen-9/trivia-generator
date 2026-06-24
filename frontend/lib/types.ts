@@ -16,7 +16,8 @@ export type QType =
   | "image_guess"
   | "connections"
   | "seance"
-  | "ladder";
+  | "ladder"
+  | "thread";
 
 export interface LadderCandidate {
   label: string;
@@ -36,6 +37,14 @@ export interface ConnectionGroup {
   label: string;
   members: string[]; // exactly 4
   difficulty?: number; // 1 (easy/yellow) … 4 (tricky/purple)
+}
+
+/** One link in a THE THREAD chain. answer[n] ends with the letter answer[n+1]
+ *  starts with; `link` explains why this answer ties to the master theme. */
+export interface ThreadLink {
+  prompt: string;
+  answer: string;
+  link: string; // why this answer is tied to the theme / passes to the next
 }
 
 export interface Question {
@@ -60,6 +69,9 @@ export interface Question {
   groups?: ConnectionGroup[]; // Connections puzzle
   clues?: string[];             // seance: ordered clue strings (vague → specific)
   candidates?: LadderCandidate[]; // ladder: comparable sibling pool
+  chain?: ThreadLink[];           // thread: ordered last-letter→first-letter links
+  theme?: string;                 // thread: the master theme (the final answer)
+  theme_choices?: string[];       // thread: optional choices for the final guess (theme included)
 }
 
 export const CATEGORIES: Category[] = [
@@ -78,6 +90,18 @@ export const CATEGORY_LABEL: Record<Category, string> = {
   screen: "Screen",
   geography: "Geography",
   wildcard: "Wildcard",
+};
+
+// Non-color channel for category (a11y 2.14): never rely on CATEGORY_HEX alone —
+// pair the colour with this suit glyph (and/or CATEGORY_LABEL) so colour-blind
+// players can still tell categories apart. Single source; mirrors the card suits.
+export const CATEGORY_GLYPH: Record<Category, string> = {
+  history: "♦",
+  music: "♥",
+  sports: "♣",
+  screen: "♠",
+  geography: "✦",
+  wildcard: "✧",
 };
 
 // hex values mirror tailwind.config.ts — used where Tailwind classes can't reach (SVG, inline glow)

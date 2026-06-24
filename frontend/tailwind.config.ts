@@ -5,21 +5,22 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // PARLOR — magic-mansion / secret-order palette (drawn from the logo:
-        // oxblood ground, brass-gold filigree, candle flame, wine-burgundy eye).
-        bg: "#150409", // deep oxblood, near-black
-        surface: "#24101a", // lifted burgundy velvet
-        line: "#4a2233", // brass-burgundy hairline
-        ink: "#f0e6cf", // parchment cream
-        muted: "#9a7a78", // dusty mauve
-        brass: "#a87a2e", // antiqued brass
-        gold: "#c9a24a", // logo gold
-        goldlite: "#e6c878", // gilt highlight
-        candle: "#f5c542", // flame core
-        smoke: "#5a4452",
-        ember: "#d4431e", // flame / danger
-        burgundy: "#6e1f2b", // the all-seeing eye
-        parchment: "#efe8c0",
+        // PARLOR semantic tokens — driven by CSS vars in globals.css so they
+        // remap between dark (candlelight) and light (daylit) themes. RGB-channel
+        // vars keep Tailwind's `/<alpha>` opacity modifiers working.
+        bg: "rgb(var(--c-bg) / <alpha-value>)",
+        surface: "rgb(var(--c-surface) / <alpha-value>)",
+        line: "rgb(var(--c-line) / <alpha-value>)",
+        ink: "rgb(var(--c-ink) / <alpha-value>)",
+        muted: "rgb(var(--c-muted) / <alpha-value>)",
+        brass: "rgb(var(--c-brass) / <alpha-value>)",
+        gold: "rgb(var(--c-gold) / <alpha-value>)",
+        goldlite: "rgb(var(--c-goldlite) / <alpha-value>)",
+        candle: "rgb(var(--c-candle) / <alpha-value>)",
+        smoke: "rgb(var(--c-smoke) / <alpha-value>)",
+        ember: "rgb(var(--c-ember) / <alpha-value>)",
+        burgundy: "rgb(var(--c-burgundy) / <alpha-value>)",
+        parchment: "rgb(var(--c-parchment) / <alpha-value>)",
         // Category jewel tones — mirrored in lib/types.ts CATEGORY_HEX
         history: "#c8852a",
         music: "#b83468",

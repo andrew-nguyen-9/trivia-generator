@@ -78,6 +78,20 @@ def synthetic_facts() -> list[dict]:
             numeric_value=float(i + 1), numeric_unit="Deezer albums",
             popularity=10.0 * i, source_url="https://example.com",
         ))
+
+    # THE THREAD (2.8): a set of geography subjects that (a) share a board theme
+    # via a keyword in the prose ('voyage') and (b) chain by last-letter→first-
+    # letter (Oceanus→Seafarer→Rudder→Reef→Frigate→Estuary), so forge_thread can
+    # build a clean themed chain offline.
+    # source must NOT be the broad 'wikipedia' sweep — forge_thread's notability
+    # gate bars that source from chains (obscure stubs make unguessable themes).
+    chain_subjects = ["Oceanus", "Seafarer", "Rudder", "Reef", "Frigate", "Estuary"]
+    for j, subj in enumerate(chain_subjects):
+        facts.append(make_fact(
+            source="curated", category="geography", subject=subj,
+            fact_text=f"A landmark from the great voyage, known to every sailor who set sail.",
+            popularity=20.0 + j, source_url="https://example.com",
+        ))
     return facts
 
 
@@ -107,6 +121,7 @@ def main() -> None:
     check("forge produces where", "where" in types)
     check("forge produces seance", "seance" in types)
     check("forge produces ladder", "ladder" in types)
+    check("forge produces thread", "thread" in types)
 
     for q in qs:
         if q["qtype"] == "where":
@@ -130,6 +145,11 @@ def main() -> None:
     for q in qs:
         if q["qtype"] == "clue":
             check("clue does not leak the answer", q["correct"].lower() not in q["prompt"].lower())
+            # THE BOARD (2.3): every clue carries board theme tags incl. the
+            # 'library' fallback, so the board can group/select by daily theme.
+            themes = (q.get("meta") or {}).get("board_themes") or []
+            check("clue carries board theme tags", isinstance(themes, list) and "library" in themes,
+                  f"{themes}")
             break
 
     for q in qs:
@@ -154,6 +174,29 @@ def main() -> None:
             break
     else:
         check("forge produces ladder", False, "no ladder question in output")
+
+    for q in qs:
+        if q["qtype"] == "thread":
+            chain = q.get("chain") or []
+            check("thread has ≥5 links", len(chain) >= 5, f"{len(chain)} found")
+            check("thread links carry prompt/answer/link",
+                  all(all(k in lk for k in ("prompt", "answer", "link")) for lk in chain))
+            # last-letter→first-letter adjacency holds across the whole chain
+            import re as _re
+            keys = [_re.sub(r"[^a-z]", "", lk["answer"].lower()) for lk in chain]
+            adj_ok = all(keys[i][-1] == keys[i + 1][0] for i in range(len(keys) - 1))
+            check("thread chain is last-letter→first-letter adjacent", adj_ok)
+            theme = q.get("theme") or ""
+            check("thread has a master theme", bool(theme) and q["correct"] == theme)
+            # no link prompt may leak the theme name
+            check("thread links don't leak the theme",
+                  all(theme.lower() not in lk["prompt"].lower() for lk in chain))
+            choices = q.get("theme_choices") or []
+            check("thread final choices include the theme",
+                  theme in choices and len(choices) >= 2)
+            break
+    else:
+        check("forge produces thread", False, "no thread question in output")
 
     d = date(2026, 6, 12)
     b1, b2 = build_daily_board(qs, d), build_daily_board(qs, d)
@@ -204,11 +247,37 @@ def main() -> None:
             if q["qtype"] == "ladder":
                 ok = ok and isinstance(q.get("candidates"), list) and len(q["candidates"]) >= 3
                 ok = ok and any(c.get("label") == q["correct"] for c in (q.get("candidates") or []))
+            if q["qtype"] == "thread":
+                chain = q.get("chain") or []
+                ok = ok and isinstance(chain, list) and len(chain) >= 5
+                ok = ok and all(all(k in lk for k in ("prompt", "answer", "link")) for lk in chain)
+                ok = ok and q.get("theme") == q["correct"]
             if not ok:
                 check("seed bank question shape", False, json.dumps(q)[:120])
                 break
         else:
             check("seed bank question shapes all valid", True)
+
+        # ── offline playability gates (Clock 2.4 / Thread 2.8) ────────────────
+        # THE CLOCK needs dated facts offline; the broad scrapers produce none
+        # (year is null), so the curated baseline must keep year_guess fuel here.
+        yg = [q for q in bank if q["qtype"] == "year_guess"]
+        check("seed bank has year_guess fuel for THE CLOCK", len(yg) >= 6, f"{len(yg)} found")
+        check("year_guess prompts don't leak the year",
+              all(str(q.get("year")) not in q["prompt"] for q in yg))
+        # THE CLOCK's audio rounds must play offline: melody facts (no audio files)
+        # carry a synthesizable note list + a year to guess.
+        au = [q for q in bank if q["qtype"] == "audio_guess"]
+        check("seed bank has offline audio rounds for THE CLOCK", len(au) >= 3, f"{len(au)} found")
+        check("audio rounds carry an offline melody + year",
+              all(isinstance(q.get("melody"), list) and q["melody"] and isinstance(q.get("year"), int) for q in au))
+        # THE THREAD's master theme must be deducible, not handed over: no chain
+        # answer may equal the theme it belongs to.
+        for q in (q for q in bank if q["qtype"] == "thread"):
+            theme = (q.get("theme") or "").lower()
+            answers = [lk["answer"].lower() for lk in (q.get("chain") or [])]
+            check("thread answers don't leak the theme", theme and theme not in answers,
+                  f"{q.get('theme')} ∈ {[lk['answer'] for lk in q.get('chain') or []]}")
 
         # ── difficulty calibration gate ──────────────────────────────────────
         # New/sourced questions must spread across tiers, not pile onto one

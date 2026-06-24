@@ -51,6 +51,26 @@ describe("deduceCulprits", () => {
       if (!c.culprits.includes(s.id)) expect(deduced.has(s.id)).toBe(false);
     }
   });
+
+  it("makes WHO a visible corroboration puzzle: culprits alone, innocents paired", () => {
+    // The day's logic: at the murder hour, every innocent shares their claimed
+    // room with >=1 other suspect; every culprit is the lone occupant of theirs.
+    for (let i = 0; i < 200; i++) {
+      const date = new Date(Date.UTC(2026, 0, 1) + i * 86400000).toISOString().slice(0, 10);
+      const c = generateCase(date);
+      const h = c.hourIndex;
+      const tally = new Map<string, number>();
+      for (const s of c.suspects) {
+        const room = c.dossiers[s.id].claimed[h];
+        tally.set(room, (tally.get(room) ?? 0) + 1);
+        expect(room).not.toBe(c.scene); // nobody claims the scene at the fatal hour
+      }
+      for (const s of c.suspects) {
+        const alone = tally.get(c.dossiers[s.id].claimed[h]) === 1;
+        expect(alone).toBe(c.culprits.includes(s.id));
+      }
+    }
+  });
 });
 
 describe("deductionMatrix", () => {

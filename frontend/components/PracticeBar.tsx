@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CATEGORY_HEX, CATEGORY_LABEL } from "@/lib/types";
 import type { SavedQ } from "@/lib/usePractice";
 
@@ -16,6 +16,15 @@ export default function PracticeBar({
   onRemove: (prompt: string) => void;
 }) {
   const [panelOpen, setPanelOpen] = useState(false);
+
+  // Escape closes the saved-questions panel (it's a dismissible dialog, unlike
+  // a committed board question). Shared by every room, so this lands everywhere.
+  useEffect(() => {
+    if (!panelOpen) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setPanelOpen(false);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [panelOpen]);
 
   return (
     <>
@@ -47,6 +56,9 @@ export default function PracticeBar({
           onClick={() => setPanelOpen(false)}
         >
           <div
+            role="dialog"
+            aria-modal="true"
+            aria-label={`saved questions, ${saved.length}`}
             className="max-h-[80vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-line bg-surface p-6"
             onClick={(e) => e.stopPropagation()}
           >

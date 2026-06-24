@@ -425,8 +425,9 @@ _QUESTION_COLS = (
     "content_hash", "qtype", "category", "difficulty", "prompt", "correct",
     "choices", "year", "value_a", "value_b", "subject_a", "subject_b", "unit",
     "lat", "lng", "image_url", "source_url", "clues", "candidates",
+    "chain", "theme", "theme_choices",
 )
-_QUESTION_JSONB = {"choices", "clues", "candidates"}
+_QUESTION_JSONB = {"choices", "clues", "candidates", "chain", "theme_choices"}
 
 
 def get_db():

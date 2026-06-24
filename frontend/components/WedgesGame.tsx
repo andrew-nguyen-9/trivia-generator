@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import {
   CATEGORIES,
   CATEGORY_HEX,
@@ -9,126 +9,222 @@ import {
   type Category,
   type Question,
 } from "@/lib/types";
+import { mulberry32, hashKey, shuffled } from "@/lib/rng";
+import {
+  buildDailyWedges,
+  shatterMirror,
+  ghostQuip,
+  GHOST_NAME,
+  type MirrorShard,
+} from "@/lib/wedges";
 import { usePractice } from "@/lib/usePractice";
 import PracticeBar from "@/components/PracticeBar";
 import { sfx } from "@/lib/sound";
 import { haptic } from "@/lib/haptics";
 import { useProfile, type Achievement } from "@/lib/profile";
-import Confetti from "@/components/Confetti";
+import dynamic from "next/dynamic";
+// code-split: the win-only canvas confetti is fetched on demand, not in
+// the room's initial bundle (perf 2.16).
+const Confetti = dynamic(() => import("@/components/Confetti"), { ssr: false });
 import AchievementToast from "@/components/AchievementToast";
 import LeaderboardPanel from "@/components/LeaderboardPanel";
 
-const MAX_QUESTIONS = 20;
+const QUESTION_SECONDS = 15;
 
-function WedgeRing({ earned }: { earned: Set<Category> }) {
-  const R = 54;
-  const C = 60;
+/** Deterministic choice order keyed by the prompt (SSR/client agree, comparable). */
+function dailyChoices(q: Question): string[] {
+  const choices = q.choices ?? [q.correct];
+  return shuffled(choices, mulberry32(hashKey(q.prompt)));
+}
+
+/** The shattered mirror — six wedges that crack along daily-shifting fault lines. */
+function ShatteredMirror({
+  shards,
+  earned,
+  reduced,
+}: {
+  shards: MirrorShard[];
+  earned: Set<Category>;
+  reduced: boolean;
+}) {
   return (
-    <svg viewBox="0 0 120 120" className="h-36 w-36">
-      {CATEGORIES.map((cat, i) => {
-        const a0 = (i / 6) * 2 * Math.PI - Math.PI / 2 + 0.04;
-        const a1 = ((i + 1) / 6) * 2 * Math.PI - Math.PI / 2 - 0.04;
-        const x0 = C + R * Math.cos(a0);
-        const y0 = C + R * Math.sin(a0);
-        const x1 = C + R * Math.cos(a1);
-        const y1 = C + R * Math.sin(a1);
-        const has = earned.has(cat);
+    <svg viewBox="0 0 120 120" className="h-36 w-36 drop-shadow-[0_0_12px_rgba(0,0,0,0.6)]">
+      <circle cx={60} cy={60} r={56} fill="#06060a" stroke="#1a1a2e" />
+      {shards.map((shard) => {
+        const has = earned.has(shard.category);
         return (
           <motion.path
-            key={cat}
-            d={`M ${C} ${C} L ${x0} ${y0} A ${R} ${R} 0 0 1 ${x1} ${y1} Z`}
-            fill={has ? CATEGORY_HEX[cat] : "#0d0d18"}
+            key={shard.category}
+            d={shard.path}
+            fill={has ? shard.fill : "#0d0d18"}
             stroke="#1a1a2e"
-            strokeWidth="1.5"
-            animate={has ? { scale: [1, 1.12, 1] } : {}}
+            strokeWidth="0.8"
+            animate={has && !reduced ? { opacity: [0.4, 1], scale: [1, 1.08, 1] } : {}}
             transition={{ duration: 0.4 }}
             style={{ transformOrigin: "60px 60px" }}
           />
         );
       })}
-      <circle cx={C} cy={C} r={20} fill="#06060a" stroke="#1a1a2e" />
-      <text
-        x={C}
-        y={C + 4}
-        textAnchor="middle"
-        fill="#f0ede6"
-        fontSize="11"
-        fontWeight="900"
-      >
+      <circle cx={60} cy={60} r={18} fill="#06060a" stroke="#1a1a2e" />
+      <text x={60} y={64} textAnchor="middle" fill="#f0ede6" fontSize="11" fontWeight="900">
         {earned.size}/6
       </text>
     </svg>
   );
 }
 
-export default function WedgesGame({ pool }: { pool: Question[] }) {
+/** The resident ghost — drifts in with a quip on a miss/timeout. */
+function Ghost({ quip, reduced }: { quip: string | null; reduced: boolean }) {
+  if (!quip) return null;
+  return (
+    <motion.div
+      className="mt-4 flex items-start gap-3 rounded-xl border border-line bg-surface/70 p-4"
+      initial={reduced ? { opacity: 1 } : { opacity: 0, x: -12 }}
+      animate={
+        reduced
+          ? { opacity: 1 }
+          : { opacity: 1, x: 0, y: [0, -3, 0] }
+      }
+      transition={reduced ? {} : { y: { duration: 3, repeat: Infinity }, opacity: { duration: 0.5 } }}
+    >
+      <span className="text-2xl" aria-hidden>
+        👻
+      </span>
+      <div>
+        <p className="microlabel text-history">{GHOST_NAME}</p>
+        <p className="mt-1 italic text-muted">&ldquo;{quip}&rdquo;</p>
+      </div>
+    </motion.div>
+  );
+}
+
+export default function WedgesGame({ pool, day }: { pool: Question[]; day: number }) {
   const { practiceMode, togglePractice, saved, saveQ, removeQ, isSaved } = usePractice();
-
-  const byCat = useMemo(() => {
-    const m = new Map<Category, Question[]>();
-    for (const q of pool) m.set(q.category, [...(m.get(q.category) ?? []), q]);
-    return m;
-  }, [pool]);
-
   const { record } = useProfile();
+  const reduced = Boolean(useReducedMotion());
+
+  // The shared daily partition: per-category order, the served slice, the bonus
+  // remainder. Identical for every player on `day` (SSR-deterministic).
+  const daily = useMemo(() => buildDailyWedges(pool, day), [pool, day]);
+  const shards = useMemo(() => shatterMirror(day), [day]);
+
+  // Main-round queue: the served slices, interleaved round-robin across categories
+  // so wedges fill evenly. Deterministic from the daily partition.
+  const mainQueue = useMemo<Question[]>(() => {
+    const out: Question[] = [];
+    for (let i = 0; ; i++) {
+      let added = false;
+      for (const cat of CATEGORIES) {
+        const q = daily.served[cat][i];
+        if (q) {
+          out.push(q);
+          added = true;
+        }
+      }
+      if (!added) break;
+    }
+    return out;
+  }, [daily]);
+
   const [started, setStarted] = useState(false);
-  const [queue, setQueue] = useState<Question[]>([]);
-  const [asked, setAsked] = useState(0);
+  const [phase, setPhase] = useState<"main" | "bonus">("main");
+  const [idx, setIdx] = useState(0);
   const [earned, setEarned] = useState<Set<Category>>(new Set());
+  const [locked, setLocked] = useState<Set<Category>>(new Set());
   const [picked, setPicked] = useState<string | null>(null);
-  const [order, setOrder] = useState<string[]>([]);
+  const [quip, setQuip] = useState<string | null>(null);
+  const [secondsLeft, setSecondsLeft] = useState(QUESTION_SECONDS);
   const [toasts, setToasts] = useState<Achievement[]>([]);
   const [burst, setBurst] = useState(0);
   const recorded = useRef(false);
   const stats = useRef<Partial<Record<Category, { correct: number; total: number }>>>({});
 
+  const queue = phase === "main" ? mainQueue : daily.bonus;
+
+  // Advance past any locked-out categories (their wedge is complete).
+  const visibleIdx = useMemo(() => {
+    let i = idx;
+    while (i < queue.length && locked.has(queue[i].category)) i++;
+    return i;
+  }, [idx, queue, locked]);
+
+  const q = queue[visibleIdx];
+  const order = useMemo(() => (q ? dailyChoices(q) : []), [q]);
+  const wonRing = earned.size === 6;
+  const mainDone = phase === "main" && (wonRing || visibleIdx >= queue.length);
+  const over = phase === "bonus" && visibleIdx >= queue.length;
+
   function start() {
-    const qs = [...pool].sort(() => Math.random() - 0.5);
-    setQueue(qs);
-    setEarned(new Set());
-    setAsked(0);
-    setPicked(null);
     setStarted(true);
-    setOrder(qs.length ? [...(qs[0].choices ?? [])].sort(() => Math.random() - 0.5) : []);
+    setPhase("main");
+    setIdx(0);
+    setEarned(new Set());
+    setLocked(new Set());
+    setPicked(null);
+    setQuip(null);
+    setSecondsLeft(QUESTION_SECONDS);
     recorded.current = false;
     stats.current = {};
   }
 
-  function answer(choice: string) {
-    if (picked) return;
-    setPicked(choice);
-    const q = queue[0];
+  function resolve(choice: string | null) {
+    if (picked || !q) return;
+    setPicked(choice ?? "⏱");
     const right = choice === q.correct;
     const s = stats.current[q.category] ?? { correct: 0, total: 0 };
-    stats.current[q.category] = { correct: s.correct + (right ? 1 : 0), total: s.total + 1 };
+    stats.current[q.category] = {
+      correct: s.correct + (right ? 1 : 0),
+      total: s.total + 1,
+    };
     if (right) {
-      setEarned((set) => new Set(set).add(q.category));
+      setEarned((set) => {
+        const next = new Set(set).add(q.category);
+        return next;
+      });
+      // Lockout: once a category is earned, it serves no more questions.
+      setLocked((set) => new Set(set).add(q.category));
       sfx.correct();
       haptic.correct();
+      setQuip(null);
     } else {
       sfx.wrong();
       haptic.wrong();
+      // The ghost jabs — deterministic per (question, miss kind).
+      setQuip(ghostQuip(`${q.prompt}|${choice ?? "timeout"}`));
     }
   }
 
   function next() {
-    const rest = queue.slice(1);
-    setQueue(rest);
-    setAsked((n) => n + 1);
     setPicked(null);
-    setOrder(
-      rest.length ? [...(rest[0].choices ?? [])].sort(() => Math.random() - 0.5) : [],
-    );
+    setQuip(null);
+    setSecondsLeft(QUESTION_SECONDS);
+    setIdx(visibleIdx + 1);
   }
 
-  const q = queue[0];
-  const won = earned.size === 6;
-  const over = won || asked >= MAX_QUESTIONS || !q;
+  function toBonus() {
+    setPhase("bonus");
+    setIdx(0);
+    setPicked(null);
+    setQuip(null);
+    setSecondsLeft(QUESTION_SECONDS);
+  }
 
+  // Per-question countdown. On timeout, auto-resolve as a miss.
+  useEffect(() => {
+    if (!started || picked || !q || over || mainDone) return;
+    if (secondsLeft <= 0) {
+      resolve(null);
+      return;
+    }
+    const t = setTimeout(() => setSecondsLeft((s) => s - 1), 1000);
+    return () => clearTimeout(t);
+  }, [started, picked, q, over, mainDone, secondsLeft]);
+
+  // Record result once when the run is fully over.
   useEffect(() => {
     if (!started || !over || recorded.current) return;
     recorded.current = true;
-    if (won) {
+    if (wonRing) {
       sfx.win();
       haptic.win();
       setBurst((b) => b + 1);
@@ -138,20 +234,20 @@ export default function WedgesGame({ pool }: { pool: Question[] }) {
     const unlocked = record({
       room: "wedges",
       score: earned.size,
-      xp: earned.size * 150 + (won ? 300 : 0),
+      xp: earned.size * 150 + (wonRing ? 300 : 0),
       perCategory: stats.current,
     });
     if (unlocked.length) setToasts(unlocked);
-  }, [started, over, won, earned.size, record]);
+  }, [started, over, wonRing, earned.size, record]);
 
   if (!started || pool.length === 0) {
     return (
       <>
         <div className="flex min-h-[60vh] flex-col items-center justify-center text-center">
-          <h1 className="display text-5xl sm:text-6xl">The Wedges</h1>
+          <h1 className="display text-5xl sm:text-6xl">Fractures</h1>
           <p className="mt-3 max-w-md text-muted">
-            Fill all six wedges in {MAX_QUESTIONS} questions or fewer. A correct
-            answer earns its category&apos;s wedge.
+            Shatter the mirror — earn all six wedges. Today&apos;s questions are
+            the same for every player; beat the clock before the ghost speaks.
           </p>
           {pool.length === 0 ? (
             <p className="mt-6 text-muted">The bank is still warming up.</p>
@@ -174,17 +270,61 @@ export default function WedgesGame({ pool }: { pool: Question[] }) {
     );
   }
 
-  if (over) {
+  // Interlude between the six wedges and the optional bonus round.
+  if (mainDone) {
+    return (
+      <>
+        <Confetti trigger={wonRing ? 1 : 0} />
+        <div className="flex min-h-[60vh] flex-col items-center justify-center text-center">
+          <ShatteredMirror shards={shards} earned={earned} reduced={reduced} />
+          <p className="display mt-6 text-4xl">
+            {wonRing ? "Mirror shattered!" : `${earned.size} of 6 wedges`}
+          </p>
+          <p className="mt-2 text-muted">
+            {daily.bonus.length > 0
+              ? "The bonus round holds the questions you never saw today."
+              : "No questions left unseen — you faced them all."}
+          </p>
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+            {daily.bonus.length > 0 && (
+              <button
+                onClick={toBonus}
+                className="microlabel rounded-full border border-history px-6 py-3 text-history transition hover:bg-history hover:text-bg"
+              >
+                bonus round →
+              </button>
+            )}
+            <button
+              onClick={() => {
+                setPhase("bonus");
+                setIdx(daily.bonus.length); // skip straight to the end screen
+              }}
+              className="microlabel rounded-full border border-ink px-6 py-3 transition hover:bg-ink hover:text-bg"
+            >
+              finish
+            </button>
+          </div>
+        </div>
+        <PracticeBar
+          practiceMode={practiceMode}
+          onToggle={togglePractice}
+          saved={saved}
+          onRemove={removeQ}
+        />
+      </>
+    );
+  }
+
+  if (over || !q) {
     return (
       <>
         <Confetti trigger={burst} />
         <AchievementToast queue={toasts} />
         <div className="flex min-h-[60vh] flex-col items-center justify-center text-center">
-          <WedgeRing earned={earned} />
+          <ShatteredMirror shards={shards} earned={earned} reduced={reduced} />
           <p className="display mt-6 text-4xl">
-            {won ? "Ring complete!" : `${earned.size} of 6 wedges`}
+            {wonRing ? "Mirror shattered!" : `${earned.size} of 6 wedges`}
           </p>
-          <p className="mt-2 text-muted">{asked} questions played</p>
           <LeaderboardPanel room="wedges" score={earned.size} accent="sports" />
           <button
             onClick={start}
@@ -203,22 +343,46 @@ export default function WedgesGame({ pool }: { pool: Question[] }) {
     );
   }
 
+  const timeRatio = secondsLeft / QUESTION_SECONDS;
+
   return (
     <div className="flex flex-col items-center">
       <div className="flex w-full items-start justify-between">
         <div>
-          <h1 className="display text-4xl sm:text-5xl">The Wedges</h1>
-          <p className="microlabel mt-1">question {asked + 1}/{MAX_QUESTIONS}</p>
+          <h1 className="display text-4xl sm:text-5xl">Fractures</h1>
+          <p className="microlabel mt-1">
+            {phase === "bonus" ? "bonus round" : "the six wedges"}
+          </p>
         </div>
-        <WedgeRing earned={earned} />
+        <ShatteredMirror shards={shards} earned={earned} reduced={reduced} />
       </div>
 
       <div className="mt-4 w-full rounded-2xl border border-line bg-surface p-6 sm:p-8">
-        <span className="microlabel" style={{ color: CATEGORY_HEX[q.category] }}>
-          {CATEGORY_LABEL[q.category]} wedge
-          {earned.has(q.category) ? " · already earned" : ""}
-        </span>
-        <p className="display mt-3 text-2xl leading-tight sm:text-3xl">{q.prompt}</p>
+        <div className="flex items-center justify-between">
+          <span className="microlabel" style={{ color: CATEGORY_HEX[q.category] }}>
+            {CATEGORY_LABEL[q.category]} wedge
+          </span>
+          {!picked && (
+            <span
+              className="microlabel tabular-nums"
+              style={{ color: timeRatio < 0.34 ? CATEGORY_HEX.music : undefined }}
+            >
+              {secondsLeft}s
+            </span>
+          )}
+        </div>
+        {/* Countdown bar */}
+        <div className="mt-2 h-1 w-full overflow-hidden rounded-full bg-line">
+          <div
+            className="h-full rounded-full transition-[width] duration-1000 ease-linear"
+            style={{
+              width: picked ? "100%" : `${timeRatio * 100}%`,
+              background: CATEGORY_HEX[q.category],
+            }}
+          />
+        </div>
+
+        <p className="display mt-4 text-2xl leading-tight sm:text-3xl">{q.prompt}</p>
 
         <div className="mt-6 grid gap-3 sm:grid-cols-2">
           {order.map((choice) => {
@@ -234,7 +398,7 @@ export default function WedgesGame({ pool }: { pool: Question[] }) {
             return (
               <button
                 key={choice}
-                onClick={() => answer(choice)}
+                onClick={() => resolve(choice)}
                 disabled={Boolean(picked)}
                 className={`rounded-xl border p-4 text-left font-bold transition ${cls}`}
               >
@@ -245,6 +409,8 @@ export default function WedgesGame({ pool }: { pool: Question[] }) {
             );
           })}
         </div>
+
+        <Ghost quip={quip} reduced={reduced} />
 
         {picked && (
           <div className="mt-6 flex items-center gap-4">

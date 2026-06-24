@@ -47,6 +47,31 @@ MIN_HL_GAP_RATIO = 0.25  # higher/lower pairs must differ by ≥25% — never a 
 MIN_SEANCE_CLUES = 3     # minimum facts per subject to forge a séance question
 LADDER_CANDIDATES = 6    # candidate pool size per ladder question
 
+# THE BOARD (2.3) daily themes. The forge tags each clue with a theme keyword so
+# the board can group/select by theme; the frontend picks the day's theme
+# deterministically by date (frontend/lib/themes.ts). Keyword → matching tokens
+# scanned (case-insensitive) in the clue text / subject. "library" is the
+# always-eligible fallback (every clue suits a library).
+BOARD_THEME_KEYWORDS: dict[str, tuple[str, ...]] = {
+    "egypt": ("egypt", "nile", "pharaoh", "pyramid", "cairo", "sphinx"),
+    "noir": ("noir", "detective", "murder", "crime", "shadow", "midnight"),
+    "voyage": ("sea", "ship", "ocean", "island", "voyage", "sail", "port", "coast"),
+    "cosmos": ("space", "star", "planet", "galaxy", "moon", "comet", "orbit"),
+    "carnival": ("circus", "carnival", "festival", "parade", "fair"),
+    "deep-sea": ("deep", "trench", "abyss", "submarine", "reef", "whale"),
+    "library": (),  # fallback — always matches
+}
+
+
+def tag_board_themes(text: str, subject: str) -> list[str]:
+    """Theme keywords a clue is eligible for (always includes the 'library'
+    fallback). Lets THE BOARD group clues by the day's theme; non-matching days
+    fall back to standard categories on the frontend."""
+    hay = f"{text} {subject}".lower()
+    tags = [k for k, toks in BOARD_THEME_KEYWORDS.items() if toks and any(t in hay for t in toks)]
+    tags.append("library")
+    return tags
+
 
 # ── difficulty ──────────────────────────────────────────────────────────────
 def assign_difficulty(facts: list[dict]) -> None:
@@ -62,16 +87,47 @@ def assign_difficulty(facts: list[dict]) -> None:
 
 
 # ── recipes ─────────────────────────────────────────────────────────────────
+def forge_audio(facts: list[dict]) -> list[dict]:
+    """THE CLOCK audio rounds (folded Jukebox): a fact carrying an offline melody
+    in meta becomes a "when was this first heard?" round — the year is the answer,
+    the synthesized tune (lib/sound.ts) is the clue. No audio files involved."""
+    out = []
+    for f in facts:
+        melody = (f.get("meta") or {}).get("melody")
+        year = f.get("year")
+        if not melody or not year:
+            continue
+        out.append(
+            {
+                "content_hash": content_hash("audio_guess", f["content_hash"]),
+                "qtype": "audio_guess",
+                "category": f["category"],
+                "difficulty": f.get("_difficulty", 3),
+                "prompt": f["fact_text"],
+                "correct": str(year),
+                "year": year,
+                "melody": melody,
+                "source_url": f.get("source_url"),
+            }
+        )
+    return out
+
+
 def forge_year_guess(facts: list[dict]) -> list[dict]:
     out = []
     for f in facts:
         year = f.get("year")
         if not year or year < 1800:
             continue
+        if (f.get("meta") or {}).get("melody"):
+            continue  # melody facts are audio rounds (forge_audio), not dial rounds
         prompt = f["fact_text"]
-        # Strip the give-away year from the prompt where formulaic
-        for token in (f" in {year}", f"/{year}"):
-            prompt = prompt.replace(token, "")
+        # Redact the answer year wherever it appears so the prompt never hands it
+        # over. On-this-day facts lead with the year ("1969 – …"); the old
+        # formulaic strip (" in 1969", "/1969") missed those, leaking the answer.
+        prompt = re.sub(rf"\b{year}\b", "____", prompt).strip(" –-—:•")
+        if "____" not in prompt and str(year) in prompt:
+            continue  # year embedded in a larger token we can't cleanly redact
         out.append(
             {
                 "content_hash": content_hash("year_guess", f["content_hash"]),
@@ -189,6 +245,8 @@ def forge_clues(facts: list[dict]) -> list[dict]:
     Only facts whose text doesn't leak the subject verbatim qualify."""
     out = []
     for f in facts:
+        if (f.get("meta") or {}).get("melody"):
+            continue  # melody facts are audio-only (forge_audio); skip as clues
         subject = f["subject"]
         clue = mask_subject(f["fact_text"], subject, f)
         if clue is None:
@@ -203,6 +261,13 @@ def forge_clues(facts: list[dict]) -> list[dict]:
                 "correct": subject,
                 "image_url": f.get("image_url"),
                 "source_url": f.get("source_url"),
+                # carried for THE THREAD's notability gate; ignored by the DB
+                # upsert (not a question column) and dropped from the seed export.
+                "source": f.get("source"),
+                # THE BOARD theme tags (meta-only; not a stored column — the
+                # frontend derives the day's theme, this just lets a DB consumer
+                # group by it). See BOARD_THEME_KEYWORDS / lib/themes.ts.
+                "meta": {"board_themes": tag_board_themes(clue, subject)},
             }
         )
     return out
@@ -331,6 +396,129 @@ def forge_ladder(facts: list[dict], rng: random.Random) -> list[dict]:
                     "source_url": target.get("source_url"),
                 }
             )
+    return out
+
+
+MIN_THREAD_LINKS = 5     # shortest publishable chain for THE THREAD
+MAX_THREAD_LINKS = 7
+
+# Display names for the master theme a thread weaves toward (mirrors
+# BOARD_THEME_KEYWORDS keys; 'library' is the always-true fallback and is NOT a
+# recognizable master theme, so it's never used as a thread theme).
+THREAD_THEME_NAMES: dict[str, str] = {
+    "egypt": "Egypt",
+    "noir": "Film Noir",
+    "voyage": "The Voyage",
+    "cosmos": "The Cosmos",
+    "carnival": "The Carnival",
+    "deep-sea": "The Deep Sea",
+}
+
+
+def _chain_key(answer: str) -> str:
+    """Normalize an answer to its bare letters (for last-char→first-char joins)."""
+    return re.sub(r"[^a-z]", "", answer.lower())
+
+
+def forge_thread(clues: list[dict], rng: random.Random) -> list[dict]:
+    """THE THREAD: greedy walk over masked CLUE questions sharing a board theme,
+    chaining answer[n]'s last letter → answer[n+1]'s first letter. Every link ties
+    (even tangentially) to one recognizable master theme; the final question asks
+    for that theme. Offline-safe: derived from the same masked clues the board uses.
+
+    # ponytail: a plain greedy walk from one seed — not a max-length Hamiltonian
+    #   path over the theme graph. Good enough for a daily 5–7 link chain; if a
+    #   theme can't reach MIN_THREAD_LINKS it's skipped rather than padded.
+    """
+    by_theme: dict[str, list[dict]] = {}
+    for q in clues:
+        # Notability gate: chains must read as recognizable, so the broad
+        # random-article Wikipedia sweep (obscure SSSIs, minor houses) is barred
+        # from threads — only structured/curated sources seed a chain a player
+        # can actually name.
+        # ponytail: source allowlist by exclusion; if the wikipedia ingest ever
+        #   pulls notable articles, swap this for a per-fact notability flag.
+        if q.get("source") == "wikipedia":
+            continue
+        for t in (q.get("meta") or {}).get("board_themes", []):
+            if t not in THREAD_THEME_NAMES:  # skip 'library' — not a master theme
+                continue
+            # never let an answer give away the theme (e.g. "Egypt" in the Egypt thread)
+            if THREAD_THEME_NAMES[t].lower() in q["correct"].lower():
+                continue
+            by_theme.setdefault(t, []).append(q)
+
+    out = []
+    for theme, pool in by_theme.items():
+        # dedupe by answer spelling so a chain never repeats a word
+        seen: set[str] = set()
+        items: list[dict] = []
+        for q in pool:
+            key = _chain_key(q["correct"])
+            if not key or key in seen:
+                continue
+            seen.add(key)
+            items.append(q)
+        if len(items) < MIN_THREAD_LINKS:
+            continue
+        rng.shuffle(items)
+
+        chain: list[dict] = []
+        for start in items:
+            walk = [start]
+            used = {_chain_key(start["correct"])}
+            while len(walk) < MAX_THREAD_LINKS:
+                last = _chain_key(walk[-1]["correct"])[-1]
+                nxt = next(
+                    (q for q in items
+                     if _chain_key(q["correct"])[0] == last
+                     and _chain_key(q["correct"]) not in used),
+                    None,
+                )
+                if nxt is None:
+                    break
+                walk.append(nxt)
+                used.add(_chain_key(nxt["correct"]))
+            if len(walk) >= MIN_THREAD_LINKS:
+                chain = walk
+                break
+        if not chain:
+            continue
+
+        theme_name = THREAD_THEME_NAMES[theme]
+        links = []
+        for i, q in enumerate(chain):
+            nxt_letter = (
+                _chain_key(chain[i + 1]["correct"])[0].upper()
+                if i + 1 < len(chain) else None
+            )
+            link = f"Ties to {theme_name}."
+            if nxt_letter:
+                link += f" Its last letter passes the thread to “{nxt_letter}…”."
+            else:
+                link += " The final stitch — now name the thread."
+            links.append({"prompt": q["prompt"], "answer": q["correct"], "link": link})
+
+        # final-guess choices: the real theme + sibling theme names as distractors
+        others = [n for k, n in THREAD_THEME_NAMES.items() if k != theme]
+        choices = rng.sample(others, min(3, len(others))) + [theme_name]
+        rng.shuffle(choices)
+
+        src = next((q.get("source_url") for q in chain if q.get("source_url")), None)
+        out.append(
+            {
+                "content_hash": content_hash("thread", theme, *[q["content_hash"] for q in chain]),
+                "qtype": "thread",
+                "category": chain[0]["category"],
+                "difficulty": max(q.get("difficulty", 3) for q in chain),
+                "prompt": "What is the thread that ties them all together?",
+                "correct": theme_name,
+                "chain": links,
+                "theme": theme_name,
+                "theme_choices": choices,
+                "source_url": src,
+            }
+        )
     return out
 
 
@@ -465,14 +653,17 @@ def load_facts_from_db(conn) -> list[dict]:
 def forge_all(facts: list[dict], seed: int = 0) -> list[dict]:
     rng = random.Random(seed)
     assign_difficulty(facts)
+    clues = forge_clues(facts)
     questions = (
         forge_year_guess(facts)
+        + forge_audio(facts)
         + forge_higher_lower(facts, rng)
         + forge_multiple_choice(facts, rng)
-        + forge_clues(facts)
+        + clues
         + forge_where(facts)
         + forge_seance(facts)
         + forge_ladder(facts, rng)
+        + forge_thread(clues, rng)  # chains masked clues by theme (THE THREAD)
     )
     return questions
 
@@ -480,6 +671,13 @@ def forge_all(facts: list[dict], seed: int = 0) -> list[dict]:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--from-bronze", action="store_true", help="offline: forge from data/raw/*.jsonl")
+    ap.add_argument(
+        "--min-questions",
+        type=int,
+        default=0,
+        help="health floor: exit non-zero if fewer than N questions are forged "
+        "(catches total/per-source data decay in CI). 0 = off.",
+    )
     args = ap.parse_args()
 
     console.rule("[bold]Question forge")
@@ -492,6 +690,14 @@ def main() -> None:
     for q in questions:
         by_type[q["qtype"]] = by_type.get(q["qtype"], 0) + 1
     console.print(f"forged {len(questions)} questions: {by_type}")
+
+    # Health floor: a collapsed ingest (e.g. wikipedia 403s) yields a near-empty
+    # forge. Fail loudly instead of letting export_seed quietly keep the stale bank.
+    if args.min_questions and len(questions) < args.min_questions:
+        raise SystemExit(
+            f"health gate: forged {len(questions)} questions, floor is "
+            f"{args.min_questions} ({by_type}) — likely a starved ingest, refusing the run"
+        )
 
     n = upsert_questions(conn, questions)
     board = build_daily_board(questions, date.today())

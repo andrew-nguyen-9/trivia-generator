@@ -45,3 +45,30 @@ export function pickRotating<T>(pool: T[], count: number, dayIndex = daySeed()):
   }
   return out;
 }
+
+// A simple string hash (FNV-1a, 32-bit) so a category name can salt a seed.
+// Lets each category get its own permutation while staying date-deterministic.
+export function hashKey(key: string): number {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < key.length; i++) {
+    h ^= key.charCodeAt(i);
+    h = Math.imul(h, 0x01000193);
+  }
+  return h >>> 0;
+}
+
+// THE shared daily order. Returns the WHOLE pool re-ordered into one fixed
+// permutation that is identical for every player on `dayIndex` and stable all
+// day, but rotates day-to-day (the rotation walks the permutation like
+// pickRotating, so a given question leads on a predictable cadence rather than
+// reshuffling). Keyed by `key` (a category) so each wedge has its own order.
+// Pure + SSR-safe: no Math.random, no clock reads beyond the passed dayIndex.
+export function dailyOrder<T>(key: string, pool: T[], dayIndex = daySeed()): T[] {
+  const n = pool.length;
+  if (n === 0) return [];
+  const perm = shuffled(pool, mulberry32(0x9e3779b9 ^ hashKey(key) ^ n));
+  const start = (((dayIndex % n) + n) % n);
+  const out: T[] = [];
+  for (let i = 0; i < n; i++) out.push(perm[(start + i) % n]);
+  return out;
+}

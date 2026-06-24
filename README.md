@@ -1,4 +1,4 @@
-# PARLOR — an after-dark house of trivia games
+# PARLOR — a secret order's house of trivia games
 
 Ten trivia rooms over one question bank, forged nightly from **Wikipedia**,
 **Deezer**, **Sleeper/ESPN**, and **TMDB**. Third project in the family after
@@ -92,13 +92,19 @@ dbt build --profiles-dir .         # staging views + marts + tests on DuckDB
 
 ## Docs
 
+Start at [`docs/README.md`](docs/README.md). The **v2 framework** is canonical; v1
+docs are archived.
+
 | Doc | Contents |
 |---|---|
-| `docs/RESEARCH_TRIVIA_SOURCES.md` | trivia-source survey + the fact→question forge design |
-| `docs/RESEARCH_DATA_PLATFORM.md` | Databricks / dbt / Snowflake / BigQuery comparison + skill-building roadmap |
-| `docs/GAME_MODES.md` | room designs, scoring, Phase-2 rooms (map, jukebox, daily, multiplayer) |
-| `docs/ARCHITECTURE.md` | the full system picture |
-| `docs/UI_SPEC.md` | design tokens, signature components, motion rules |
+| `docs/v2/ROADMAP.md` | v2 spine: every phase, deps, traceability, the Secret Order canon |
+| `docs/v2/DESIGN_SYSTEM.md` | logo-derived language, card deck, light/dark, reference sites, Claude Design |
+| `docs/v2/GAMES.md` | per-game refurbishment specs + legacy folding |
+| `docs/v2/PLATFORM.md` | pipeline fix, SEO, a11y, perf, mobile, cross-browser, site pages |
+| `docs/v2/PHASE_PROMPTS.md` | copy-paste initiation prompt per phase |
+| `docs/FILE_INDEX.md` | annotated map of every dir/file |
+| `CHANGELOG.md` | version policy (1.0.0 frozen, 2.x.x per phase) |
+| `docs/archive/` | v1.0.0 docs (architecture, game modes, UI spec, research) |
 | `databricks/README.md` | Phase-2 lab: mirror the medallion onto Databricks Free Edition |
 
 Data credits: Wikipedia (CC BY-SA), Deezer API, Sleeper API, ESPN, TMDB

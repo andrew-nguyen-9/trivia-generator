@@ -29,7 +29,9 @@ the Phase-2 Delta Lake mirror lab (never the serving path).
 | `transform/` | dbt project (`dbt build --profiles-dir .` from inside it) |
 | `frontend/lib/queries.ts` | ALL data access; Neon (`lib/db.ts`) with seed-bank fallback |
 | `frontend/lib/types.ts` | Question shape + category palette (single source) |
-| `docs/UI_SPEC.md` | design tokens + component guide |
+| `docs/v2/` | v2 framework (canonical): ROADMAP, DESIGN_SYSTEM, GAMES, PLATFORM, PHASE_PROMPTS |
+| `docs/FILE_INDEX.md` | annotated map of every dir/file |
+| `docs/archive/UI_SPEC.md` | v1 design tokens (superseded by `docs/v2/DESIGN_SYSTEM.md`) |
 
 ## Conventions
 
@@ -66,7 +68,7 @@ the Phase-2 Delta Lake mirror lab (never the serving path).
 ### Add a new game room
 1. `frontend/app/{room}/page.tsx` (server: fetch + arrange) + `components/{Room}Game.tsx` (client)
 2. wrap in `RoomShell`, add a `RoomCard` on the home page
-3. document in `docs/GAME_MODES.md`
+3. document in `docs/v2/GAMES.md`
 
 ### Debugging the pipeline offline (no keys)
 ```bash

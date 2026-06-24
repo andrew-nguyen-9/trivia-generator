@@ -19,17 +19,17 @@ import {
 } from "@/lib/profile";
 
 const ROOM_LABEL: Record<Room, string> = {
-  board: "The Board",
-  clock: "The Clock",
-  wedges: "The Wedges",
-  streak: "The Streak",
-  map: "The Map",
-  daily: "The Daily",
+  board: "Codex",
+  clock: "Chronos",
+  wedges: "Fractures",
+  streak: "Ignite",
+  map: "Atlas Obscura",
+  daily: "The Gauntlet",
   jukebox: "The Jukebox",
   gallery: "The Gallery",
   blitz: "The Blitz",
   connections: "The Connections",
-  mystery: "The Mystery",
+  mystery: "Sanctum Mysterii",
 };
 
 /** last 12 weeks of play-activity, GitHub-style. */

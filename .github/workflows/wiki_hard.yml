@@ -20,16 +20,18 @@ on:
         description: "number of hard facts to mine this run"
         default: "40"
 
-# never let two scrapes race on the same branch (both push the seed bank)
+# Shared with etl_daily: a single "bank-writer" group serializes BOTH workflows so
+# they can never push the seed bank concurrently (the push-race root cause).
 concurrency:
-  group: bank-refresh
+  group: bank-writer
   cancel-in-progress: false
 
 jobs:
   scrape-hard:
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # Add this to allow pushing commits
+      contents: write # push the refreshed bank
+      issues: write # open the pipeline-failure issue on failure
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -39,11 +41,15 @@ jobs:
       - run: pip install -r pipeline/requirements.txt
       - name: Mine obscure Wikipedia facts
         continue-on-error: true
-        run: python pipeline/wikipedia_ingest.py --hard ${{ github.event.inputs.count || '40' }} --random 0
+        # COUNT via env (not inline interpolation) so the dispatch input can't be
+        # shell-injected; default 40.
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          COUNT: ${{ github.event.inputs.count || '40' }}
+        run: python pipeline/wikipedia_ingest.py --hard "$COUNT" --random 0
       - name: Re-forge questions + daily board
-        run: python pipeline/question_forge.py
+        # same health floor as etl_daily: never re-export from a collapsed forge
+        run: python pipeline/question_forge.py --min-questions 100
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
       - name: Refresh committed seed bank
@@ -62,5 +68,26 @@ jobs:
           git add data/raw frontend/public/seed-questions.json
           git diff --cached --quiet && echo "no changes" && exit 0
           git commit -m "chore: hard-question sweep [skip ci]"
-          git pull --rebase --autostash origin "${GITHUB_REF_NAME}" || true
+          # rebase before push (no `|| true` — a failed rebase must surface, not be
+          # swallowed into a doomed push). Concurrency group makes a conflict rare.
+          git pull --rebase --autostash origin "${GITHUB_REF_NAME}"
           git push
+      - name: Open or update the pipeline-failure issue
+        if: failure()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          WORKFLOW: ${{ github.workflow }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          gh label create pipeline-failure --color B60205 \
+            --description "ETL pipeline run failed" --force --repo "$REPO" || true
+          body="\`${WORKFLOW}\` failed. Run: ${RUN_URL}"
+          existing=$(gh issue list --repo "$REPO" --label pipeline-failure \
+            --state open --limit 1 --json number --jq '.[0].number')
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --repo "$REPO" --body "$body"
+          else
+            gh issue create --repo "$REPO" --title "🚨 ${WORKFLOW} pipeline failed" \
+              --label pipeline-failure --body "$body"
+          fi

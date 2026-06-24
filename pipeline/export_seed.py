@@ -15,13 +15,17 @@ from __future__ import annotations
 
 import argparse
 import json
+from collections import defaultdict, deque
 from pathlib import Path
 
 from common import REPO_ROOT, console, fetch_all, get_db
 from question_forge import forge_all, load_facts_from_bronze
 
 SEED_PATH = REPO_ROOT / "frontend" / "public" / "seed-questions.json"
-PER_TYPE_CAP = 120  # keep the payload lean — the app samples client-side anyway
+PER_TYPE_CAP = 200  # offline bank size per type. In DB-less mode the seed bank IS
+# the database, so this caps how many forged questions reach players; raised from
+# 120 (2.x pipeline fix) now that the Wikipedia bronze is healthy. Live Neon holds
+# the full forge output regardless — this only bounds the committed JSON payload.
 
 FIELDS = [
     "qtype", "category", "difficulty", "prompt", "correct", "choices",
@@ -29,6 +33,9 @@ FIELDS = [
     "lat", "lng", "image_url", "source_url", "audio_url", "melody", "groups",
     "clues",       # seance: ordered clue strings
     "candidates",  # ladder: [{label, category, region, magnitude}]
+    "chain",       # thread: [{prompt, answer, link}]
+    "theme",       # thread: master theme (final answer)
+    "theme_choices",  # thread: final-guess choices (theme included)
 ]
 
 
@@ -47,11 +54,28 @@ def main() -> None:
     else:
         questions = fetch_all(conn, "select * from questions", limit=5000)
 
+    # Stratified per-type sampling. Naive "sort by difficulty, take first CAP"
+    # silently collapses the board's difficulty spread once the bank grows large
+    # (the cap fills entirely with tier-1/2 questions), which then trips the
+    # board-ready-spread guard below and freezes the bank forever. Instead, draw
+    # round-robin across every (difficulty, category) bucket so the capped set
+    # keeps the full spread the forge produced. (2.x pipeline fix.)
     by_type: dict[str, list[dict]] = {}
-    for q in sorted(questions, key=lambda q: q.get("difficulty", 3)):
-        rows = by_type.setdefault(q["qtype"], [])
-        if len(rows) < PER_TYPE_CAP:
-            rows.append(slim(q))
+    by_type_groups: dict[str, dict[tuple, deque]] = defaultdict(lambda: defaultdict(deque))
+    for q in questions:
+        key = (q.get("difficulty", 3), q.get("category"))
+        by_type_groups[q["qtype"]][key].append(q)
+
+    for qtype, groups in by_type_groups.items():
+        keys = list(groups.keys())
+        picked: list[dict] = []
+        i = 0
+        while len(picked) < PER_TYPE_CAP and any(groups[k] for k in keys):
+            k = keys[i % len(keys)]
+            if groups[k]:
+                picked.append(slim(groups[k].popleft()))
+            i += 1
+        by_type[qtype] = picked
 
     flat = [q for rows in by_type.values() for q in rows]
     if len(flat) < 20:

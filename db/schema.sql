@@ -10,7 +10,7 @@
 create table if not exists facts (
   id            uuid primary key default gen_random_uuid(),
   content_hash  text not null unique,           -- sha256 of (source, subject, fact_text) → idempotent upserts
-  source        text not null check (source in ('wikipedia','deezer','sleeper','espn','tmdb','restcountries','opentdb','manual')),
+  source        text not null check (source in ('wikipedia','deezer','sleeper','espn','tmdb','restcountries','opentdb','manual','curated')),
   category      text not null check (category in ('history','music','sports','screen','geography','wildcard')),
   subject       text not null,                  -- "Lollapalooza", "Patrick Mahomes", "Pulp Fiction"
   fact_text     text not null,                  -- human-readable, citeable sentence
@@ -36,7 +36,7 @@ create table if not exists questions (
   id            uuid primary key default gen_random_uuid(),
   content_hash  text not null unique,
   fact_id       uuid references facts(id) on delete cascade,
-  qtype         text not null check (qtype in ('multiple_choice','year_guess','higher_lower','clue','where','audio_guess','image_guess','connections','seance','ladder')),
+  qtype         text not null check (qtype in ('multiple_choice','year_guess','higher_lower','clue','where','audio_guess','image_guess','connections','seance','ladder','thread')),
   category      text not null check (category in ('history','music','sports','screen','geography','wildcard')),
   difficulty    int not null default 3 check (difficulty between 1 and 5),
   prompt        text not null,                  -- the clue / question / pair framing
@@ -57,6 +57,9 @@ create table if not exists questions (
   groups        jsonb,                          -- connections: [{label,members,difficulty}]
   clues         jsonb,                          -- seance: ordered clue strings (vague→specific)
   candidates    jsonb,                          -- ladder: [{label,category,region,magnitude}]
+  chain         jsonb,                          -- thread: [{prompt,answer,link}] last-letter→first-letter
+  theme         text,                           -- thread: master theme (the final answer)
+  theme_choices jsonb,                          -- thread: ["theme", distractors...] for the final guess
   created_at    timestamptz default now()
 );
 
@@ -115,6 +118,35 @@ create policy "public read questions" on questions for select using (true);
 
 drop policy if exists "public read daily_sets" on daily_sets;
 create policy "public read daily_sets" on daily_sets for select using (true);
+
+-- ── seance_puzzles: pre-generated daily logic puzzles (Phase 2.9). ──
+-- Date-keyed archive, written ahead by scripts/generate-seance.ts, read-only
+-- from the frontend. No seed fallback — absent row ⇒ the room is dark.
+create table if not exists seance_puzzles (
+  play_date   date primary key,
+  weekday     int  not null,
+  spirit      text not null,
+  seed        bigint not null,
+  payload     jsonb not null,   -- full SeancePuzzle (see frontend/lib/seance.ts)
+  created_at  timestamptz not null default now()
+);
+alter table seance_puzzles enable row level security;
+drop policy if exists "public read seance" on seance_puzzles;
+create policy "public read seance" on seance_puzzles for select using (true);
+
+-- ── ladder_puzzles: pre-generated daily logic/math ladders (Phase 2.10). ──
+-- Same archive pattern as seance_puzzles. No seed fallback — absent row ⇒ dark.
+create table if not exists ladder_puzzles (
+  play_date   date primary key,
+  weekday     int  not null,
+  rite        text not null,
+  seed        bigint not null,
+  payload     jsonb not null,   -- full LadderPuzzle (see frontend/lib/ladder.ts)
+  created_at  timestamptz not null default now()
+);
+alter table ladder_puzzles enable row level security;
+drop policy if exists "public read ladder" on ladder_puzzles;
+create policy "public read ladder" on ladder_puzzles for select using (true);
 
 -- updated_at trigger
 create or replace function set_updated_at() returns trigger as $$

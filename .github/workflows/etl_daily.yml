@@ -15,6 +15,13 @@ on:
     - cron: "20 9 * * *" # 09:20 UTC daily
   workflow_dispatch: {}
 
+# Shared across etl_daily + wiki_hard: only ONE bank writer runs at a time, so the
+# two workflows can never push to the bank concurrently (the root cause of the
+# week-long silent failure). cancel-in-progress: false → queue, never drop a run.
+concurrency:
+  group: bank-writer
+  cancel-in-progress: false
+
 jobs:
   extract:
     runs-on: ubuntu-latest
@@ -85,18 +92,26 @@ jobs:
         run: |
           dbt build --profiles-dir .
           dbt docs generate --profiles-dir .
-      - name: Category health report
+      - name: Category health gate
         working-directory: transform
+        # Not just a log line: fail the run if the bank has starved below a
+        # board-ready spread (≥3 categories), so silent multi-source decay goes red.
         run: |
           python - <<'EOF'
-          import duckdb
+          import sys, duckdb
           con = duckdb.connect("../data/parlor.duckdb")
-          print(con.sql("select * from mart_category_stats"))
+          rows = con.sql("select * from mart_category_stats").df()
+          print(rows.to_string(index=False))
+          n = len(rows)
+          if n < 3:
+              sys.exit(f"health gate: only {n} categories in the bank (floor 3) — a source has likely stopped flowing")
           EOF
 
   publish:
     needs: transform
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # this job commits the refreshed bank back to the repo
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -109,7 +124,9 @@ jobs:
           name: bronze
           path: data/raw/
       - name: Forge questions + daily board
-        run: python pipeline/question_forge.py
+        # --min-questions: health floor (baseline ~335). A starved ingest forges
+        # near-empty; fail loudly instead of letting export_seed keep the stale bank.
+        run: python pipeline/question_forge.py --min-questions 100
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
       - name: Refresh committed seed bank
@@ -123,5 +140,60 @@ jobs:
           git config user.name "parlor-etl"
           git config user.email "actions@users.noreply.github.com"
           git add data/raw frontend/public/seed-questions.json
-          git diff --cached --quiet || git commit -m "chore: nightly bank refresh [skip ci]"
+          git diff --cached --quiet && echo "no changes" && exit 0
+          git commit -m "chore: nightly bank refresh [skip ci]"
+          # rebase onto whatever landed (e.g. a wiki_hard sweep) before pushing —
+          # the belt to the concurrency group's suspenders against the push race.
+          git pull --rebase --autostash origin main
           git push
+
+  # PUZZLE ARCHIVES — Séance + Ladder. Independent of the question bank. Each is
+  # a deterministic daily logic puzzle pre-generated and upserted to Neon (write
+  # role). No DB secret → the generate step is skipped (rooms stay dark; there is
+  # no offline/seed fallback for these two rooms by design).
+  puzzles:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+        working-directory: frontend
+      - name: Generate + archive Séance & Ladder puzzles (today + 14 days)
+        if: ${{ secrets.DATABASE_URL != '' }}
+        working-directory: frontend
+        run: npm run puzzles:generate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+  # Any failed job in the DAG trips this. Opens a pipeline-failure issue (or
+  # comments on the open one, so repeated failures don't spam) — the observability
+  # that was missing while the nightly silently died for a week.
+  notify-failure:
+    needs: [extract, transform, publish, puzzles]
+    if: failure()
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Open or update the pipeline-failure issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          WORKFLOW: ${{ github.workflow }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          gh label create pipeline-failure --color B60205 \
+            --description "ETL pipeline run failed" --force --repo "$REPO" || true
+          body="\`${WORKFLOW}\` failed. Run: ${RUN_URL}"
+          existing=$(gh issue list --repo "$REPO" --label pipeline-failure \
+            --state open --limit 1 --json number --jq '.[0].number')
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --repo "$REPO" --body "$body"
+          else
+            gh issue create --repo "$REPO" --title "🚨 ${WORKFLOW} pipeline failed" \
+              --label pipeline-failure --body "$body"
+          fi
