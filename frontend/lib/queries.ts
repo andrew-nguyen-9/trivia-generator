@@ -4,7 +4,7 @@
 
 import seed from "../public/seed-questions.json";
 import { getDb } from "./db";
-import type { Category, Question, QType } from "./types";
+import type { Question, QType } from "./types";
 import type { SeancePuzzle } from "./seance";
 import type { LadderPuzzle } from "./ladder";
 
