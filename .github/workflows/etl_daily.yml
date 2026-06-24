@@ -25,6 +25,9 @@ concurrency:
 jobs:
   extract:
     runs-on: ubuntu-latest
+    # `secrets` can't be used in a step `if:` — hoist to env, gate on env below.
+    env:
+      TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -62,7 +65,7 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
       - name: Ingest TMDB (skipped without TMDB_API_KEY)
         continue-on-error: true
-        if: ${{ secrets.TMDB_API_KEY != '' }}
+        if: ${{ env.TMDB_API_KEY != '' }}
         run: python pipeline/screen_ingest.py
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
@@ -153,6 +156,9 @@ jobs:
   # no offline/seed fallback for these two rooms by design).
   puzzles:
     runs-on: ubuntu-latest
+    # `secrets` can't be used in a step `if:` — hoist to env, gate on env below.
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -163,11 +169,9 @@ jobs:
       - run: npm ci
         working-directory: frontend
       - name: Generate + archive Séance & Ladder puzzles (today + 14 days)
-        if: ${{ secrets.DATABASE_URL != '' }}
+        if: ${{ env.DATABASE_URL != '' }}
         working-directory: frontend
         run: npm run puzzles:generate
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
   # Any failed job in the DAG trips this. Opens a pipeline-failure issue (or
   # comments on the open one, so repeated failures don't spam) — the observability
