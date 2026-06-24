@@ -29,3 +29,4 @@ transform/logs/
 # misc
 .DS_Store
 transform/.user.yml
+.gstack/
