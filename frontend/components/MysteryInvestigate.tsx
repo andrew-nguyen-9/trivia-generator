@@ -1,24 +1,15 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { sfxCorrect, sfxGlassClink, sfxPianoChord, sfxWrong } from "@/lib/sound";
 import { haptic } from "@/lib/haptics";
 import { useProfile, type Achievement } from "@/lib/profile";
-import { deductionMatrix, HOURS, seedFromDate, type MysteryCase } from "@/lib/mystery";
-import { mulberry32 } from "@/lib/rng";
-import { enrichCase } from "@/lib/mysteryEnrich";
-import type { MysteryContext } from "@/lib/mysteryTypes";
+import { deductionMatrix, HOURS, ROOMS, pretty, type MysteryCase } from "@/lib/mystery";
 import { score, type MysteryAttempt, type MysteryScoreResult } from "@/lib/mysteryScore";
-import MysteryEvidenceLog from "./MysteryEvidenceLog";
 import MysteryAccusationForm from "./MysteryAccusationForm";
-import MysteryAlibiTracker from "./MysteryAlibiTracker";
-import MysteryMapView from "./MysteryMapView";
-import MysteryRelationshipMap from "./MysteryRelationshipMap";
 import { nextTag, type SuspectTag } from "./MysteryStatusPill";
 import AchievementToast from "./AchievementToast";
-
-type LayoutMode = "single" | "stacked" | "split";
 
 export interface StoredMysteryAttempt {
   attempt: MysteryAttempt;
@@ -26,14 +17,26 @@ export interface StoredMysteryAttempt {
   at: number;
 }
 
-type MainTab = "relationship-map" | "alibi-tracker" | "map-view";
-type MobileTab = "relationship-map" | "alibi-tracker" | "map-view" | "evidence";
+const TAG_STYLE: Record<"potential" | "prime" | "cleared", string> = {
+  potential: "border-gold/55 text-gold",
+  prime: "border-ember bg-ember/15 text-ink",
+  cleared: "border-line text-muted bg-surface/70 opacity-60",
+};
+const TAG_LABEL = { potential: "PERSON OF INTEREST", prime: "ACCUSE", cleared: "CLEARED" } as const;
 
-const MAIN_TABS: { key: MainTab; label: string }[] = [
-  { key: "relationship-map", label: "⬡ Relationship Map" },
-  { key: "alibi-tracker",   label: "⊞ Alibi Tracker" },
-  { key: "map-view",        label: "≡ Map View" },
+// Stable colour per room so the alibi grid is scannable — same room, same tint.
+// The player reads the fatal-hour column and spots which tint appears alone.
+const ROOM_TINT = [
+  "bg-[#3a2a1a] text-amber-100",
+  "bg-[#1f2e2a] text-emerald-100",
+  "bg-[#2a1f33] text-violet-100",
+  "bg-[#33231f] text-rose-100",
+  "bg-[#1f2733] text-sky-100",
+  "bg-[#2e2a1a] text-yellow-100",
 ];
+
+const shortRoom = (r: string) => r.replace(/^the /, "");
+const displayRoom = (r: string) => r.replace(/^the /, "The ");
 
 export default function MysteryInvestigate({
   mystery,
@@ -47,100 +50,37 @@ export default function MysteryInvestigate({
   const [tags, setTags] = useState<Record<string, SuspectTag>>({});
   const [whereGuess, setWhereGuess] = useState<string | null>(null);
   const [whenGuess, setWhenGuess] = useState<number | null>(null);
-  const [mainTab, setMainTab] = useState<MainTab>("alibi-tracker");
-  const [mobileTab, setMobileTab] = useState<MobileTab>("alibi-tracker");
+  const [expanded, setExpanded] = useState<string | null>(null);
   const [toasts, setToasts] = useState<Achievement[]>([]);
-  const [context, setContext] = useState<MysteryContext>({ byCharacter: {}, loaded: false });
-  const [autoMarkUsed, setAutoMarkUsed] = useState(false);
-  const [notesMap, setNotesMap] = useState<Record<string, string>>({});
-  const [leftOpen, setLeftOpen] = useState(false);
-  const [rightOpen, setRightOpen] = useState(false);
-  const [layoutMode, setLayoutMode] = useState<LayoutMode>("single");
-  const [splitBottom, setSplitBottom] = useState<MainTab>("map-view");
   const startedAt = useRef(Date.now());
-
-  function handleNoteChange(key: string, val: string) {
-    setNotesMap((prev) => ({ ...prev, [key]: val }));
-  }
-
-  useEffect(() => {
-    const rnd = mulberry32(seedFromDate(mystery.date));
-    enrichCase(mystery, rnd).then(setContext);
-  }, [mystery.date]);
 
   const whoGuess = useMemo(
     () => mystery.suspects.filter((s) => tags[s.id] === "prime").map((s) => s.id),
-    [mystery.suspects, tags]
+    [mystery.suspects, tags],
   );
+
+  // The elimination grid as of the clues revealed. Once a single hour survives,
+  // its column lights up on the alibi board — that's the cue to hunt the loner.
+  const matrix = useMemo(() => deductionMatrix(mystery, cluesRevealed), [mystery, cluesRevealed]);
+  const survivingRooms = ROOMS.map((_, i) => i).filter((i) => !matrix[i].every((c) => c === "ruled-out"));
+  const survivingHours = HOURS.map((_, h) => h).filter((h) => !matrix.every((row) => row[h] === "ruled-out"));
+  const lockedHour = survivingHours.length === 1 ? survivingHours[0] : null;
+  const lockedRoom = survivingRooms.length === 1 ? survivingRooms[0] : null;
+
+  // room → tint index, by ROOMS order (stable for the day)
+  const tintFor = (room: string) => ROOM_TINT[ROOMS.indexOf(room as (typeof ROOMS)[number]) % ROOM_TINT.length];
 
   function cycleTag(id: string) {
     setTags((t) => ({ ...t, [id]: nextTag(t[id]) }));
     sfxGlassClink();
   }
-
   function revealNext() {
     setCluesRevealed((r) => Math.min(mystery.clues.length, r + 1));
     sfxPianoChord();
   }
-
-  function handleAutoMark() {
-    if (autoMarkUsed) return;
-    const matrix = deductionMatrix(mystery, cluesRevealed);
-    let confirmedHourIdx: number | null = null;
-    for (let h = 0; h < HOURS.length; h++) {
-      if (matrix.some((row) => row[h] === "confirmed")) {
-        confirmedHourIdx = h;
-        break;
-      }
-    }
-    setTags((prev) => {
-      const next = { ...prev };
-      for (const s of mystery.suspects) {
-        const allVerified = HOURS.every((_, h) => {
-          if (!context.loaded) return false;
-          const charCtx = context.byCharacter[s.id];
-          if (!charCtx) return false;
-          const hourLabel = HOURS[h];
-          const selfCorroborated = charCtx.witnesses.some(
-            (w) => w.statementType === "true" && w.hour === hourLabel
-          );
-          const crossConfirmed = mystery.suspects.some((other) => {
-            if (other.id === s.id) return false;
-            return context.byCharacter[other.id]?.witnesses.some(
-              (w) =>
-                w.aboutCharacter === s.id &&
-                w.statementType === "true" &&
-                w.hour === hourLabel
-            );
-          });
-          return selfCorroborated || crossConfirmed;
-        });
-        if (allVerified) {
-          next[s.id] = "cleared";
-          continue;
-        }
-        if (confirmedHourIdx !== null) {
-          const hourLabel = HOURS[confirmedHourIdx];
-          const charCtx = context.byCharacter[s.id];
-          const hasWitness =
-            charCtx?.witnesses.some(
-              (w) => w.statementType === "true" && w.hour === hourLabel
-            ) ||
-            mystery.suspects.some((other) => {
-              if (other.id === s.id) return false;
-              return context.byCharacter[other.id]?.witnesses.some(
-                (w) =>
-                  w.aboutCharacter === s.id &&
-                  w.statementType === "true" &&
-                  w.hour === hourLabel
-              );
-            });
-          if (!hasWitness) next[s.id] = "potential";
-        }
-      }
-      return next;
-    });
-    setAutoMarkUsed(true);
+  function relationshipToVictim(id: string): string {
+    const edge = mystery.dossiers[id]?.relationships.find((r) => r.to === mystery.victim.id);
+    return edge ? edge.kind : "no known tie to the victim";
   }
 
   function submit() {
@@ -152,235 +92,248 @@ export default function MysteryInvestigate({
       cluesRevealed,
       elapsedSeconds,
       tableTags: tags,
-      autoMarkUsed,
+      autoMarkUsed: false,
     };
     const result = score(mystery, attempt);
-    if (result.won) {
-      sfxCorrect();
-      haptic.win();
-    } else {
-      sfxWrong();
-      haptic.wrong();
-    }
-    const unlocked = record({
-      room: "mystery",
-      score: result.total,
-      correct: result.won ? 1 : 0,
-      total: 1,
-    });
+    if (result.won) { sfxCorrect(); haptic.win(); } else { sfxWrong(); haptic.wrong(); }
+    const unlocked = record({ room: "mystery", score: result.total, correct: result.won ? 1 : 0, total: 1 });
     if (unlocked.length) setToasts(unlocked);
     onSolved({ attempt, result, at: Date.now() });
   }
 
-  function renderMainTab(tab: MainTab) {
-    if (tab === "relationship-map") {
-      return (
-        <MysteryRelationshipMap mystery={mystery} context={context} />
-      );
-    }
-    if (tab === "alibi-tracker") {
-      return (
-        <MysteryAlibiTracker
-          mystery={mystery}
-          context={context}
-          cluesRevealed={cluesRevealed}
-          tags={tags}
-          onCycleTag={cycleTag}
-          onAutoMark={handleAutoMark}
-          autoMarkUsed={autoMarkUsed}
-          notesMap={notesMap}
-          onNoteChange={handleNoteChange}
-        />
-      );
-    }
-    return (
-      <MysteryMapView mystery={mystery} context={context} />
-    );
-  }
-
   return (
-    <div className="w-full">
-      {/* Floating toggle buttons */}
-      <button
-        onClick={() => setLeftOpen(true)}
-        className="fixed left-4 top-1/2 z-40 -translate-y-1/2 hidden lg:flex items-center justify-center h-10 w-10 rounded-full border border-line bg-surface/80 text-gold hover:border-gold/40 shadow-lg"
-        title="Evidence Log"
-      >
-        📋
-      </button>
-      <button
-        onClick={() => setRightOpen(true)}
-        className="fixed right-4 top-1/2 z-40 -translate-y-1/2 hidden lg:flex items-center justify-center h-10 w-10 rounded-full border border-line bg-surface/80 text-gold hover:border-gold/40 shadow-lg"
-        title="Submit Accusation"
-      >
-        ⚖️
-      </button>
+    <div className="mx-auto w-full max-w-3xl px-4 pb-16">
+      {/* ── Case header · the all-seeing eye ─────────────────────────────── */}
+      <header className="pt-6 text-center">
+        <div className="mb-2 text-3xl text-gold/80" aria-hidden>𓂀</div>
+        <p className="microlabel text-brass">case #{mystery.caseNumber}</p>
+        <h2 className="display gilt mt-1 text-3xl sm:text-4xl">{mystery.title}</h2>
+        <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-ink/85">{mystery.opening}</p>
+      </header>
 
-      {/* Left drawer — Evidence */}
-      <AnimatePresence>
-        {leftOpen && (
-          <>
-            <div className="fixed inset-0 z-40 bg-black/30" onClick={() => setLeftOpen(false)} />
-            <motion.div
-              initial={{ x: -340 }} animate={{ x: 0 }} exit={{ x: -340 }}
-              transition={{ type: "tween", duration: 0.22 }}
-              className="fixed left-0 top-0 z-50 h-full w-80 overflow-y-auto border-r border-line/40 bg-[#100c08]/95 p-5"
-            >
-              <div className="mb-4 flex items-center justify-between">
-                <p className="microlabel text-gold">Evidence Log</p>
-                <button onClick={() => setLeftOpen(false)} className="text-muted hover:text-ink">✕</button>
-              </div>
-              <MysteryEvidenceLog mystery={mystery} cluesRevealed={cluesRevealed} onRevealNext={revealNext} />
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
-
-      {/* Right drawer — Accusation */}
-      <AnimatePresence>
-        {rightOpen && (
-          <>
-            <div className="fixed inset-0 z-40 bg-black/30" onClick={() => setRightOpen(false)} />
-            <motion.div
-              initial={{ x: 320 }} animate={{ x: 0 }} exit={{ x: 320 }}
-              transition={{ type: "tween", duration: 0.22 }}
-              className="fixed right-0 top-0 z-50 h-full w-72 overflow-y-auto border-l border-line/40 bg-[#100c08]/95 p-5"
-            >
-              <div className="mb-4 flex items-center justify-between">
-                <button onClick={() => setRightOpen(false)} className="text-muted hover:text-ink">✕</button>
-                <p className="microlabel text-gold">Submit Accusation</p>
-              </div>
-              <MysteryAccusationForm
-                mystery={mystery} whoGuess={whoGuess}
-                whereGuess={whereGuess} whenGuess={whenGuess}
-                onWhereChange={setWhereGuess} onWhenChange={setWhenGuess}
-                onSubmit={submit}
-              />
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
-
-      {/* Header */}
-      <div className="flex items-baseline justify-between px-4 pt-4">
-        <h2 className="display gilt text-3xl">{mystery.title}</h2>
-        <span className="microlabel text-brass">case #{mystery.caseNumber}</span>
-      </div>
-
-      {/* Desktop investigation area */}
-      <div className="mt-6 hidden lg:block px-4">
-        {/* Layout mode + tab bar row */}
-        <div className="mb-4 flex flex-wrap items-center gap-4">
-          {layoutMode !== "stacked" && (
-            <div className="flex gap-2">
-              {MAIN_TABS.map((t) => (
-                <button
-                  key={t.key}
-                  onClick={() => setMainTab(t.key)}
-                  className={`microlabel rounded-full border px-4 py-1.5 transition ${
-                    mainTab === t.key
-                      ? "border-gold text-gold"
-                      : "border-line text-muted hover:border-gold/40 hover:text-gold/60"
-                  }`}
-                >
-                  {t.label}
-                </button>
-              ))}
-            </div>
-          )}
-          <div className="ml-auto flex items-center gap-0.5 rounded-full border border-line p-0.5">
-            {(["single", "stacked", "split"] as LayoutMode[]).map((mode) => (
-              <button
-                key={mode}
-                onClick={() => setLayoutMode(mode)}
-                className={`microlabel rounded-full px-3 py-1 transition ${
-                  layoutMode === mode ? "bg-gold/20 text-gold" : "text-muted hover:text-gold/60"
-                }`}
+      {/* ── 1 · The Suspects ─────────────────────────────────────────────── */}
+      <Section step={1} title="The Suspects" hint="Tap a card to mark it. Tap the name to read the dossier.">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+          {mystery.suspects.map((s) => {
+            const tag = tags[s.id];
+            const open = expanded === s.id;
+            return (
+              <div
+                key={s.id}
+                className={`rounded-xl border p-3 transition ${tag ? TAG_STYLE[tag] : "border-line bg-surface/50"}`}
               >
-                {mode === "single" ? "⊡ Single" : mode === "stacked" ? "☰ Stacked" : "⊟ Split"}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Panels */}
-        {layoutMode === "single" && (
-          <div className="gilt-frame rounded-2xl bg-surface/60 p-5">
-            {renderMainTab(mainTab)}
-          </div>
-        )}
-
-        {layoutMode === "stacked" && (
-          <div className="space-y-6">
-            {MAIN_TABS.map((t) => (
-              <div key={t.key} className="gilt-frame rounded-2xl bg-surface/60 p-5">
-                <p className="microlabel mb-3 text-muted">{t.label}</p>
-                {renderMainTab(t.key)}
-              </div>
-            ))}
-          </div>
-        )}
-
-        {layoutMode === "split" && (
-          <div className="space-y-4">
-            <div className="gilt-frame rounded-2xl bg-surface/60 p-5">
-              {renderMainTab(mainTab)}
-            </div>
-            <div className="flex gap-2">
-              {MAIN_TABS.filter((t) => t.key !== mainTab).map((t) => (
-                <button
-                  key={t.key}
-                  onClick={() => setSplitBottom(t.key)}
-                  className={`microlabel rounded-full border px-4 py-1.5 transition ${
-                    splitBottom === t.key
-                      ? "border-gold text-gold"
-                      : "border-line text-muted hover:border-gold/40 hover:text-gold/60"
-                  }`}
-                >
-                  {t.label}
+                <button onClick={() => cycleTag(s.id)} className="flex w-full items-center gap-2 text-left">
+                  <span className="text-2xl">{s.emoji}</span>
+                  <span className="min-w-0">
+                    <span className="block truncate text-sm text-ink">{pretty(s.id)}</span>
+                    <span className="block truncate text-[11px] text-muted">{s.title}</span>
+                  </span>
                 </button>
-              ))}
-            </div>
-            <div className="gilt-frame rounded-2xl bg-surface/60 p-5">
-              {renderMainTab(splitBottom)}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Mobile layout — unchanged from before */}
-      <div className="mt-6 px-4 lg:hidden">
-        <div className="mb-4 flex gap-1 overflow-x-auto pb-1">
-          {([...MAIN_TABS, { key: "evidence" as const, label: "Evidence" }]).map((t) => (
-            <button
-              key={t.key}
-              onClick={() => setMobileTab(t.key as MobileTab)}
-              className={`microlabel flex-shrink-0 rounded-full border px-3 py-2 ${
-                mobileTab === t.key ? "border-gold text-gold" : "border-line text-muted"
-              }`}
-            >
-              {t.label}
-            </button>
-          ))}
+                <div className="mt-2 flex items-center justify-between gap-2">
+                  <span className="microlabel text-[9px] text-muted">{tag ? TAG_LABEL[tag] : "tap to mark"}</span>
+                  <button
+                    onClick={() => setExpanded(open ? null : s.id)}
+                    className="text-[11px] text-muted underline-offset-2 hover:text-gold hover:underline"
+                  >
+                    {open ? "hide" : "dossier"}
+                  </button>
+                </div>
+                <AnimatePresence>
+                  {open && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="overflow-hidden"
+                    >
+                      <p className="mt-2 text-[11px] italic leading-snug text-ink/70">{s.trait}</p>
+                      <p className="mt-1 text-[11px] text-ink/60">Always carries {s.quirk}.</p>
+                      <p className="mt-1 text-[11px] text-ember/80">To the victim: {relationshipToVictim(s.id)}.</p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            );
+          })}
         </div>
-        {mobileTab === "evidence" ? (
-          <div className="flex flex-col gap-6">
-            <MysteryEvidenceLog mystery={mystery} cluesRevealed={cluesRevealed} onRevealNext={revealNext} />
-            <MysteryAccusationForm
-              mystery={mystery} whoGuess={whoGuess}
-              whereGuess={whereGuess} whenGuess={whenGuess}
-              onWhereChange={setWhereGuess} onWhenChange={setWhenGuess}
-              onSubmit={submit}
-            />
+      </Section>
+
+      {/* ── 2 · The Evidence Ledger + WHERE/WHEN elimination ─────────────── */}
+      <Section
+        step={2}
+        title="The Evidence Ledger"
+        hint={`${cluesRevealed}/${mystery.clues.length} revealed · each new clue costs points`}
+      >
+        <div className="space-y-3">
+          <AnimatePresence initial={false}>
+            {mystery.clues.slice(0, cluesRevealed).map((clue) => (
+              <motion.div
+                key={clue.stage}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="rounded-xl border border-line bg-bg/40 p-4"
+              >
+                <p className="microlabel text-ember">{clue.kind}</p>
+                <p className="display mt-1 text-base">{clue.title}</p>
+                <p className="mt-1 text-sm leading-relaxed text-ink/85">{clue.text}</p>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+          {cluesRevealed < mystery.clues.length && (
+            <button
+              onClick={revealNext}
+              className="microlabel rounded-full border border-line px-5 py-2 text-muted transition hover:border-gold hover:text-gold"
+            >
+              ✦ reveal next clue (−points)
+            </button>
+          )}
+        </div>
+
+        {/* room × hour elimination — the WHERE/WHEN board */}
+        <div className="mt-5">
+          <p className="microlabel mb-2 text-muted">where &amp; when — rule it out</p>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse text-center text-[11px]">
+              <thead>
+                <tr>
+                  <th className="p-1" />
+                  {HOURS.map((h, hi) => (
+                    <th
+                      key={h}
+                      className={`p-1 font-normal ${lockedHour === hi ? "text-gold" : "text-muted"}`}
+                    >
+                      {h.replace(":00", "")}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {ROOMS.map((room, ri) => (
+                  <tr key={room}>
+                    <td className={`whitespace-nowrap py-1 pr-2 text-right ${lockedRoom === ri ? "text-gold" : "text-muted"}`}>
+                      {shortRoom(room)}
+                    </td>
+                    {HOURS.map((_, hi) => {
+                      const cell = matrix[ri][hi];
+                      return (
+                        <td key={hi} className="p-0.5">
+                          <span
+                            className={`flex h-5 w-full items-center justify-center rounded ${
+                              cell === "ruled-out"
+                                ? "bg-bg/30 text-muted/30"
+                                : cell === "confirmed"
+                                  ? "bg-ember/25 text-ember"
+                                  : "border border-line/60 text-muted"
+                            }`}
+                          >
+                            {cell === "ruled-out" ? "·" : cell === "confirmed" ? "✦" : ""}
+                          </span>
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        ) : (
-          <div className="gilt-frame rounded-2xl bg-surface/60 p-4">
-            {renderMainTab(mobileTab as MainTab)}
-          </div>
-        )}
-      </div>
+        </div>
+      </Section>
+
+      {/* ── 3 · The Alibi Board — the WHO puzzle ─────────────────────────── */}
+      <Section
+        step={3}
+        title="The Alibi Board"
+        hint={
+          lockedHour !== null
+            ? `At ${HOURS[lockedHour]} the innocent pair up — find the guest who stands alone.`
+            : "Each guest's claimed room, hour by hour. Pin down the fatal hour first."
+        }
+      >
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse text-center text-[11px]">
+            <thead>
+              <tr>
+                <th className="p-1 text-left" />
+                {HOURS.map((h, hi) => (
+                  <th
+                    key={h}
+                    className={`p-1 font-normal ${lockedHour === hi ? "text-gold underline decoration-ember" : "text-muted"}`}
+                  >
+                    {h.replace(":00", "")}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {mystery.suspects.map((s) => (
+                <tr key={s.id}>
+                  <td className="whitespace-nowrap py-1 pr-2 text-left text-ink">
+                    <span className="mr-1">{s.emoji}</span>
+                    <span className="hidden sm:inline">{pretty(s.id)}</span>
+                  </td>
+                  {HOURS.map((_, hi) => {
+                    const room = mystery.dossiers[s.id].claimed[hi];
+                    const isFatal = lockedHour === hi;
+                    return (
+                      <td key={hi} className="p-0.5">
+                        <span
+                          className={`block truncate rounded px-1 py-1 ${tintFor(room)} ${
+                            isFatal ? "ring-1 ring-gold" : "opacity-70"
+                          }`}
+                          title={displayRoom(room)}
+                        >
+                          {shortRoom(room)}
+                        </span>
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p className="mt-2 text-[11px] text-muted">
+          Same colour = same room. In the fatal-hour column, the guilty are the ones whose colour appears <em>only once</em>.
+        </p>
+      </Section>
+
+      {/* ── 4 · The Accusation ───────────────────────────────────────────── */}
+      <Section step={4} title="The Accusation" hint="Name the guilty, the room, and the hour.">
+        <MysteryAccusationForm
+          mystery={mystery}
+          whoGuess={whoGuess}
+          whereGuess={whereGuess}
+          whenGuess={whenGuess}
+          onWhereChange={setWhereGuess}
+          onWhenChange={setWhenGuess}
+          onSubmit={submit}
+        />
+      </Section>
 
       <AchievementToast queue={toasts} />
     </div>
+  );
+}
+
+function Section({
+  step,
+  title,
+  hint,
+  children,
+}: {
+  step: number;
+  title: string;
+  hint: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="mt-10">
+      <div className="mb-3 flex items-baseline gap-3">
+        <span className="display gilt text-xl tabular-nums">{step}</span>
+        <h3 className="display text-lg text-ink">{title}</h3>
+      </div>
+      <p className="microlabel mb-3 text-muted">{hint}</p>
+      {children}
+    </section>
   );
 }

@@ -8,10 +8,12 @@
 // "Case #N" for every player, forever, and regenerates from nothing but the date.
 //
 // Solvability: this is a real WHO + WHERE + WHEN logic puzzle.
-// - WHO: innocents' claimed location at the murder hour is always the truth
-//   (never the scene); culprits' claim is a lie (their true location at that
-//   hour is the scene). `deduceCulprits()` reads this off `Dossier.trueLocation`
-//   vs `Dossier.claimed` directly — no relationship-graph guessing involved.
+// - WHO: a corroboration puzzle read straight off the visible alibi grid. At the
+//   murder hour the innocent pair up (>=2 to a room, a corroborated truth) while
+//   each culprit claims a room nobody else claims (the uncorroborated lie), and
+//   nobody claims the scene. `deduceCulprits()` tallies that hour's `claimed`
+//   column and returns the lone occupants — no hidden field, no clue that names
+//   a name. (`Dossier.trueLocation` still records the ground truth for prose.)
 // - WHERE / WHEN: four of the seven clues each rule out a set of rooms or hours
 //   entirely (`Clue.eliminatesRooms` / `eliminatesHours`). Together they're
 //   constructed to eliminate every room but the true scene and every hour but
@@ -162,26 +164,43 @@ export function generateCase(date: string): MysteryCase {
   const culprits = shuffle(suspects, rnd).slice(0, culpritCount).map((s) => s.id);
 
   const scene = pick(ROOMS, rnd);
+  const sceneIdx = ROOMS.indexOf(scene as (typeof ROOMS)[number]);
   const hourIndex = 1 + Math.floor(rnd() * (HOURS.length - 2)); // crime at 7,8, or 9 PM
   const motive = pick(MOTIVES, rnd);
 
-  // Alibis: everyone claims a location each hour. Innocents' claim at the murder
-  // hour is the TRUTH (they were elsewhere). Culprits CLAIM elsewhere but were
-  // truly in `scene` — `trueLocation` records that ground truth separately from
-  // `claimed`, so deduceCulprits() can read off the lie directly.
+  // ── WHO, by corroboration (the day's logic) ─────────────────────────────────
+  // At the murder hour the killer was alone. We build the alibi grid so that the
+  // guilty are exactly the suspects whose claimed room at that hour is shared
+  // with NO ONE (an uncorroborated lie), while every innocent pairs up with at
+  // least one other (a corroborated truth). Nobody claims the scene. This makes
+  // WHO deducible straight off the visible `claimed` grid — no hidden field, no
+  // clue that names a name. `deduceCulprits()` simply tallies the murder-hour
+  // column and returns the lone occupants.
+  const culpritIds = new Set(culprits);
+  const innocents = suspects.filter((s) => !culpritIds.has(s.id));
+  const nonSceneRoomNames = shuffle(ROOMS.filter((_, i) => i !== sceneIdx), rnd); // 5 rooms
+
+  const murderRoom: Record<string, string> = {};
+  // each culprit gets a distinct solo room nobody else will claim this hour
+  culprits.forEach((id, i) => { murderRoom[id] = nonSceneRoomNames[i]; });
+  // innocents fill the remaining rooms in groups of >=2 (every group corroborates)
+  const innocentRooms = nonSceneRoomNames.slice(culprits.length);
+  const nGroups = Math.floor(innocents.length / 2); // <= innocentRooms.length for all 1..3 culprits
+  shuffle(innocents, rnd).forEach((s, idx) => {
+    const g = idx < 2 * nGroups ? idx % nGroups : nGroups - 1; // odd one out joins the last group
+    murderRoom[s.id] = innocentRooms[g];
+  });
+
+  // Full per-hour alibis: murder hour is the corroboration grid above; the other
+  // hours are free flavor. `trueLocation` keeps the ground truth (culprits were
+  // really in `scene`) for prose/forensics, but the deduction reads `claimed`.
   const dossiers: Record<string, Dossier> = {};
   for (const s of suspects) {
     const claimed: string[] = [];
-    for (let h = 0; h < HOURS.length; h++) claimed.push(pick(ROOMS, rnd));
-    const isCulprit = culprits.includes(s.id);
-    if (!isCulprit && claimed[hourIndex] === scene) {
-      // keep innocents away from the scene at the murder hour
-      claimed[hourIndex] = ROOMS[(ROOMS.indexOf(claimed[hourIndex] as (typeof ROOMS)[number]) + 1) % ROOMS.length];
+    for (let h = 0; h < HOURS.length; h++) {
+      claimed.push(h === hourIndex ? murderRoom[s.id] : pick(ROOMS, rnd));
     }
-    if (isCulprit && claimed[hourIndex] === scene) {
-      // a culprit must CLAIM somewhere other than the scene (the lie)
-      claimed[hourIndex] = ROOMS[(ROOMS.indexOf(scene as (typeof ROOMS)[number]) + 2) % ROOMS.length];
-    }
+    const isCulprit = culpritIds.has(s.id);
     const trueLocation = [...claimed];
     trueLocation[hourIndex] = isCulprit ? scene : claimed[hourIndex];
     dossiers[s.id] = { id: s.id, claimed, trueLocation, relationships: [] };
@@ -209,7 +228,6 @@ export function generateCase(date: string): MysteryCase {
   // Partition the non-scene rooms and non-murder hours so that, once all four
   // elimination clues are revealed, exactly the true scene and true hour have
   // not been ruled out — deterministic, not generate-and-check.
-  const sceneIdx = ROOMS.indexOf(scene as (typeof ROOMS)[number]);
   const nonSceneRooms = shuffle(ROOMS.map((_, i) => i).filter((i) => i !== sceneIdx), rnd);
   const roomsRound1 = nonSceneRooms.slice(0, 2);
   const roomsRound2 = nonSceneRooms.slice(2);
@@ -233,7 +251,6 @@ export function generateCase(date: string): MysteryCase {
     `Seven guests remain in the mansion, each with a story, and at least one with a lie. ` +
     `The Order convenes. The reckoning is ${motive.toLowerCase()}.`;
 
-  const ring = ROSTER.find((c) => c.id === ringleader)!;
   const clues: Clue[] = [
     {
       stage: 1, kind: "Witness Statement",
@@ -261,33 +278,27 @@ export function generateCase(date: string): MysteryCase {
     },
     {
       stage: 5, kind: "Physical Evidence",
-      title: "Left behind",
-      text: `Investigators recover ${ring.quirk} from the room the timeline now points to. Only one guest in this house is ever seen with such a thing.`,
+      title: "The lonely hour",
+      text: `Forensics are blunt: at the moment of the murder, the killer stood alone. Whoever cannot be placed in a room with another guest at the fatal hour kept their own deadly company.`,
       eliminatesRooms: [], eliminatesHours: [],
     },
     {
       stage: 6, kind: "Timeline Discovery",
-      title: "A broken alibi",
-      text: `Cross-examined, ${pretty(ringleader)} insists they spent ${HOURS[hourIndex]} in ${dossiers[ringleader].claimed[hourIndex]}. Three guests place them nowhere near it. The alibi is a lie.`,
+      title: "Two to a room",
+      text: `Every guest names a room for every hour. Study the fatal hour: the innocent corroborate one another — never fewer than two to a room. A guest who shares their room with no one has no one to vouch for them.`,
       eliminatesRooms: [], eliminatesHours: [],
     },
     {
       stage: 7, kind: "Secret Relationship",
       title: "The motive",
       text: culprits.length > 1
-        ? `The Order uncovers a pact: ${pretty(ringleader)} did not act alone. A ${relTo(dossiers, culprits)} tie binds them to ${culprits.length === 2 ? "an accomplice" : "two accomplices"}, and the victim's exposure of a secret made it ${motive.toLowerCase()}.`
-        : `At last the thread is pulled: the victim had exposed a secret, and ${pretty(ringleader)} alone stood to gain. The motive is ${motive.toLowerCase()}.`,
+        ? `The Order uncovers a pact: more than one hand was bound to the deed. The victim had exposed a secret, and the reckoning is ${motive.toLowerCase()}.`
+        : `At last the thread is pulled: the victim had exposed a secret, and one guest alone stood to gain. The reckoning is ${motive.toLowerCase()}.`,
       eliminatesRooms: [], eliminatesHours: [],
     },
   ];
 
   return { date, caseNumber, title, opening, victim, suspects, dossiers, clues, culprits, motive, scene, hourIndex };
-}
-
-function relTo(dossiers: Record<string, Dossier>, culprits: string[]): string {
-  const lead = dossiers[culprits[0]];
-  const e = lead.relationships.find((r) => culprits.includes(r.to));
-  return e ? e.kind : "business partner";
 }
 
 export function pretty(id: string): string {
@@ -322,14 +333,19 @@ export function deductionMatrix(c: MysteryCase, cluesRevealed: number): Mark[][]
 }
 
 /**
- * WHO: culprits are exactly the suspects whose claimed location at the murder
- * hour differs from their true location at that hour (the lie). Innocents'
- * claim is always the truth, by construction in generateCase().
+ * WHO, read straight off the visible alibi grid: the guilty are exactly the
+ * suspects who claim a room at the murder hour that NO other suspect claims —
+ * the uncorroborated lie. Innocents always pair up (>=2 to a room), by
+ * construction in generateCase(), so a lone occupant at that hour is a culprit.
  */
 export function deduceCulprits(c: MysteryCase): string[] {
-  return c.suspects
-    .filter((s) => c.dossiers[s.id].trueLocation[c.hourIndex] !== c.dossiers[s.id].claimed[c.hourIndex])
-    .map((s) => s.id);
+  const h = c.hourIndex;
+  const tally = new Map<string, number>();
+  for (const s of c.suspects) {
+    const room = c.dossiers[s.id].claimed[h];
+    tally.set(room, (tally.get(room) ?? 0) + 1);
+  }
+  return c.suspects.filter((s) => tally.get(c.dossiers[s.id].claimed[h]) === 1).map((s) => s.id);
 }
 
 /** Checks all three legs of the puzzle are uniquely solvable: WHO, WHERE, WHEN. */
