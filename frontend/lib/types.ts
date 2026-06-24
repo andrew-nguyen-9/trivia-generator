@@ -92,6 +92,18 @@ export const CATEGORY_LABEL: Record<Category, string> = {
   wildcard: "Wildcard",
 };
 
+// Non-color channel for category (a11y 2.14): never rely on CATEGORY_HEX alone —
+// pair the colour with this suit glyph (and/or CATEGORY_LABEL) so colour-blind
+// players can still tell categories apart. Single source; mirrors the card suits.
+export const CATEGORY_GLYPH: Record<Category, string> = {
+  history: "♦",
+  music: "♥",
+  sports: "♣",
+  screen: "♠",
+  geography: "✦",
+  wildcard: "✧",
+};
+
 // hex values mirror tailwind.config.ts — used where Tailwind classes can't reach (SVG, inline glow)
 export const CATEGORY_HEX: Record<Category, string> = {
   history: "#c8852a",

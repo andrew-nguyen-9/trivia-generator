@@ -178,24 +178,37 @@ body {
   .streak-bloom { transform: scale(1) !important; }
   .streak-dark  { animation: none !important; opacity: 1 !important; }
 
+  /* Kill every perpetual decorative animation by name (drift/flicker/shimmer/
+     pendulum/eye-glow/flame). `none` stops them outright — belt to the universal
+     rule's suspenders. */
   .glow,
   .animate-marquee,
+  .animate-flicker,
   .page-enter,
-  .gold-text {
+  .gold-text,
+  .clock-pendulum,
+  .eye-glow {
     animation: none !important;
   }
-  .glow,
-  .animate-marquee,
-  .page-enter,
-  .gold-text {
-    animation: none !important;
-  }
+
+  /* Universal clamp: crucially also cap iteration-count to 1 — a 0.01ms duration
+     on an `infinite` animation would otherwise loop ~100k×/s (CPU + flicker). */
   *,
   *::before,
   *::after {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
   }
+}
+
+/* ── Global focus-visible: a consistent brass ring for keyboard users on every
+   interactive element (components may still override with a richer treatment). */
+:where(a, button, input, select, textarea, [tabindex], [role="button"]):focus-visible {
+  outline: 2px solid #e6c878;
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 /* ── 3D card flip for board cells ── */

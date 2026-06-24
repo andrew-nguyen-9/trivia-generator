@@ -100,7 +100,17 @@ Per-route Next `metadata` (unique title/description in the mystery voice);
 structured data (WebSite, and per-game where it fits). **Done-when**: sitemap +
 robots resolve, every route has unique metadata, OG previews render.
 
-## 2.14 — Accessibility
+## 2.14 — Accessibility ✅ (core shipped)
+
+> Shipped: `globals.css` reduced-motion now also caps `animation-iteration-count`
+> (infinite decorations were looping at a 0.01ms duration) and kills every named
+> perpetual animation; a global `:focus-visible` brass ring covers all interactive
+> elements. `CATEGORY_GLYPH` in `lib/types.ts` is the single non-color category
+> channel (suit glyph), wired through `RoomShell`. The Map gained an arrow-key
+> reticle (`WorldMap.tsx`) so pin-drop is keyboard-playable; the Clock year
+> selector is a native `<input type=range>`. New games (Séance/Ladder) ship ARIA
+> grids + reduced-motion guards. Remaining: a live axe/Lighthouse audit pass
+> (needs a running server) and the glyph channel on every last color-only swatch.
 
 - Honor `prefers-reduced-motion` across **all** v2 motion — the card deck (2.2), the
   Streak flame + darkness (2.6), the 404 cards (2.19): static/eased fallbacks, no
