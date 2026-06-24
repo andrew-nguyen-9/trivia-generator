@@ -122,9 +122,12 @@ def forge_year_guess(facts: list[dict]) -> list[dict]:
         if (f.get("meta") or {}).get("melody"):
             continue  # melody facts are audio rounds (forge_audio), not dial rounds
         prompt = f["fact_text"]
-        # Strip the give-away year from the prompt where formulaic
-        for token in (f" in {year}", f"/{year}"):
-            prompt = prompt.replace(token, "")
+        # Redact the answer year wherever it appears so the prompt never hands it
+        # over. On-this-day facts lead with the year ("1969 – …"); the old
+        # formulaic strip (" in 1969", "/1969") missed those, leaking the answer.
+        prompt = re.sub(rf"\b{year}\b", "____", prompt).strip(" –-—:•")
+        if "____" not in prompt and str(year) in prompt:
+            continue  # year embedded in a larger token we can't cleanly redact
         out.append(
             {
                 "content_hash": content_hash("year_guess", f["content_hash"]),
