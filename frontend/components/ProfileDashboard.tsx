@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo } from "react";
 import {
   CATEGORIES,
@@ -7,6 +8,7 @@ import {
   CATEGORY_LABEL,
   type Category,
 } from "@/lib/types";
+import { weakestCategory } from "@/lib/weakspot";
 import {
   ACHIEVEMENTS,
   ROOMS,
@@ -67,6 +69,7 @@ export default function ProfileDashboard() {
   const into = xpIntoLevel(profile.xp);
   const streak = dayStreak(profile.days);
   const totalPlays = Object.values(profile.plays).reduce((s, n) => s + (n ?? 0), 0);
+  const weak = weakestCategory(profile.cat);
 
   return (
     <div>
@@ -108,6 +111,30 @@ export default function ProfileDashboard() {
         <Heatmap days={profile.days} />
       </div>
 
+      {/* weak-spot practice — route the player to drill their worst category */}
+      {weak && (
+        <Link
+          href={weak.href}
+          className="mt-6 flex items-center justify-between rounded-2xl border p-6 transition hover:bg-surface"
+          style={{ borderColor: CATEGORY_HEX[weak.category] }}
+        >
+          <div>
+            <p className="microlabel" style={{ color: CATEGORY_HEX[weak.category] }}>
+              your weak spot
+            </p>
+            <p className="mt-1 text-xl font-black">
+              {weak.label} — {Math.round(weak.accuracy * 100)}%
+            </p>
+            <p className="mt-1 text-xs text-muted">
+              drill it in {weak.room}
+            </p>
+          </div>
+          <span className="text-2xl" style={{ color: CATEGORY_HEX[weak.category] }}>
+            →
+          </span>
+        </Link>
+      )}
+
       {/* per-category accuracy */}
       <div className="mt-6 rounded-2xl border border-line bg-surface p-6">
         <p className="microlabel mb-4">accuracy by category</p>
@@ -115,10 +142,14 @@ export default function ProfileDashboard() {
           {CATEGORIES.map((cat: Category) => {
             const c = profile.cat[cat];
             const pct = c && c.total ? Math.round((c.correct / c.total) * 100) : 0;
+            const isWeak = weak?.category === cat;
             return (
               <div key={cat}>
                 <div className="flex justify-between text-xs">
-                  <span style={{ color: CATEGORY_HEX[cat] }}>{CATEGORY_LABEL[cat]}</span>
+                  <span style={{ color: CATEGORY_HEX[cat] }}>
+                    {CATEGORY_LABEL[cat]}
+                    {isWeak && <span className="ml-2 text-muted">· weak spot</span>}
+                  </span>
                   <span className="tabular text-muted">
                     {c ? `${pct}% · ${c.correct}/${c.total}` : "—"}
                   </span>
