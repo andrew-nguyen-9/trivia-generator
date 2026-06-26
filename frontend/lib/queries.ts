@@ -2,6 +2,7 @@
 // (Neon) first and silently falls back to the committed seed bank, so the app
 // works from `git clone` with zero env vars.
 
+import { unstable_cache } from "next/cache";
 import seed from "../public/seed-questions.json";
 import { getDb } from "./db";
 import type { Question, QType } from "./types";
@@ -36,18 +37,34 @@ export async function getQuestionsByType(qtype: QType): Promise<Question[]> {
  * DB) the room is dark. `date` (YYYY-MM-DD) enables archive-play of past days;
  * defaults to today (UTC).
  */
-export async function getSeancePuzzle(date?: string): Promise<SeancePuzzle | null> {
-  const sql = getDb();
-  if (!sql) return null;
-  const day = date ?? new Date().toISOString().slice(0, 10);
-  try {
+// ponytail: per-day cache wrapper. The puzzle is deterministic per date, so the
+// Neon read is keyed by `day` (the fn argument joins unstable_cache's key) and
+// re-served from Next's data cache on every later same-day hit ⇒ one read/day.
+// A real DB hiccup THROWS so the rejection is NOT cached (the outer wrapper
+// catches → dark state); only successful reads — including a legit "no row yet"
+// null — get stored. Ceiling: a missing row caches as null for `revalidate`
+// seconds; harmless because puzzles are archived nightly before serving — drop
+// `revalidate` if a same-day backfill must appear immediately.
+const cachedSeance = unstable_cache(
+  async (day: string): Promise<SeancePuzzle | null> => {
+    const sql = getDb()!;
     const rows = await sql`
       select payload from seance_puzzles where play_date = ${day} limit 1`;
-    if (rows.length > 0) return rows[0].payload as SeancePuzzle;
+    return rows.length > 0 ? (rows[0].payload as SeancePuzzle) : null;
+  },
+  ["seance-puzzle"],
+  { revalidate: 86_400 },
+);
+
+export async function getSeancePuzzle(date?: string): Promise<SeancePuzzle | null> {
+  const sql = getDb();
+  if (!sql) return null; // db-less ⇒ dark, nothing to cache
+  const day = date ?? new Date().toISOString().slice(0, 10);
+  try {
+    return await cachedSeance(day);
   } catch {
-    // db hiccup → dark state, never throw (and never fall back to a fake puzzle)
+    return null; // db hiccup → dark state, never throw, don't poison the cache
   }
-  return null;
 }
 
 /**
@@ -55,18 +72,27 @@ export async function getSeancePuzzle(date?: string): Promise<SeancePuzzle | nul
  * contract as the Séance: read-only, NO seed fallback (absent row / no DB ⇒ the
  * room is dark). `date` (YYYY-MM-DD) enables archive-play; defaults to today.
  */
-export async function getLadderPuzzle(date?: string): Promise<LadderPuzzle | null> {
-  const sql = getDb();
-  if (!sql) return null;
-  const day = date ?? new Date().toISOString().slice(0, 10);
-  try {
+// ponytail: same per-day cache wrapper as the Séance (see cachedSeance above).
+const cachedLadder = unstable_cache(
+  async (day: string): Promise<LadderPuzzle | null> => {
+    const sql = getDb()!;
     const rows = await sql`
       select payload from ladder_puzzles where play_date = ${day} limit 1`;
-    if (rows.length > 0) return rows[0].payload as LadderPuzzle;
+    return rows.length > 0 ? (rows[0].payload as LadderPuzzle) : null;
+  },
+  ["ladder-puzzle"],
+  { revalidate: 86_400 },
+);
+
+export async function getLadderPuzzle(date?: string): Promise<LadderPuzzle | null> {
+  const sql = getDb();
+  if (!sql) return null; // db-less ⇒ dark, nothing to cache
+  const day = date ?? new Date().toISOString().slice(0, 10);
+  try {
+    return await cachedLadder(day);
   } catch {
-    // db hiccup → dark state, never throw, never fabricate a puzzle
+    return null; // db hiccup → dark state, never throw, don't poison the cache
   }
-  return null;
 }
 
 // Board arrangement lives in lib/board.ts (seed-free) so client components can
