@@ -356,6 +356,23 @@ def main() -> None:
     check("bronze sources all in dbt accepted_values (else transform gates publish)",
           not unknown, f"unlisted sources: {sorted(unknown)}")
 
+    # ── per-source health floor (§3.17, debt #3) ─────────────────────────────
+    # The total floor (question_forge --min-questions) is cleared by one healthy
+    # source, so a single ingest can die and the bank rots silently. Hold every
+    # live (source, category) bucket in bronze to a minimum instead, so the next
+    # starvation fails the run loudly and names the culprit.
+    from common import HEALTH_FLOOR, bronze_bucket_counts, starved_buckets
+    # END STATE: a starved source trips the floor (pure-helper unit check).
+    check("health floor flags a starved source",
+          starved_buckets({("deezer", "music"): 200, ("zombie", "history"): 2})
+          == [("zombie", "history")])
+    check("health floor passes a healthy roster",
+          starved_buckets({("deezer", "music"): 200, ("wikipedia", "history"): 468}) == [])
+    # Live gate: hold the committed bronze itself to the floor.
+    starved = starved_buckets(bronze_bucket_counts())
+    check(f"every live (source,category) bronze bucket has ≥{HEALTH_FLOOR} facts",
+          not starved, f"starved: {starved}")
+
     if args.core_only:
         if FAILURES:
             print(f"\n{len(FAILURES)} failure(s)")
