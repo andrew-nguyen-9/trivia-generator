@@ -125,10 +125,13 @@ class _RateLimitedSession:
         elapsed = time.time() - last
         if elapsed < self.min_interval:
             sleep_time = self.min_interval - elapsed
-            console.print(
-                f"[dim][{_tracker.session_id}] rate-limit throttle: "
-                f"sleeping {sleep_time:.2f}s for {domain}[/dim]"
-            )
+            # Preemptive per-domain spacing — NOT a rate-limit error. Logged only
+            # under PARLOR_HTTP_DEBUG so normal CI logs aren't a wall of throttle lines.
+            if os.getenv("PARLOR_HTTP_DEBUG"):
+                console.print(
+                    f"[dim][{_tracker.session_id}] rate-limit throttle: "
+                    f"sleeping {sleep_time:.2f}s for {domain}[/dim]"
+                )
             time.sleep(sleep_time)
         self.domain_last_call[domain] = time.time()
 
