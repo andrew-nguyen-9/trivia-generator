@@ -21,7 +21,13 @@ export interface RoomMeta {
   kind: RoomKind;
 }
 
-/** The ten cards of the deck — order mirrors the home page rank. */
+/**
+ * Canonical game registry — order mirrors the home page rank. The home page's
+ * playing-card deck (`app/page.tsx` `GAMES[]`) is the curated ten-card poker
+ * deck; this registry is the broader source for sitemap/metadata/footer and
+ * also carries rooms not (yet) on the poker deck. New rooms register HERE in
+ * §3.0 so later segments add only their own files (PLATFORM.md §3.0 firewall).
+ */
 export const GAME_ROOMS: RoomMeta[] = [
   {
     path: "/mystery",
@@ -113,49 +119,25 @@ export const GAME_ROOMS: RoomMeta[] = [
     accent: "music",
     kind: "game",
   },
+  // ── New v3 rooms — routes + registry reserved in §3.0; built in Wave D.
+  // Placeholder pages live in their own route dirs until the owning segment
+  // (3.22 / 3.23) replaces them, so neither segment edits this shared file. ──
   {
-    path: "/jukebox",
-    name: "The Jukebox",
-    title: "The Jukebox — name the tune",
+    path: "/overture",
+    name: "The Overture",
+    title: "The Overture — name the intro",
     description:
-      "The parlor's brass jukebox spins a hook. Name the song before the needle lifts — a music room for the sharp-eared.",
+      "The parlor strikes up an overture. Name the track before the needle lifts — a music room for the sharp-eared. (Opens soon.)",
     accent: "music",
     kind: "game",
   },
   {
-    path: "/gallery",
-    name: "The Gallery",
-    title: "The Gallery — name the picture",
+    path: "/cold-case",
+    name: "The Cold Case",
+    title: "The Cold Case — the week-long mystery",
     description:
-      "Portraits and stills line the gallery walls. Name what you see on screen before the curator moves you along.",
-    accent: "screen",
-    kind: "game",
-  },
-  {
-    path: "/blitz",
-    name: "The Blitz",
-    title: "The Blitz — beat the clock",
-    description:
-      "Answers against a falling timer. A rapid-fire history room for members who think faster than the candle burns.",
+      "One unsolved case, opened across a week. Follow clues from every room of the Order to name the culprit. (Opens soon.)",
     accent: "history",
-    kind: "game",
-  },
-  {
-    path: "/connections",
-    name: "The Connections",
-    title: "The Connections — find the four groups",
-    description:
-      "Sixteen tiles, four hidden bonds. Sort the grid into its secret groups before the Order runs out of patience.",
-    accent: "wildcard",
-    kind: "game",
-  },
-  {
-    path: "/lobby",
-    name: "The Lobby",
-    title: "The Lobby — play together",
-    description:
-      "Gather other members and play the rooms head to head. The multiplayer antechamber of the Secret Order.",
-    accent: "wildcard",
     kind: "game",
   },
 ];

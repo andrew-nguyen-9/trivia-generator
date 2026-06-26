@@ -1,0 +1,84 @@
+/* THE THREAD — component-scoped chrome owned by §3.6.
+
+   The whole game is ONE persistent rail: resolved links stay on screen as they
+   are solved (per-link reveals), the active link expands inline with the input,
+   and the final theme guess + share card live at the foot of the same rail.
+   No phase-swapping full-height cards → chain + input + reveals always share one
+   desktop screen (verified 1280×800 / 1920×1080), no scroll.
+
+   The "woven thread" is a single border running down the knot gutter (::before),
+   so there is no SVG and nothing to animate for prefers-reduced-motion. Tier
+   colour lives on the knot only; the spun segment above a solved knot inherits
+   it via --knot so the thread visibly takes the link's colour as it is woven. */
+
+.rail {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.link {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1.75rem 1fr;
+  align-items: start;
+  column-gap: 0.75rem;
+  padding: 0.5rem 0;
+}
+
+/* the thread: a vertical seam from this knot up to the previous one */
+.link:not(:first-child)::before {
+  content: "";
+  position: absolute;
+  left: calc(0.875rem - 1px);
+  top: -0.5rem;
+  height: 1rem;
+  border-left: 2px dashed var(--knot, #26263a);
+}
+
+.knot {
+  grid-row: 1;
+  grid-column: 1;
+  width: 1.75rem;
+  height: 1.75rem;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 2px solid var(--knot, #26263a);
+  color: var(--knot, #6b6b80);
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: var(--bg, #0e0e16);
+}
+
+/* resolved knot: filled so the thread reads as woven through it */
+.knotDone {
+  background: var(--knot);
+  color: #0e0e16;
+  border-color: var(--knot);
+}
+
+.body {
+  grid-column: 2;
+  min-width: 0; /* let clamped tie text shrink instead of overflowing */
+}
+
+/* a solved/revealed link: the answer + why it ties to the theme, kept tight so
+   N rows + the foot fit one screen. tie text clamps to one line. */
+.tie {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.hintChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: 1px dashed var(--knot, #8a6d2f);
+  border-radius: 9999px;
+  padding: 0.15rem 0.6rem;
+  letter-spacing: 0.12em;
+}

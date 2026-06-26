@@ -1,0 +1,193 @@
+/* PARLOR v3 §3.7 — The Séance layout.
+ *
+ * LAYOUT ONLY. Palette and type stay on the global design system (Tailwind
+ * tokens + .microlabel/.display) so this module never forks the colour set —
+ * same firewall discipline as Mystery.module.css. The job here is the
+ * one-screen mandate.
+ *
+ * The board is ONE unified matrix: rows = the N seats (the shared anchor axis),
+ * columns = the K categories, each contributing its N value columns. Height is
+ * always ~N rows + a header band regardless of K, so even Sunday (n=7, K=4)
+ * clears 1280×800 / 1920×1080 with no scroll-to-play. Value headers rotate
+ * vertical so K·N columns fit the width; the matrix may scroll horizontally
+ * INTERNALLY as a safety valve — never the page.
+ */
+
+.shell {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  width: 100%;
+  max-width: 80rem;
+  margin: 0 auto;
+  min-height: min(82vh, 760px);
+  border-radius: 24px;
+}
+
+/* ── HUD: identity + timer, one compact row ─────────────────────────────── */
+.hud {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.5rem 1.5rem;
+  border-bottom: 1px solid var(--line, rgba(255, 255, 255, 0.08));
+  padding-bottom: 0.7rem;
+}
+
+/* ── main: clues stacked above a FULL-WIDTH matrix ──────────────────────────
+ * The board must be seen in full, so it gets the whole content width — never
+ * starved by a side column (RoomShell caps width near ~1024, which a beside
+ * layout can't split wide enough for the n=7 board). Full-width lets the widest
+ * day (28 value columns ≈ 975px) render with NO horizontal scroll. Clues sit
+ * above in a shallow, capped, internally-scrolling 2-column ledger so a long
+ * clue set never pushes the board below the fold. */
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  align-items: flex-start;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* clue ledger: shallow + internal scroll so it never pushes the board down. */
+.clues {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.25rem 1.25rem;
+  width: 100%;
+  max-height: 8rem;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+@media (min-width: 768px) {
+  .clues {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.clue {
+  display: flex;
+  gap: 0.5rem;
+  width: 100%;
+  text-align: left;
+  border: 1px solid transparent;
+  border-radius: 0.5rem;
+  padding: 0.4rem 0.55rem;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.clue:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+.clueActive {
+  border-color: currentColor;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* ── the unified matrix ─────────────────────────────────────────────────── */
+/* safety valve: scroll inside the wrapper, never the page. */
+.matrixWrap {
+  align-self: start;
+  max-width: 100%;
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+}
+.matrix {
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+/* category band spanning its N value columns */
+.catBand {
+  font-size: 0.62rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.3rem 0.4rem;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* vertical value headers keep the grid narrow under K·N columns */
+.valHead {
+  height: 4.75rem;
+  vertical-align: bottom;
+  padding: 0.15rem 0 0.3rem;
+  font-size: 0.6rem;
+  font-weight: 400;
+}
+.valHead > span {
+  display: inline-block;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  max-height: 4.4rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.seatHead {
+  font-size: 0.62rem;
+  font-weight: 400;
+  white-space: nowrap;
+  padding: 0 0.45rem;
+  text-align: right;
+}
+.corner {
+  font-size: 0.55rem;
+  font-weight: 400;
+  text-align: right;
+  padding: 0 0.45rem 0.4rem;
+  vertical-align: bottom;
+}
+
+/* separator before each category group (skipped on the first) */
+.groupStart {
+  border-left: 1px solid var(--line, rgba(255, 255, 255, 0.14));
+}
+
+.cellTd {
+  padding: 0.1rem;
+}
+.cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(1.5rem, 2.4vw, 1.9rem);
+  height: clamp(1.5rem, 2.4vw, 1.9rem);
+  border: 1px solid var(--line, #2a2333);
+  border-radius: 0.3rem;
+  font-size: 0.9rem;
+  line-height: 1;
+  transition: border-color 0.12s, background 0.12s;
+}
+.cell:hover {
+  border-color: var(--brass, #b08d57);
+}
+.cell:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--brass, #b08d57);
+}
+
+/* column highlight when a clue that names it is selected */
+.colHiHead {
+  background: rgba(112, 64, 168, 0.16);
+  border-radius: 0.2rem;
+}
+.colHi .cell {
+  box-shadow: inset 0 0 0 1px rgba(112, 64, 168, 0.85);
+}
+
+/* ── pinned controls footer ─────────────────────────────────────────────── */
+.nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  border-top: 1px solid var(--line, rgba(255, 255, 255, 0.08));
+  padding-top: 0.8rem;
+}

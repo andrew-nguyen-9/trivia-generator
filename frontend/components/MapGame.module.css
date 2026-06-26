@@ -1,0 +1,56 @@
+/* PARLOR v3 §3.5 — The Map (Atlas Obscura). Per-game styles only (firewall:
+   new styles go in a *.module.css, never a shared file). Colour comes from
+   Tailwind utility classes in the JSX; this file owns layout + sizing only. */
+
+/* Desktop one-screen: on a pin round the map and the question/controls sit
+   side by side, so the whole round is visible at 1280×800 and 1920×1080 with
+   no scroll-to-play. Mobile (<1024px) keeps the existing stacked flow. */
+.layout {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+@media (min-width: 1024px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr) 320px;
+    align-items: start;
+  }
+}
+
+/* The per-round distance line (the §3.5 social artifact): one bar per round,
+   fill height ∝ closeness. Pin rounds show km; MC tangents show ✓/✗. */
+.bars {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+.barCol {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  width: 2.75rem;
+}
+.barTrack {
+  position: relative;
+  width: 100%;
+  height: 4rem;
+  border-radius: 0.4rem;
+  overflow: hidden;
+}
+.barFill {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 0.4rem 0.4rem 0 0;
+  transition: height 0.4s ease;
+}
+
+/* In-round proximity meter shown under the km readout. */
+.proxFill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.5s ease;
+}

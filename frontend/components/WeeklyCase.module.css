@@ -1,0 +1,212 @@
+/* §3.23 — THE COLD CASE. Colocated styles (the §3.0 *.module.css convention).
+   Two columns on desktop (clue ledger | suspect dossiers), stacked on mobile.
+   Aims for one screen on desktop density. */
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.cols {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--d-col-gap, 1rem);
+}
+@media (min-width: 820px) {
+  .cols {
+    grid-template-columns: minmax(15rem, 22rem) 1fr;
+    align-items: start;
+  }
+}
+
+/* ── Clue ledger ───────────────────────────────────────── */
+.ledger {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.clue {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  border-left: 2px solid rgb(var(--c-brass));
+  border-radius: 0 6px 6px 0;
+  background: rgb(var(--c-surface) / 0.55);
+  padding: 0.45rem 0.65rem;
+}
+
+.locked {
+  border-left-color: rgb(var(--c-line));
+  opacity: 0.5;
+}
+
+.clueDay {
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgb(var(--c-smoke));
+}
+
+.clueText {
+  font-size: 0.84rem;
+  line-height: 1.3;
+}
+
+/* ── Suspect dossier board ─────────────────────────────── */
+.board {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(12.5rem, 1fr));
+  gap: 0.6rem;
+}
+
+.suspect {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  border: 1px solid rgb(var(--c-line));
+  border-radius: 8px;
+  background: rgb(var(--c-surface) / 0.6);
+  padding: 0.6rem 0.7rem;
+  text-align: left;
+  transition:
+    border-color 0.15s,
+    opacity 0.15s,
+    transform 0.1s;
+}
+.suspect:not(:disabled):hover {
+  transform: translateY(-1px);
+  border-color: rgb(var(--c-brass));
+}
+
+.picked {
+  box-shadow: 0 0 0 1px currentColor inset;
+}
+
+.cleared {
+  opacity: 0.4;
+}
+.cleared .name {
+  text-decoration: line-through;
+}
+
+.guilty {
+  box-shadow: 0 0 18px rgb(168 122 46 / 0.4);
+}
+
+.suspectTop {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.glyph {
+  font-size: 1.1rem;
+  color: rgb(var(--c-brass));
+  line-height: 1;
+}
+
+.name {
+  font-weight: 600;
+  font-size: 0.92rem;
+  flex: 1;
+}
+
+.strike {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 999px;
+  border: 1px solid rgb(var(--c-line));
+  font-size: 0.7rem;
+  color: rgb(var(--c-muted));
+  cursor: pointer;
+}
+.strike:hover {
+  border-color: rgb(var(--c-brass));
+  color: rgb(var(--c-brass));
+}
+
+.attrs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.2rem 0.6rem;
+  margin: 0;
+}
+
+.attr {
+  display: flex;
+  flex-direction: column;
+}
+.attr dt {
+  font-size: 0.55rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgb(var(--c-smoke));
+}
+.attr dd {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.2;
+}
+
+.guiltyTag {
+  align-self: flex-start;
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgb(var(--c-brass));
+}
+
+/* ── Actions / verdict ─────────────────────────────────── */
+.actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  text-align: center;
+}
+
+.accuse {
+  border-radius: 999px;
+  padding: 0.7rem 1.6rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: rgb(var(--c-bg));
+  background: rgb(var(--c-smoke));
+  transition: filter 0.15s;
+}
+.accuse:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+.accuse:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.verdict {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  text-align: center;
+}
+
+.grid {
+  font-size: 1.6rem;
+  letter-spacing: 0.1em;
+  margin: 0.2rem 0;
+}

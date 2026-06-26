@@ -2,8 +2,10 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import type { LadderPuzzle, Rung, GridRung } from "@/lib/ladder";
+import type { LadderPuzzle, GridRung } from "@/lib/ladder";
+import { buildShare, type Tier } from "@/lib/share";
 import { sfxDoorLatch, sfxWrong, sfxPianoChord, sfxGlassClink } from "@/lib/sound";
+import styles from "./LadderGame.module.css";
 
 const ACCENT = "#c8852a"; // history / the Trickster's climb
 const BEST_KEY = "parlor.ladder.best.v1";
@@ -15,6 +17,29 @@ function fmt(s: number): string {
 
 const regionTint = (id: number, n: number, alpha: number) =>
   `hsl(${Math.round((id * 360) / n)} 45% 45% / ${alpha})`;
+
+// ── Grid constraint check (UI-side): which placed rows break a constraint.
+// One sigil per row is enforced by the data model, so only column, colour-region
+// and orthogonal/diagonal adjacency can conflict. Returns the offending rows so
+// the board can glow them live — this is the whole point of the refurb. ──
+function conflictRows(placements: number[], regions: number[][]): Set<number> {
+  const bad = new Set<number>();
+  const rows = placements.map((c, r) => [r, c] as const).filter(([, c]) => c >= 0);
+  for (let i = 0; i < rows.length; i++) {
+    for (let j = i + 1; j < rows.length; j++) {
+      const [ra, ca] = rows[i];
+      const [rb, cb] = rows[j];
+      const sameCol = ca === cb;
+      const sameRegion = regions[ra][ca] === regions[rb][cb];
+      const touching = Math.abs(ra - rb) <= 1 && Math.abs(ca - cb) <= 1;
+      if (sameCol || sameRegion || touching) {
+        bad.add(ra);
+        bad.add(rb);
+      }
+    }
+  }
+  return bad;
+}
 
 export default function LadderGame({
   puzzle,
@@ -47,10 +72,13 @@ export default function LadderGame({
 function Climb({ puzzle, reduce }: { puzzle: LadderPuzzle; reduce: boolean }) {
   const [idx, setIdx] = useState(0);
   const [placements, setPlacements] = useState<number[]>([]);
+  const [marks, setMarks] = useState<Set<string>>(new Set());
   const [choice, setChoice] = useState<number | null>(null);
   const [elapsed, setElapsed] = useState(0);
   const [penalty, setPenalty] = useState(0);
   const [collapses, setCollapses] = useState(0);
+  // per-rung: false once a collapse happens on that rung (drives 🟩 vs 🟨 share)
+  const [clean, setClean] = useState<boolean[]>(() => puzzle.rungs.map(() => true));
   const [shake, setShake] = useState(false);
   const [won, setWon] = useState(false);
   const startedAt = useRef(Date.now());
@@ -62,6 +90,7 @@ function Climb({ puzzle, reduce }: { puzzle: LadderPuzzle; reduce: boolean }) {
   useEffect(() => {
     if (rung.type === "grid") setPlacements([...rung.givens]);
     else setChoice(null);
+    setMarks(new Set());
   }, [idx, rung]);
 
   useEffect(() => {
@@ -70,10 +99,24 @@ function Climb({ puzzle, reduce }: { puzzle: LadderPuzzle; reduce: boolean }) {
     return () => clearInterval(id);
   }, [won]);
 
+  // live conflict set for the active grid rung (cheap: n ≤ 6)
+  const conflicts = useMemo(
+    () => (rung.type === "grid" ? conflictRows(placements, rung.regions) : new Set<number>()),
+    [rung, placements],
+  );
+
+  // the Lock gate: a grid is lockable only when complete AND conflict-free
+  // (deduction does the work); sequence/door need a selection to risk.
+  const canLock =
+    rung.type === "grid"
+      ? placements.length === rung.n && placements.every((c) => c >= 0) && conflicts.size === 0
+      : choice !== null;
+
   const collapse = useCallback(() => {
     const nth = collapses + 1;
     setPenalty((p) => p + (nth === 1 ? 90 : 180)); // +90 first, +180 thereafter
     setCollapses(nth);
+    setClean((cl) => cl.map((v, i) => (i === idx ? false : v)));
     sfxWrong();
     if (!reduce) {
       setShake(true);
@@ -82,16 +125,21 @@ function Climb({ puzzle, reduce }: { puzzle: LadderPuzzle; reduce: boolean }) {
     // the board collapses — re-trace from the givens / clear the choice
     if (rung.type === "grid") setPlacements([...rung.givens]);
     else setChoice(null);
-  }, [collapses, reduce, rung]);
+    setMarks(new Set());
+  }, [collapses, reduce, rung, idx]);
 
   function lock() {
-    if (won) return;
+    if (won || !canLock) return;
     let correct = false;
     if (rung.type === "grid") {
       correct =
         placements.length === rung.n &&
         placements.every((c, r) => c === rung.solution[r]);
+    } else if (rung.type === "sequence") {
+      // choice is an option INDEX; rung.answer is the correct VALUE
+      correct = choice !== null && rung.options[choice] === rung.answer;
     } else {
+      // door: rung.answer is the index of the truthful door
       correct = choice === rung.answer;
     }
     if (!correct) {
@@ -113,19 +161,16 @@ function Climb({ puzzle, reduce }: { puzzle: LadderPuzzle; reduce: boolean }) {
     }
   }
 
-  if (won) return <Summit puzzle={puzzle} seconds={total} collapses={collapses} />;
+  if (won) return <Summit puzzle={puzzle} seconds={total} collapses={collapses} clean={clean} />;
 
   return (
     <div className="mx-auto max-w-2xl">
-      {/* HUD */}
-      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <p className="microlabel" style={{ color: ACCENT }}>
-            {puzzle.rite}
-          </p>
-          <p className="text-xs text-muted mt-0.5 max-w-md">{puzzle.framing}</p>
-        </div>
-        <div className="flex items-center gap-4">
+      {/* HUD — one row: rite on the left, timer + collapses right */}
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
+        <p className="microlabel" style={{ color: ACCENT }}>
+          {puzzle.rite}
+        </p>
+        <div className="flex items-center gap-3">
           <span className="font-mono text-lg tabular-nums text-ink">⏱ {fmt(total)}</span>
           {collapses > 0 && (
             <span className="microlabel text-[#b22b2b]" title="board collapses (time penalty)">
@@ -136,7 +181,10 @@ function Climb({ puzzle, reduce }: { puzzle: LadderPuzzle; reduce: boolean }) {
       </div>
 
       {/* Rung pips */}
-      <div className="mb-6 flex items-center justify-center gap-2" aria-label={`rung ${idx + 1} of ${puzzle.rungs.length}`}>
+      <div
+        className="mb-3 flex items-center justify-center gap-2"
+        aria-label={`rung ${idx + 1} of ${puzzle.rungs.length}`}
+      >
         {puzzle.rungs.map((r, i) => (
           <span
             key={i}
@@ -152,10 +200,10 @@ function Climb({ puzzle, reduce }: { puzzle: LadderPuzzle; reduce: boolean }) {
       <motion.div
         animate={shake ? { x: [0, -10, 10, -7, 7, 0] } : { x: 0 }}
         transition={{ duration: 0.5 }}
-        className="rounded-2xl border border-line bg-surface/70 p-5 sm:p-6"
+        className="rounded-2xl border border-line bg-surface/70 p-4 sm:p-5"
       >
         {/* Trickster + resonance */}
-        <div className="mb-4 flex items-center justify-between">
+        <div className="mb-2 flex items-center justify-between gap-3">
           <span className="microlabel text-smoke">
             rung {idx + 1} · {rung.modifier}
           </span>
@@ -167,10 +215,19 @@ function Climb({ puzzle, reduce }: { puzzle: LadderPuzzle; reduce: boolean }) {
             ✦ resonance {rung.resonance}
           </span>
         </div>
-        <p className="mb-5 text-sm italic text-muted">“{rung.whisper}”</p>
+        <p className="mb-3 truncate text-xs italic text-muted" title={rung.whisper}>
+          “{rung.whisper}”
+        </p>
 
         {rung.type === "grid" && (
-          <GridRungView rung={rung} placements={placements} setPlacements={setPlacements} />
+          <GridRungView
+            rung={rung}
+            placements={placements}
+            setPlacements={setPlacements}
+            marks={marks}
+            setMarks={setMarks}
+            conflicts={conflicts}
+          />
         )}
         {rung.type === "sequence" && (
           <SequenceRungView rung={rung} choice={choice} setChoice={setChoice} />
@@ -181,16 +238,18 @@ function Climb({ puzzle, reduce }: { puzzle: LadderPuzzle; reduce: boolean }) {
 
         <button
           onClick={lock}
-          className="mt-6 w-full rounded-full px-6 py-3 text-sm font-medium text-bg transition hover:brightness-110"
+          disabled={!canLock}
+          title={
+            rung.type === "grid"
+              ? "fill every row with no two sigils sharing a column, region, or touching"
+              : "select an answer, then lock — a wrong lock collapses the board (+90s, then +180s)"
+          }
+          className="mt-5 w-full rounded-full px-6 py-3 text-sm font-medium text-bg transition enabled:hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"
           style={{ background: ACCENT }}
         >
-          ⟁ Lock this rung
+          {rung.type === "grid" && !canLock ? "⟁ Resolve every constraint to lock" : "⟁ Lock this rung"}
         </button>
       </motion.div>
-
-      <p className="mt-4 text-center microlabel text-smoke">
-        a wrong lock collapses the board (+90s, then +180s) — there is no undo, only the climb
-      </p>
     </div>
   );
 }
@@ -199,55 +258,82 @@ function GridRungView({
   rung,
   placements,
   setPlacements,
+  marks,
+  setMarks,
+  conflicts,
 }: {
   rung: GridRung;
   placements: number[];
   setPlacements: (p: number[]) => void;
+  marks: Set<string>;
+  setMarks: (m: Set<string>) => void;
+  conflicts: Set<number>;
 }) {
   const { n, regions, givens } = rung;
+
+  // tap cycles a free cell: empty → ✕ (elimination note) → ♛ sigil → empty
   function tap(r: number, c: number) {
     if (givens[r] >= 0) return; // locked given
-    const next = [...placements];
-    next[r] = next[r] === c ? -1 : c;
-    setPlacements(next);
+    const key = `${r}-${c}`;
+    if (placements[r] === c) {
+      // ♛ → empty
+      const next = [...placements];
+      next[r] = -1;
+      setPlacements(next);
+    } else if (marks.has(key)) {
+      // ✕ → ♛ (one sigil per row; this overwrites any other sigil in the row)
+      const m = new Set(marks);
+      m.delete(key);
+      setMarks(m);
+      const next = [...placements];
+      next[r] = c;
+      setPlacements(next);
+    } else {
+      // empty → ✕
+      const m = new Set(marks);
+      m.add(key);
+      setMarks(m);
+    }
     sfxGlassClink();
   }
+
   return (
     <div>
-      <p className="mb-3 text-sm text-ink">
-        Place one sigil ♛ in every row, column, and colour region — no two may touch,
-        even diagonally.
+      <p className="mb-3 text-xs text-ink">
+        One sigil ♛ per row, column, and colour region — none may touch, even
+        diagonally. Tap once to mark ✕, again for ♛.
       </p>
-      <div className="overflow-x-auto">
-        <div
-          className="mx-auto grid w-max gap-1"
-          style={{ gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))` }}
-          role="grid"
-          aria-label="Queens grid"
-        >
-          {Array.from({ length: n }, (_, r) =>
-            Array.from({ length: n }, (_, c) => {
-              const placed = placements[r] === c;
-              const given = givens[r] === c;
-              return (
-                <button
-                  key={`${r}-${c}`}
-                  onClick={() => tap(r, c)}
-                  disabled={given}
-                  aria-label={`row ${r + 1}, column ${c + 1}${placed ? ", sigil placed" : ""}${given ? ", locked" : ""}`}
-                  className="flex h-11 w-11 items-center justify-center rounded-md border text-xl transition focus:outline-none focus-visible:ring-2"
-                  style={{
-                    borderColor: "rgba(0,0,0,0.25)",
-                    background: regionTint(regions[r][c], n, given ? 0.5 : 0.22),
-                    color: given ? ACCENT : "#f3ead8",
-                  }}
-                >
-                  <span aria-hidden>{placed || given ? "♛" : ""}</span>
-                </button>
-              );
-            }),
-          )}
-        </div>
+      <div
+        className={styles.board}
+        style={{ gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))` }}
+        role="grid"
+        aria-label="Queens grid"
+      >
+        {Array.from({ length: n }, (_, r) =>
+          Array.from({ length: n }, (_, c) => {
+            const placed = placements[r] === c;
+            const given = givens[r] === c;
+            const marked = marks.has(`${r}-${c}`);
+            const bad = (placed || given) && conflicts.has(r);
+            return (
+              <button
+                key={`${r}-${c}`}
+                onClick={() => tap(r, c)}
+                disabled={given}
+                aria-label={`row ${r + 1}, column ${c + 1}${placed || given ? ", sigil placed" : marked ? ", marked" : ""}${given ? ", locked" : ""}${bad ? ", conflict" : ""}`}
+                className={`${styles.cell} ${bad ? styles.conflict : ""}`}
+                style={{
+                  background: regionTint(regions[r][c], n, given ? 0.5 : 0.22),
+                  color: given ? ACCENT : "#f3ead8",
+                }}
+              >
+                <span aria-hidden className={marked ? styles.mark : undefined}>
+                  {placed || given ? "♛" : marked ? "✕" : ""}
+                </span>
+              </button>
+            );
+          }),
+        )}
       </div>
     </div>
   );
@@ -262,13 +348,15 @@ function SequenceRungView({
   choice: number | null;
   setChoice: (i: number) => void;
 }) {
+  const [showDiffs, setShowDiffs] = useState(false);
+  const diffs = rung.shown.slice(1).map((v, i) => v - rung.shown[i]);
   return (
     <div>
-      <p className="mb-3 text-sm text-ink">
+      <p className="mb-3 text-xs text-ink">
         One rule generates this sequence. The obvious next step is the Trickster’s
         decoy — find the true continuation.
       </p>
-      <div className="mb-5 flex flex-wrap items-center justify-center gap-2 font-mono text-lg">
+      <div className="mb-2 flex flex-wrap items-center justify-center gap-2 font-mono text-lg">
         {rung.shown.map((v, i) => (
           <span key={i} className="rounded-md border border-line bg-bg/50 px-3 py-2 text-ink">
             {v}
@@ -278,6 +366,20 @@ function SequenceRungView({
         <span className="rounded-md border border-dashed px-3 py-2" style={{ borderColor: ACCENT, color: ACCENT }}>
           ?
         </span>
+      </div>
+      <div className="mb-4 text-center">
+        {showDiffs ? (
+          <p className="font-mono text-xs text-smoke">
+            differences&nbsp; {diffs.map((d) => (d >= 0 ? `+${d}` : `${d}`)).join("  ")}
+          </p>
+        ) : (
+          <button
+            onClick={() => setShowDiffs(true)}
+            className="microlabel text-smoke underline-offset-2 hover:underline"
+          >
+            show first differences
+          </button>
+        )}
       </div>
       <div className="flex flex-wrap justify-center gap-2">
         {rung.options.map((v, i) => (
@@ -311,16 +413,16 @@ function DoorRungView({
 }) {
   return (
     <div>
-      <p className="mb-4 text-sm text-ink">
+      <p className="mb-3 text-xs text-ink">
         Only one door speaks the truth about the resonance you carry. Choose it.
       </p>
-      <div className="grid gap-3">
+      <div className="grid gap-2">
         {rung.doors.map((d, i) => (
           <button
             key={i}
             onClick={() => setChoice(i)}
             aria-pressed={choice === i}
-            className="flex items-center gap-3 rounded-xl border px-4 py-3 text-left text-sm transition"
+            className="flex items-center gap-3 rounded-xl border px-4 py-2.5 text-left text-sm transition"
             style={{
               borderColor: choice === i ? ACCENT : "var(--line,#2a2333)",
               background: choice === i ? `${ACCENT}1f` : "transparent",
@@ -339,10 +441,12 @@ function Summit({
   puzzle,
   seconds,
   collapses,
+  clean,
 }: {
   puzzle: LadderPuzzle;
   seconds: number;
   collapses: number;
+  clean: boolean[];
 }) {
   const [copied, setCopied] = useState(false);
   const perfect = collapses === 0;
@@ -353,17 +457,20 @@ function Summit({
       return 0;
     }
   }, []);
-  const glyph = (r: Rung) => (r.type === "grid" ? "🟧" : r.type === "sequence" ? "🔢" : "🚪");
-  const share = useMemo(
-    () =>
-      [
-        `🪜 Climb of the Initiate — ${puzzle.rite}`,
-        `⏱ ${fmt(seconds)}  ${perfect ? "PERFECT ASCENT ✦" : `💥 ${collapses}`}`,
-        puzzle.rungs.map(glyph).join(""),
-        `parlor · ${puzzle.date}`,
-      ].join("\n"),
-    [puzzle, seconds, collapses, perfect],
-  );
+
+  // The solved result, via the canonical share seam (lib/share.ts): one tier per
+  // rung — 🟩 cleared first try, 🟨 cleared after a collapse. One row, no DB.
+  const card = useMemo(() => {
+    const tiers: Tier[] = clean.map((c) => (c ? "hit" : "near") as Tier);
+    return buildShare({
+      room: "/ladder",
+      date: puzzle.date,
+      tiers,
+      score: clean.filter(Boolean).length,
+      maxScore: clean.length,
+      columns: clean.length,
+    });
+  }, [clean, puzzle.date]);
 
   return (
     <motion.div
@@ -386,10 +493,10 @@ function Summit({
           {collapses} collapse{collapses > 1 ? "s" : ""} on the way up.
         </p>
       )}
-      <p className="text-2xl">{puzzle.rungs.map(glyph).join("")}</p>
+      <p className="text-2xl tracking-[0.2em]">{card.grid}</p>
       <button
         onClick={() =>
-          navigator.clipboard?.writeText(share).then(() => {
+          navigator.clipboard?.writeText(card.text).then(() => {
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
           })

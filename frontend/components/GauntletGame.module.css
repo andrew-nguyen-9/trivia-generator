@@ -1,0 +1,54 @@
+/* THE GAUNTLET — §3.10 scoped chrome. The speed run is five trials on one clock;
+   the only structural chrome here is the STAGE TRANSITION. Each trial slides in
+   under a bold gate plate so the runner always knows which gate they're at, and
+   the resolve banner flashes green (cleared) or red (trapped) before the next
+   gate. Everything else stays Tailwind. prefers-reduced-motion drops the motion;
+   the plate, ring and colours still read. --accent is set per-trial from the
+   category hex. */
+
+.stage {
+  animation: gauntletSlide 280ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes gauntletSlide {
+  from { opacity: 0; transform: translateX(1.5rem); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* the gate plate: which trial you're standing at, pulsed on entry */
+.plate {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid var(--accent, #b07aff);
+  border-radius: 9999px;
+  padding: 0.25rem 0.85rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  color: var(--accent, #b07aff);
+  animation: gauntletPlate 650ms ease-out;
+}
+
+@keyframes gauntletPlate {
+  from { box-shadow: 0 0 0 0 var(--accent, #b07aff); }
+  to   { box-shadow: 0 0 0 10px transparent; }
+}
+
+/* resolve banner: bold pass/fail before pressing on */
+.banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  border-radius: 0.75rem;
+  padding: 0.55rem 1rem;
+  font-weight: 800;
+  animation: gauntletSlide 220ms ease-out;
+}
+.cleared { background: rgba(52, 210, 123, 0.14); color: #34d27b; }
+.trapped { background: rgba(255, 107, 94, 0.14); color: #ff6b5e; }
+
+@media (prefers-reduced-motion: reduce) {
+  .stage, .banner, .plate { animation: none; }
+}

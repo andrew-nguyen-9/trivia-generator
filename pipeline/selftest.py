@@ -36,6 +36,7 @@ def synthetic_facts() -> list[dict]:
             fact_text=f"Artist {i} has {(i + 1) * 1_000_000:,} fans on Deezer.",
             numeric_value=(i + 1) * 1_000_000.0, numeric_unit="Deezer fans",
             popularity=10.0 * i, source_url="https://example.com",
+            image_url="https://cdn-images.dzcdn.net/images/artist/def/1000x1000-000.jpg",
         ))
         facts.append(make_fact(
             source="wikipedia", category="history", subject=f"Event {i}",
@@ -76,6 +77,32 @@ def synthetic_facts() -> list[dict]:
             fact_text=f'Artist {i} released the album "Album {i}" in {1990 + i * 3}.',
             year=1990 + i * 3,
             numeric_value=float(i + 1), numeric_unit="Deezer albums",
+            popularity=10.0 * i, source_url="https://example.com",
+            image_url="https://cdn-images.dzcdn.net/images/cover/abc/1000x1000-000.jpg",
+        ))
+        # §3.13 music depth: label / genre / featured-artist MC + BPM higher_lower
+        facts.append(make_fact(
+            source="deezer", category="music", subject=f"Artist {i}",
+            fact_text=f'Artist {i}\'s album "Album {i}" was released on the label Label {i}.',
+            popularity=10.0 * i, source_url="https://example.com",
+            meta={"answer_field": "label", "answer": f"Label {i}"},
+        ))
+        facts.append(make_fact(
+            source="deezer", category="music", subject=f"Artist {i}",
+            fact_text=f'Artist {i}\'s album "Album {i}" is categorized as Genre {i}.',
+            popularity=10.0 * i, source_url="https://example.com",
+            meta={"answer_field": "genre", "answer": f"Genre {i}"},
+        ))
+        facts.append(make_fact(
+            source="deezer", category="music", subject=f"Artist {i}",
+            fact_text=f'On the track "Song {i}", Artist {i} features Guest {i}.',
+            popularity=10.0 * i, source_url="https://example.com",
+            meta={"answer_field": "featured_artist", "answer": f"Guest {i}"},
+        ))
+        facts.append(make_fact(
+            source="deezer", category="music", subject=f"Track {i}",
+            fact_text=f'"Track {i}" by Artist {i} has a tempo of {80 + i * 50} BPM.',
+            numeric_value=float(80 + i * 50), numeric_unit="BPM",
             popularity=10.0 * i, source_url="https://example.com",
         ))
 
@@ -132,6 +159,18 @@ def main() -> None:
     check("forge produces ladder", "ladder" in types)
     check("forge produces thread", "thread" in types)
 
+    mc_corrects = {q["correct"] for q in qs if q["qtype"] == "multiple_choice"}
+    check("forge produces music label MC", any(c.startswith("Label ") for c in mc_corrects))
+    check("forge produces music genre MC", any(c.startswith("Genre ") for c in mc_corrects))
+    check("forge produces music featured-artist MC", any(c.startswith("Guest ") for c in mc_corrects))
+    check("forge produces music BPM higher_lower",
+          any(q["qtype"] == "higher_lower" and q.get("unit") == "BPM" for q in qs))
+    music_qs = [q for q in qs if q.get("category") == "music"]
+    check("forge strips album-cover art from music questions (leak)",
+          all("/images/cover/" not in (q.get("image_url") or "") for q in music_qs))
+    check("forge preserves music artist portraits (not over-stripped)",
+          any("/images/artist/" in (q.get("image_url") or "") for q in music_qs))
+
     for q in qs:
         if q["qtype"] == "where":
             check("where carries coordinates",
@@ -144,6 +183,15 @@ def main() -> None:
                   len(q["choices"]) == 4 and q["correct"] in q["choices"])
             check("MC prompt blanks the answer", "_____" in q["prompt"] and q["correct"] not in q["prompt"])
             break
+
+    # §3.15 wikidata source: row→facts contract + forge-roundtrip, run offline so
+    # the keyless WDQS ingest is covered by the same pre-ingestion gate.
+    try:
+        from wikidata_ingest import _selfcheck as _wd_selfcheck
+        _wd_selfcheck()
+        check("wikidata_ingest row→facts + forge roundtrip", True)
+    except Exception as e:
+        check("wikidata_ingest row→facts + forge roundtrip", False, repr(e))
 
     for q in qs:
         if q["qtype"] == "higher_lower":
@@ -176,6 +224,35 @@ def main() -> None:
     check("forge_trivia emits MC keeping source distractors",
           bool(trivia_mc) and set(trivia_mc[0]["choices"]) ==
           {"Inception", "Tenet", "Interstellar", "Memento"})
+
+    # ── §3.12 distractor closeness ───────────────────────────────────────────
+    # Distractors must sit *close* to the answer (same era/magnitude/shape) so the
+    # right option isn't guessable by being the odd one out. The closeness
+    # heuristic lives in distractor_quality; assert it (a) catches obvious
+    # outliers, (b) repairs a mixed pool, and (c) the forge emits no separable set.
+    import random as _random
+
+    from distractor_quality import closest as _closest
+    from distractor_quality import separable_reason
+    check("gate flags a type outlier (year among names)",
+          separable_reason(["Paris", "London", "Berlin", "1999"], "1999") is not None)
+    check("gate flags a magnitude outlier (7-fig among single digits)",
+          separable_reason(["1500000", "12", "9", "11"], "1500000") is not None)
+    check("gate passes a tight same-magnitude set",
+          separable_reason(["1500000", "1200000", "900000", "1100000"], "1500000") is None)
+    _d = _closest("1500000", ["1200000", "900000", "1100000", "5", "12", "9"], 3, _random.Random(1))
+    check("closest repairs a mixed-magnitude pool",
+          _d is not None and separable_reason([*_d, "1500000"], "1500000") is None, f"{_d}")
+    # every distractor set the forge SYNTHESISES (clue + meta-answer MC; not the
+    # hand-authored trivia set) must be non-separable.
+    synth = [q for q in qs
+             if q["qtype"] in ("multiple_choice", "clue")
+             and isinstance(q.get("choices"), list) and len(q["choices"]) == 4
+             and q["correct"] != "Inception"]
+    sep = [(q["correct"], separable_reason(q["choices"], q["correct"])) for q in synth]
+    sep = [s for s in sep if s[1]]
+    check("forge synthesises no trivially-separable distractor sets",
+          not sep, f"{len(sep)}/{len(synth)} separable e.g. {sep[:2]}")
 
     for q in qs:
         if q["qtype"] == "seance":
@@ -227,6 +304,36 @@ def main() -> None:
     b1, b2 = build_daily_board(qs, d), build_daily_board(qs, d)
     check("daily board is deterministic", b1 == b2)
 
+    # ── §3.18 quality scoring ─────────────────────────────────────────────────
+    # Every forged question carries a 0..1 quality score the board sorts on.
+    scores = [(q.get("meta") or {}).get("quality") for q in qs]
+    check("every question carries a quality score in [0,1]",
+          all(s is not None and 0.0 <= s <= 1.0 for s in scores))
+
+    # The board must bias toward good clues: over a pool where each (category,
+    # difficulty) tier holds sharp and thin clues in equal number, the clues the
+    # board picks should average higher quality than the pool. Fails loudly if
+    # the ranking step is dropped and the board reverts to a blind random pick.
+    from quality_score import quality_score as _qs
+
+    def _clue(cat: str, diff: int, i: int, sharp: bool) -> dict:
+        text = (f"In 196{i % 10}, this {cat} pioneer led a celebrated campaign abroad."
+                if sharp else "a thing.")
+        return {"content_hash": f"{cat}-{diff}-{i}-{int(sharp)}", "qtype": "clue",
+                "category": cat, "difficulty": diff, "prompt": text,
+                "meta": {"quality": _qs({"prompt": text})}}
+
+    pool = [_clue(c, dd, i, i % 2 == 0)
+            for c in ("alpha", "beta", "gamma", "delta", "epsilon")
+            for dd in range(1, 6) for i in range(8)]
+    bb = build_daily_board(pool, date(2026, 6, 12))
+    ph = {q["content_hash"]: q for q in pool}
+    chosen = [ph[h] for col in bb["payload"]["columns"] for h in col["cells"]]
+    board_avg = sum(_qs(q) for q in chosen) / len(chosen)
+    pool_avg = sum(_qs(q) for q in pool) / len(pool)
+    check("board biases toward higher-quality clues", board_avg > pool_avg,
+          f"board {board_avg:.3f} vs pool {pool_avg:.3f}")
+
     # bronze compaction (DB-less serving depends on this not bloating the repo)
     import tempfile
 
@@ -245,6 +352,56 @@ def main() -> None:
         row_a = next(r for r in lines if r["content_hash"] == "a")
         check("compaction keeps original timestamp for unchanged facts",
               row_a["_ingested_at"] == "t1")
+
+    # ── bronze→staging source contract (§3.11) ───────────────────────────────
+    # The dbt accepted_values test on stg_facts.source is a hand-kept allow-list
+    # that gates the whole publish. When a new ingest writes a source the list
+    # doesn't know, the nightly dies at the dbt step — and Séance/Ladder, which
+    # are server-generated with no seed fallback, go dark. Catch that drift here,
+    # offline and before commit, against the same allow-list dbt enforces.
+    import yaml
+
+    from common import RAW_DIR
+    schema = yaml.safe_load(
+        (REPO_ROOT / "transform" / "models" / "staging" / "schema.yml").read_text()
+    )
+    accepted: set[str] = set()
+    for m in schema["models"]:
+        for col in m.get("columns", []) if m["name"] == "stg_facts" else []:
+            if col["name"] != "source":
+                continue
+            for t in col.get("tests", []):
+                if isinstance(t, dict) and "accepted_values" in t:
+                    accepted = {str(v).lower() for v in t["accepted_values"]["values"]}
+    bronze_sources: set[str] = set()
+    for f in RAW_DIR.glob("*.jsonl"):
+        for line in f.read_text().splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            s = json.loads(line).get("source")
+            if s is not None:
+                bronze_sources.add(str(s).lower())
+    unknown = bronze_sources - accepted
+    check("bronze sources all in dbt accepted_values (else transform gates publish)",
+          not unknown, f"unlisted sources: {sorted(unknown)}")
+
+    # ── per-source health floor (§3.17, debt #3) ─────────────────────────────
+    # The total floor (question_forge --min-questions) is cleared by one healthy
+    # source, so a single ingest can die and the bank rots silently. Hold every
+    # live (source, category) bucket in bronze to a minimum instead, so the next
+    # starvation fails the run loudly and names the culprit.
+    from common import HEALTH_FLOOR, bronze_bucket_counts, starved_buckets
+    # END STATE: a starved source trips the floor (pure-helper unit check).
+    check("health floor flags a starved source",
+          starved_buckets({("deezer", "music"): 200, ("zombie", "history"): 2})
+          == [("zombie", "history")])
+    check("health floor passes a healthy roster",
+          starved_buckets({("deezer", "music"): 200, ("wikipedia", "history"): 468}) == [])
+    # Live gate: hold the committed bronze itself to the floor.
+    starved = starved_buckets(bronze_bucket_counts())
+    check(f"every live (source,category) bronze bucket has ≥{HEALTH_FLOOR} facts",
+          not starved, f"starved: {starved}")
 
     if args.core_only:
         if FAILURES:
@@ -290,6 +447,9 @@ def main() -> None:
         check("seed bank has year_guess fuel for THE CLOCK", len(yg) >= 6, f"{len(yg)} found")
         check("year_guess prompts don't leak the year",
               all(str(q.get("year")) not in q["prompt"] for q in yg))
+        music_bank = [q for q in bank if q.get("category") == "music"]
+        check("seed bank: no music image leaks the answer (no album covers)",
+              all("/images/cover/" not in (q.get("image_url") or "") for q in music_bank))
         # THE CLOCK's audio rounds must play offline: melody facts (no audio files)
         # carry a synthesizable note list + a year to guess.
         au = [q for q in bank if q["qtype"] == "audio_guess"]
@@ -323,6 +483,20 @@ def main() -> None:
         )
         check("≥3 categories have a board-ready difficulty spread",
               cats_with_board_spread >= 3, f"{cats_with_board_spread} categories")
+
+        # ── §3.12 distractor closeness (regression tripwire) ──────────────────
+        # Across the whole bank, trivially-separable MC/clue sets must stay rare.
+        # The forge synthesises zero (asserted above on live output); the residual
+        # here is third-party trivia whose hand-authored answer happens to read as
+        # a number/year ("2002" the song, "+44" the band) — not a synthesis fault.
+        # A spike means our distractor logic regressed.
+        from distractor_quality import separable_reason as _sep
+        mc = [q for q in bank if q["qtype"] in ("multiple_choice", "clue")
+              and isinstance(q.get("choices"), list) and len(q["choices"]) == 4]
+        seps = [q for q in mc if _sep(q["choices"], q["correct"])]
+        share = len(seps) / len(mc) if mc else 0.0
+        check("seed-bank trivially-separable distractor share ≤ 3%",
+              share <= 0.03, f"{len(seps)}/{len(mc)} ({share:.1%})")
     else:
         check("seed bank exists", False, str(seed_path))
 

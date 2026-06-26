@@ -1,7 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { CATEGORY_HEX, CATEGORY_LABEL } from "@/lib/types";
+import { useProfile } from "@/lib/profile";
+import { weakestCategory } from "@/lib/weakspot";
 import type { SavedQ } from "@/lib/usePractice";
 
 export default function PracticeBar({
@@ -16,6 +19,8 @@ export default function PracticeBar({
   onRemove: (prompt: string) => void;
 }) {
   const [panelOpen, setPanelOpen] = useState(false);
+  const { profile } = useProfile();
+  const weak = weakestCategory(profile.cat);
 
   // Escape closes the saved-questions panel (it's a dismissible dialog, unlike
   // a committed board question). Shared by every room, so this lands everywhere.
@@ -40,14 +45,26 @@ export default function PracticeBar({
           {practiceMode ? "◉ practice mode on" : "◎ practice mode"}
         </button>
 
-        {saved.length > 0 && (
-          <button
-            onClick={() => setPanelOpen(true)}
-            className="microlabel rounded-full border border-line px-4 py-2 text-muted transition hover:border-ink hover:text-ink"
-          >
-            {saved.length} saved →
-          </button>
-        )}
+        <div className="flex items-center gap-3">
+          {weak && (
+            <Link
+              href={weak.href}
+              className="microlabel rounded-full border px-4 py-2 transition hover:opacity-80"
+              style={{ borderColor: CATEGORY_HEX[weak.category], color: CATEGORY_HEX[weak.category] }}
+            >
+              weak spot: {CATEGORY_LABEL[weak.category]} →
+            </Link>
+          )}
+
+          {saved.length > 0 && (
+            <button
+              onClick={() => setPanelOpen(true)}
+              className="microlabel rounded-full border border-line px-4 py-2 text-muted transition hover:border-ink hover:text-ink"
+            >
+              {saved.length} saved →
+            </button>
+          )}
+        </div>
       </div>
 
       {panelOpen && (

@@ -2,9 +2,11 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import type { SeancePuzzle } from "@/lib/seance";
+import { generateSeance, type SeancePuzzle } from "@/lib/seance";
 import { recordBanishing, loadGrimoire, spiritsBanished } from "@/lib/grimoire";
+import { buildShare, type GameResult, type Tier } from "@/lib/share";
 import { sfxGlassClink, sfxWrong, sfxPianoChord, sfxDoorLatch } from "@/lib/sound";
+import styles from "./SeanceGame.module.css";
 
 const ACCENT = "#7040a8"; // wildcard / the Medium
 
@@ -24,6 +26,21 @@ function fmt(s: number): string {
   return `${m}:${r.toString().padStart(2, "0")}`;
 }
 
+// ponytail: dev/preview seam the §3.7 doc calls for. Live Séance data is dark
+// until 3.11's transform fix lands, so `?sample=1` (today) or
+// `?sample=YYYY-MM-DD` generates a puzzle client-side via the pure generator —
+// OPT-IN only. The default no-puzzle dark state is untouched, so the
+// "no seed fallback by design" invariant holds. Remove the seam if it ever
+// risks shipping as a real fallback.
+function sampleFromQuery(): SeancePuzzle | null {
+  if (typeof window === "undefined") return null;
+  const q = new URLSearchParams(window.location.search).get("sample");
+  if (!q) return null;
+  const date = /^\d{4}-\d{2}-\d{2}$/.test(q) ? q : new Date().toISOString().slice(0, 10);
+  const dayIndex = Math.floor(Date.parse(date + "T00:00:00Z") / 86_400_000);
+  return generateSeance(dayIndex, date);
+}
+
 export default function SeanceGame({
   puzzle,
   requestedDate,
@@ -32,9 +49,17 @@ export default function SeanceGame({
   requestedDate?: string | null;
 }) {
   const reduce = useReducedMotion();
+  const [sample, setSample] = useState<SeancePuzzle | null>(null);
+
+  // client-only: pull a sample puzzle if the dev seam asked for one.
+  useEffect(() => {
+    if (!puzzle) setSample(sampleFromQuery());
+  }, [puzzle]);
+
+  const active = puzzle ?? sample;
 
   // ── Dark state: no archived puzzle. NO offline fallback (by design). ──
-  if (!puzzle) {
+  if (!active) {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 text-center">
         <p className="text-5xl opacity-70" aria-hidden>
@@ -52,7 +77,7 @@ export default function SeanceGame({
     );
   }
 
-  return <SeanceTable puzzle={puzzle} reduce={!!reduce} />;
+  return <SeanceTable puzzle={active} reduce={!!reduce} />;
 }
 
 function SeanceTable({ puzzle, reduce }: { puzzle: SeancePuzzle; reduce: boolean }) {
@@ -64,6 +89,7 @@ function SeanceTable({ puzzle, reduce }: { puzzle: SeancePuzzle; reduce: boolean
   const [won, setWon] = useState(false);
   const [shake, setShake] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [activeClue, setActiveClue] = useState<number | null>(null);
   const startedAt = useRef(Date.now());
 
   const total = elapsed + strikes * 60;
@@ -80,16 +106,27 @@ function SeanceTable({ puzzle, reduce }: { puzzle: SeancePuzzle; reduce: boolean
   // atmospheric pressure: vignette deepens with time (frozen if reduced-motion)
   const pressure = reduce ? 0.25 : Math.min(0.85, 0.18 + total / 900);
 
-  const layer = whisperMode ? whisper : board;
   const setLayer = whisperMode ? setWhisper : setBoard;
+
+  // columns the selected clue names, as "cat:val" keys → highlight in the matrix.
+  const hiCols = useMemo(() => {
+    const s = new Set<string>();
+    if (activeClue === null) return s;
+    const cl = puzzle.clues[activeClue];
+    if (!cl) return s;
+    s.add(`${cl.a.cat}:${cl.a.val}`);
+    if (cl.b) s.add(`${cl.b.cat}:${cl.b.val}`);
+    return s;
+  }, [activeClue, puzzle.clues]);
 
   const cycle = useCallback(
     (c: number, seat: number, val: number) => {
       if (won) return;
+      const wasEmpty = board[c][seat][val] === 0;
       setLayer((prev) => {
         const next = prev.map((cat) => cat.map((row) => row.slice()));
         const cur = next[c][seat][val];
-        const nv: Mark = (((cur + 1) % 3) as Mark);
+        const nv: Mark = ((cur + 1) % 3) as Mark;
         next[c][seat][val] = nv;
         // auto-propagation on confirm: snuff the rest of the row + column
         // (only empty cells; manual marks are left intact — clear them by hand).
@@ -101,9 +138,10 @@ function SeanceTable({ puzzle, reduce }: { puzzle: SeancePuzzle; reduce: boolean
         }
         return next;
       });
-      if (!whisperMode) {
-        const cur = board[c][seat][val];
-        if ((cur + 1) % 3 === 2) sfxGlassClink();
+      // glass clink when a fresh cell is bound (empty → bind needs two taps; the
+      // snuff→bind transition is the one that lands on confirm).
+      if (!whisperMode && !wasEmpty && (board[c][seat][val] + 1) % 3 === 2) {
+        sfxGlassClink();
       }
     },
     [board, puzzle.n, setLayer, whisperMode, won],
@@ -145,22 +183,29 @@ function SeanceTable({ puzzle, reduce }: { puzzle: SeancePuzzle; reduce: boolean
   }
 
   if (won) {
-    return <Banished puzzle={puzzle} seconds={total} strikes={strikes} copied={copied} setCopied={setCopied} />;
+    return (
+      <Banished
+        puzzle={puzzle}
+        seconds={total}
+        strikes={strikes}
+        copied={copied}
+        setCopied={setCopied}
+      />
+    );
   }
 
   return (
     <motion.div
-      className="relative mx-auto max-w-4xl"
+      className={styles.shell}
       animate={shake ? { x: [0, -8, 8, -6, 6, 0] } : { x: 0 }}
       transition={{ duration: 0.5 }}
       style={{
         // edges darken as the séance drags on
         boxShadow: `inset 0 0 140px ${pressure * 100}px rgba(8,4,14,${pressure})`,
-        borderRadius: 24,
       }}
     >
       {/* HUD */}
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+      <div className={styles.hud}>
         <div>
           <p className="microlabel" style={{ color: ACCENT }}>
             {puzzle.rite} · {puzzle.spirit}
@@ -179,41 +224,123 @@ function SeanceTable({ puzzle, reduce }: { puzzle: SeancePuzzle; reduce: boolean
         </div>
       </div>
 
-      {/* Clues — the corrupted message */}
-      <div className="mb-6 rounded-2xl border border-line bg-surface/70 p-4">
-        <p className="microlabel mb-2 text-smoke">the spirit whispers ({puzzle.clues.length})</p>
-        <ol className="grid gap-1.5 sm:grid-cols-2">
-          {puzzle.clues.map((cl, i) => (
-            <li key={i} className="flex gap-2 text-sm text-ink">
-              <span className="text-smoke select-none">✦</span>
-              <span>{cl.text}</span>
-            </li>
-          ))}
-        </ol>
-      </div>
+      <div className={styles.main}>
+        {/* Clues — the corrupted message. Tap one to light up the cells it names. */}
+        <div>
+          <p className="microlabel mb-2 text-smoke">
+            the spirit whispers ({puzzle.clues.length}) · tap to trace
+          </p>
+          <div className={styles.clues}>
+            {puzzle.clues.map((cl, i) => {
+              const on = activeClue === i;
+              return (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setActiveClue(on ? null : i)}
+                  aria-pressed={on}
+                  className={`${styles.clue} ${on ? styles.clueActive : ""} text-sm text-ink`}
+                  style={on ? { color: ACCENT } : undefined}
+                >
+                  <span className="text-smoke select-none" aria-hidden>
+                    ✦
+                  </span>
+                  <span>{cl.text}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
 
-      {/* The Scrying Matrix */}
-      <div className="space-y-6 overflow-x-auto pb-2">
-        {puzzle.categories.map((cat, c) => (
-          <Grid
-            key={cat.key}
-            puzzle={puzzle}
-            cat={c}
-            layer={board}
-            whisperLayer={whisper}
-            onCell={cycle}
-          />
-        ))}
+        {/* The Scrying Matrix — one unified seat × (category·value) grid. */}
+        <div className={styles.matrixWrap}>
+          <table className={styles.matrix} role="grid" aria-label="the scrying matrix">
+            <thead>
+              <tr>
+                <td className={styles.corner} aria-hidden />
+                {puzzle.categories.map((cat, c) => (
+                  <th
+                    key={cat.key}
+                    colSpan={puzzle.n}
+                    scope="colgroup"
+                    className={`${styles.catBand} ${c > 0 ? styles.groupStart : ""}`}
+                    style={{ color: ACCENT }}
+                  >
+                    {cat.label}
+                  </th>
+                ))}
+              </tr>
+              <tr>
+                <td className={styles.corner}>seat</td>
+                {puzzle.categories.map((cat, c) =>
+                  cat.values.map((v, val) => {
+                    const hi = hiCols.has(`${c}:${val}`);
+                    return (
+                      <th
+                        key={`${cat.key}-${val}`}
+                        scope="col"
+                        className={`${styles.valHead} ${val === 0 && c > 0 ? styles.groupStart : ""} ${hi ? styles.colHiHead : ""} text-muted`}
+                        title={v}
+                      >
+                        <span>{v}</span>
+                      </th>
+                    );
+                  }),
+                )}
+              </tr>
+            </thead>
+            <tbody>
+              {Array.from({ length: puzzle.n }, (_, seat) => (
+                <tr key={seat}>
+                  <th scope="row" className={`${styles.seatHead} text-smoke`}>
+                    {seat + 1}
+                  </th>
+                  {puzzle.categories.map((cat, c) =>
+                    cat.values.map((v, val) => {
+                      const m = board[c][seat][val];
+                      const w = whisper[c][seat][val];
+                      const mark = m === 2 ? "◯" : m === 1 ? "✕" : "";
+                      const wisp = w !== 0 && m === 0 ? (w === 2 ? "◯" : "✕") : "";
+                      const hi = hiCols.has(`${c}:${val}`);
+                      return (
+                        <td
+                          key={`${cat.key}-${val}`}
+                          className={`${styles.cellTd} ${val === 0 && c > 0 ? styles.groupStart : ""} ${hi ? styles.colHi : ""}`}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => cycle(c, seat, val)}
+                            aria-label={`seat ${seat + 1}, ${cat.label} ${v}: ${m === 2 ? "bound" : m === 1 ? "snuffed" : "unmarked"}`}
+                            className={styles.cell}
+                            style={{
+                              borderColor: m === 2 ? ACCENT : undefined,
+                              background: m === 2 ? `${ACCENT}26` : "transparent",
+                              color: m === 2 ? ACCENT : m === 1 ? "#7a6e8a" : "transparent",
+                            }}
+                          >
+                            <span aria-hidden>
+                              {mark || (wisp && <span className="opacity-30">{wisp}</span>) || "·"}
+                            </span>
+                          </button>
+                        </td>
+                      );
+                    }),
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* Controls */}
-      <div className="mt-8 flex flex-wrap items-center justify-between gap-3">
+      <div className={styles.nav}>
         <div className="flex items-center gap-2">
           {puzzle.whisper && (
             <>
               <button
                 onClick={() => {
-                  setWhisperMode((w) => !w);
+                  setWhisperMode((wm) => !wm);
                   sfxDoorLatch();
                 }}
                 aria-pressed={whisperMode}
@@ -246,81 +373,11 @@ function SeanceTable({ puzzle, reduce }: { puzzle: SeancePuzzle; reduce: boolean
         </button>
       </div>
 
-      <p className="mt-4 text-center microlabel text-smoke">
+      <p className="text-center microlabel text-smoke">
         tap once to snuff (✕) · tap twice to bind (◯) · a wrong submission costs +60s
         {puzzle.whisper ? " · whisper mode is a scratchpad" : ""}
       </p>
     </motion.div>
-  );
-}
-
-function Grid({
-  puzzle,
-  cat,
-  layer,
-  whisperLayer,
-  onCell,
-}: {
-  puzzle: SeancePuzzle;
-  cat: number;
-  layer: Board;
-  whisperLayer: Board;
-  onCell: (c: number, seat: number, val: number) => void;
-}) {
-  const c = puzzle.categories[cat];
-  const seatLabel = (s: number) => `${s + 1}`;
-  return (
-    <div className="rounded-2xl border border-line bg-surface/60 p-3">
-      <p className="microlabel mb-2" style={{ color: ACCENT }}>
-        {c.label}
-      </p>
-      <table className="border-collapse text-xs" role="grid" aria-label={`${c.label} matrix`}>
-        <thead>
-          <tr>
-            <th className="w-10 p-1 text-left text-smoke font-normal">seat</th>
-            {c.values.map((v) => (
-              <th
-                key={v}
-                className="max-w-[5.5rem] p-1 align-bottom text-[10px] font-normal leading-tight text-muted"
-              >
-                {v}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {Array.from({ length: puzzle.n }, (_, seat) => (
-            <tr key={seat}>
-              <th className="p-1 text-left text-smoke font-normal" scope="row">
-                {seatLabel(seat)}
-              </th>
-              {c.values.map((v, val) => {
-                const m = layer[cat][seat][val];
-                const w = whisperLayer[cat][seat][val];
-                const mark = m === 2 ? "◯" : m === 1 ? "✕" : "";
-                const wisp = w !== 0 && m === 0 ? (w === 2 ? "◯" : "✕") : "";
-                return (
-                  <td key={val} className="p-0.5">
-                    <button
-                      onClick={() => onCell(cat, seat, val)}
-                      aria-label={`seat ${seat + 1}, ${v}: ${m === 2 ? "bound" : m === 1 ? "snuffed" : "unmarked"}`}
-                      className="flex h-11 w-11 items-center justify-center rounded-md border text-base transition hover:border-brass focus:outline-none focus-visible:ring-2 sm:h-9 sm:w-9"
-                      style={{
-                        borderColor: m === 2 ? ACCENT : "var(--line,#2a2333)",
-                        background: m === 2 ? `${ACCENT}26` : "transparent",
-                        color: m === 2 ? ACCENT : m === 1 ? "#7a6e8a" : "transparent",
-                      }}
-                    >
-                      <span aria-hidden>{mark || (wisp && <span className="opacity-30">{wisp}</span>) || "·"}</span>
-                    </button>
-                  </td>
-                );
-              })}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
   );
 }
 
@@ -338,24 +395,44 @@ function Banished({
   setCopied: (b: boolean) => void;
 }) {
   const collected = useMemo(() => spiritsBanished(loadGrimoire()).length, []);
-  const share = useMemo(() => {
-    const runes = puzzle.categories
-      .map(() => "🔮".repeat(puzzle.n))
-      .join("\n");
-    return [
-      `✦ The Séance — ${puzzle.rite}`,
-      `${puzzle.spirit} banished`,
-      `⏱ ${fmt(seconds)}  💀 ${strikes}`,
-      runes,
-      `parlor · ${puzzle.date}`,
-    ].join("\n");
+
+  // §3.7 social artifact: solve time + the solved grid, through the §3.0 share
+  // seam. One 🟩 tier per binding (cat × seat); a clean solve is an all-green
+  // board shaped K rows × N. Time/strikes ride in the headline composed over
+  // card.grid/card.url — the Mystery pattern (no `score`, so the OG card shows
+  // the grid + date without a misleading numeric).
+  const { grid, text } = useMemo(() => {
+    const tiers: Tier[] = Array(puzzle.categories.length * puzzle.n).fill("hit");
+    const card = buildShare({
+      room: "/seance",
+      date: puzzle.date,
+      tiers,
+      columns: puzzle.n,
+    } satisfies GameResult);
+    return {
+      grid: card.grid,
+      text: [
+        `✦ The Séance — ${puzzle.rite}`,
+        `${puzzle.spirit} banished`,
+        `⏱ ${fmt(seconds)}  💀 ${strikes}`,
+        card.grid,
+        card.url,
+      ].join("\n"),
+    };
   }, [puzzle, seconds, strikes]);
 
   function copy() {
-    navigator.clipboard?.writeText(share).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    });
+    try {
+      if (typeof navigator !== "undefined" && navigator.share) {
+        void navigator.share({ text }).catch(() => {});
+      } else {
+        void navigator.clipboard?.writeText(text);
+      }
+    } catch {
+      /* clipboard/share unavailable — silently no-op */
+    }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   }
 
   return (
@@ -376,9 +453,7 @@ function Banished({
           ? "A flawless channelling. The Medium nods."
           : `${strikes} poltergeist strike${strikes > 1 ? "s" : ""} along the way.`}
       </p>
-      <pre className="whitespace-pre-wrap text-2xl leading-snug">
-        {puzzle.categories.map(() => "🔮".repeat(puzzle.n)).join("\n")}
-      </pre>
+      <pre className="whitespace-pre-wrap text-2xl leading-snug">{grid}</pre>
       <button
         onClick={copy}
         className="rounded-full px-6 py-3 text-sm font-medium text-bg transition hover:brightness-110"

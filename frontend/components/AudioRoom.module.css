@@ -1,0 +1,48 @@
+/* PARLOR v3 §3.22 — The Overture ("Name the Intro") layout.
+ *
+ * LAYOUT ONLY. Colours, type and surfaces stay in the global design system
+ * (Tailwind + tokens) so this module never forks the palette.
+ *
+ * One-screen mandate (1280×800 and 1920×1080, no scroll-to-play): on desktop the
+ * play card (equalizer + play button) sits beside the timeout meter + choice grid,
+ * so a 5-round run never pushes the choices below the fold. Mobile keeps the
+ * single-column responsive flow. */
+
+.play {
+  display: grid;
+  gap: 1.5rem;
+}
+
+@media (min-width: 1024px) {
+  .play {
+    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1fr);
+    gap: 2rem;
+    align-items: start;
+  }
+}
+
+/* Equalizer height is fixed so the play card never grows with animation. */
+.eq {
+  height: 6rem;
+}
+
+/* Hard-timeout meter — a thin track that drains as the round clock runs down. */
+.meter {
+  height: 0.5rem;
+  width: 100%;
+  border-radius: 9999px;
+  background: rgb(255 255 255 / 0.08);
+  overflow: hidden;
+}
+
+.meterFill {
+  height: 100%;
+  border-radius: 9999px;
+}
+
+/* The result line: per-round squares (5 across for a set, 1 for the daily intro). */
+.line {
+  font-size: 2.25rem;
+  letter-spacing: 0.15em;
+  line-height: 1;
+}

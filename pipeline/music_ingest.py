@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import argparse
 import math
+import re
 
 from common import console, dump_raw, get_json, get_db, make_fact, upsert_facts
 
@@ -67,7 +68,8 @@ def facts_for_artist(artist: dict) -> list[dict]:
                 make_fact(
                     source="deezer", category="music", subject=name,
                     fact_text=f"{name} released the album “{first['title']}” in {year}.",
-                    year=year, image_url=first.get("cover_xl") or pic,
+                    # ponytail: covers embed the title/artist as text → leaks the answer in clue mode; use the portrait
+                    year=year, image_url=pic,
                     source_url=link, popularity=pop,
                     meta={},  # album_id/album not read by forge
                 )
@@ -81,6 +83,57 @@ def facts_for_artist(artist: dict) -> list[dict]:
                 meta={},
             )
         )
+        # ── music depth (§3.13): label / genre / featured-artist / BPM ─────────
+        # One /album/{id} call (label + genres + tracklist) + one /track/{id} (bpm).
+        try:
+            album = get_json(f"{API}/album/{first['id']}")
+            alink = album.get("link") or link
+            label = (album.get("label") or "").strip()
+            if label:
+                out.append(make_fact(
+                    source="deezer", category="music", subject=name,
+                    fact_text=f"{name}'s album “{first['title']}” was released on the label {label}.",
+                    image_url=pic, source_url=alink, popularity=pop,
+                    meta={"answer_field": "label", "answer": label},
+                ))
+            genres = [g.get("name") for g in (album.get("genres") or {}).get("data", []) if g.get("name")]
+            if genres:
+                genre = genres[0]
+                out.append(make_fact(
+                    source="deezer", category="music", subject=name,
+                    fact_text=f"{name}'s album “{first['title']}” is categorized as {genre}.",
+                    image_url=pic, source_url=alink, popularity=pop,
+                    meta={"answer_field": "genre", "answer": genre},
+                ))
+            tracks = (album.get("tracks") or {}).get("data", [])
+            # featured artist parsed from the track title — free, no extra call
+            for t in tracks:
+                m = re.search(r"\((?:feat\.?|ft\.?)\s+([^)]+)\)", t.get("title", ""), re.I)
+                if not m:
+                    continue
+                guest = m.group(1).strip().split(",")[0].split(" & ")[0].strip()
+                base = re.sub(r"\s*\((?:feat\.?|ft\.?)[^)]*\)", "", t["title"], flags=re.I).strip()
+                if guest and guest.lower() != name.lower():
+                    out.append(make_fact(
+                        source="deezer", category="music", subject=name,
+                        fact_text=f"On the track “{base}”, {name} features {guest}.",
+                        image_url=pic, source_url=alink, popularity=pop,
+                        meta={"answer_field": "featured_artist", "answer": guest},
+                    ))
+                    break  # one featured-artist fact per artist is plenty
+            # BPM — ponytail: Deezer bpm is frequently 0/unset; guard >0, may be sparse
+            if tracks:
+                tr = get_json(f"{API}/track/{tracks[0]['id']}")
+                bpm = tr.get("bpm") or 0
+                if bpm and bpm > 0:
+                    out.append(make_fact(
+                        source="deezer", category="music", subject=tracks[0]["title"],
+                        fact_text=f"“{tracks[0]['title']}” by {name} has a tempo of {round(bpm)} BPM.",
+                        numeric_value=float(bpm), numeric_unit="BPM",
+                        image_url=pic, source_url=alink, popularity=pop, meta={},
+                    ))
+        except Exception as e:  # album/track detail is enrichment — never lose core facts
+            console.print(f"[yellow]music-depth skip {name}: {e}[/yellow]")
     return out
 
 

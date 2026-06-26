@@ -17,6 +17,8 @@ import {
   GHOST_NAME,
   type MirrorShard,
 } from "@/lib/wedges";
+import { buildShare, type GameResult } from "@/lib/share";
+import styles from "./WedgesGame.module.css";
 import { usePractice } from "@/lib/usePractice";
 import PracticeBar from "@/components/PracticeBar";
 import { sfx } from "@/lib/sound";
@@ -30,6 +32,10 @@ import AchievementToast from "@/components/AchievementToast";
 import LeaderboardPanel from "@/components/LeaderboardPanel";
 
 const QUESTION_SECONDS = 15;
+// Speed bonus: a correct wedge is worth a flat base plus the seconds left on the
+// clock — answer fast, score more. Timeouts and misses earn nothing.
+const WEDGE_BASE = 100;
+const SPEED_PER_SECOND = 20;
 
 /** Deterministic choice order keyed by the prompt (SSR/client agree, comparable). */
 function dailyChoices(q: Question): string[] {
@@ -98,6 +104,39 @@ function Ghost({ quip, reduced }: { quip: string | null; reduced: boolean }) {
   );
 }
 
+/** The six-wedge lockout legend. Each chip shows its wedge's state: earned and
+ *  locked (✓, filled), the active wedge (•), or still-pending (dim) — so the
+ *  per-category lockout is legible at a glance, not just implied by the ring. */
+function WedgeLegend({ earned, active }: { earned: Set<Category>; active: Category | null }) {
+  return (
+    <div className={styles.legend}>
+      {CATEGORIES.map((cat) => {
+        const has = earned.has(cat);
+        const isActive = !has && cat === active;
+        const hex = CATEGORY_HEX[cat];
+        return (
+          <div
+            key={cat}
+            className="flex items-center gap-1.5 rounded-lg border border-line px-2 py-1.5 text-[11px] font-bold uppercase tracking-wide transition"
+            style={{
+              borderColor: has || isActive ? hex : undefined,
+              background: has ? `${hex}1f` : undefined,
+              color: has || isActive ? hex : undefined,
+              opacity: has || isActive ? 1 : 0.45,
+            }}
+          >
+            <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: hex }} />
+            <span className="truncate">{CATEGORY_LABEL[cat]}</span>
+            <span className="ml-auto" aria-hidden>
+              {has ? "✓" : isActive ? "•" : ""}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function WedgesGame({ pool, day }: { pool: Question[]; day: number }) {
   const { practiceMode, togglePractice, saved, saveQ, removeQ, isSaved } = usePractice();
   const { record } = useProfile();
@@ -134,6 +173,9 @@ export default function WedgesGame({ pool, day }: { pool: Question[]; day: numbe
   const [picked, setPicked] = useState<string | null>(null);
   const [quip, setQuip] = useState<string | null>(null);
   const [secondsLeft, setSecondsLeft] = useState(QUESTION_SECONDS);
+  const [points, setPoints] = useState(0);
+  const [flash, setFlash] = useState<number | null>(null); // last speed-bonus "+N"
+  const [copied, setCopied] = useState(false);
   const [toasts, setToasts] = useState<Achievement[]>([]);
   const [burst, setBurst] = useState(0);
   const recorded = useRef(false);
@@ -163,6 +205,9 @@ export default function WedgesGame({ pool, day }: { pool: Question[]; day: numbe
     setPicked(null);
     setQuip(null);
     setSecondsLeft(QUESTION_SECONDS);
+    setPoints(0);
+    setFlash(null);
+    setCopied(false);
     recorded.current = false;
     stats.current = {};
   }
@@ -183,6 +228,10 @@ export default function WedgesGame({ pool, day }: { pool: Question[]; day: numbe
       });
       // Lockout: once a category is earned, it serves no more questions.
       setLocked((set) => new Set(set).add(q.category));
+      // Speed bonus: base + whatever seconds remain when answered.
+      const bonus = WEDGE_BASE + secondsLeft * SPEED_PER_SECOND;
+      setPoints((p) => p + bonus);
+      setFlash(bonus);
       sfx.correct();
       haptic.correct();
       setQuip(null);
@@ -197,6 +246,7 @@ export default function WedgesGame({ pool, day }: { pool: Question[]; day: numbe
   function next() {
     setPicked(null);
     setQuip(null);
+    setFlash(null);
     setSecondsLeft(QUESTION_SECONDS);
     setIdx(visibleIdx + 1);
   }
@@ -234,11 +284,11 @@ export default function WedgesGame({ pool, day }: { pool: Question[]; day: numbe
     const unlocked = record({
       room: "wedges",
       score: earned.size,
-      xp: earned.size * 150 + (wonRing ? 300 : 0),
+      xp: earned.size * 150 + (wonRing ? 300 : 0) + points,
       perCategory: stats.current,
     });
     if (unlocked.length) setToasts(unlocked);
-  }, [started, over, wonRing, earned.size, record]);
+  }, [started, over, wonRing, earned.size, points, record]);
 
   if (!started || pool.length === 0) {
     return (
@@ -316,6 +366,33 @@ export default function WedgesGame({ pool, day }: { pool: Question[]; day: numbe
   }
 
   if (over || !q) {
+    // The filled-ring run → six tiers (one per wedge, earned = 🟩) + OG card,
+    // all via the §3.0 share seam. `date` is a cosmetic label; the daily board
+    // is day-seeded upstream, so a client Date() on this click is hydration-safe.
+    // ponytail: client Date() here — page.tsx isn't ours to edit.
+    const result: GameResult = {
+      room: "/wedges",
+      date: new Date().toISOString().slice(0, 10),
+      tiers: CATEGORIES.map((c) => (earned.has(c) ? "hit" : "miss")),
+      score: earned.size,
+      maxScore: 6,
+      columns: 3,
+    };
+    const card = buildShare(result);
+    const shareResult = () => {
+      try {
+        if (typeof navigator !== "undefined" && navigator.share) {
+          void navigator.share({ text: card.text, url: card.url }).catch(() => {});
+        } else {
+          void navigator.clipboard?.writeText(card.text);
+        }
+      } catch {
+        /* clipboard/share unavailable — silently no-op */
+      }
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    };
+
     return (
       <>
         <Confetti trigger={burst} />
@@ -325,13 +402,31 @@ export default function WedgesGame({ pool, day }: { pool: Question[]; day: numbe
           <p className="display mt-6 text-4xl">
             {wonRing ? "Mirror shattered!" : `${earned.size} of 6 wedges`}
           </p>
+          <p className="mt-2 text-muted">
+            <span className="tabular-nums font-black text-sports">{points}</span> points
+          </p>
+
+          {/* The filled-ring emoji — the §3.3 social artifact. */}
+          <p className="microlabel mt-6 text-muted">your ring</p>
+          <div className={`mt-1 ${styles.ringShare}`} aria-label="filled wedge ring">
+            {card.grid}
+          </div>
+
           <LeaderboardPanel room="wedges" score={earned.size} accent="sports" />
-          <button
-            onClick={start}
-            className="microlabel mt-8 rounded-full border border-ink px-6 py-3 transition hover:bg-ink hover:text-bg"
-          >
-            play again
-          </button>
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
+            <button
+              onClick={shareResult}
+              className="microlabel rounded-full border border-sports px-6 py-3 text-sports transition hover:bg-sports hover:text-bg"
+            >
+              {copied ? "copied ✓" : "share ring"}
+            </button>
+            <button
+              onClick={start}
+              className="microlabel rounded-full border border-ink px-6 py-3 transition hover:bg-ink hover:text-bg"
+            >
+              play again
+            </button>
+          </div>
         </div>
         <PracticeBar
           practiceMode={practiceMode}
@@ -344,116 +439,139 @@ export default function WedgesGame({ pool, day }: { pool: Question[]; day: numbe
   }
 
   const timeRatio = secondsLeft / QUESTION_SECONDS;
+  const lowTime = timeRatio < 0.34;
 
   return (
-    <div className="flex flex-col items-center">
-      <div className="flex w-full items-start justify-between">
-        <div>
-          <h1 className="display text-4xl sm:text-5xl">Fractures</h1>
-          <p className="microlabel mt-1">
-            {phase === "bonus" ? "bonus round" : "the six wedges"}
-          </p>
-        </div>
-        <ShatteredMirror shards={shards} earned={earned} reduced={reduced} />
-      </div>
-
-      <div className="mt-4 w-full rounded-2xl border border-line bg-surface p-6 sm:p-8">
-        <div className="flex items-center justify-between">
-          <span className="microlabel" style={{ color: CATEGORY_HEX[q.category] }}>
-            {CATEGORY_LABEL[q.category]} wedge
-          </span>
-          {!picked && (
-            <span
-              className="microlabel tabular-nums"
-              style={{ color: timeRatio < 0.34 ? CATEGORY_HEX.music : undefined }}
-            >
-              {secondsLeft}s
-            </span>
-          )}
-        </div>
-        {/* Countdown bar */}
-        <div className="mt-2 h-1 w-full overflow-hidden rounded-full bg-line">
-          <div
-            className="h-full rounded-full transition-[width] duration-1000 ease-linear"
-            style={{
-              width: picked ? "100%" : `${timeRatio * 100}%`,
-              background: CATEGORY_HEX[q.category],
-            }}
-          />
-        </div>
-
-        <p className="display mt-4 text-2xl leading-tight sm:text-3xl">{q.prompt}</p>
-
-        <div className="mt-6 grid gap-3 sm:grid-cols-2">
-          {order.map((choice) => {
-            const isCorrect = choice === q.correct;
-            const isPicked = choice === picked;
-            const cls = picked
-              ? isCorrect
-                ? "border-sports bg-sports/15 text-sports"
-                : isPicked
-                  ? "border-music bg-music/15 text-music"
-                  : "border-line text-muted"
-              : "border-line hover:border-ink";
-            return (
-              <button
-                key={choice}
-                onClick={() => resolve(choice)}
-                disabled={Boolean(picked)}
-                className={`rounded-xl border p-4 text-left font-bold transition ${cls}`}
+    <div>
+      <div className={styles.play}>
+        {/* Ring column — leads on mobile, swaps to the right on desktop so the
+            ring + score + legend sit beside the question within one screen. */}
+        <aside className={styles.aside}>
+          <div className="text-center">
+            <h1 className="display text-3xl sm:text-4xl">Fractures</h1>
+            <p className="microlabel mt-1">
+              {phase === "bonus" ? "bonus round" : "the six wedges"}
+            </p>
+          </div>
+          <div className="relative">
+            <ShatteredMirror shards={shards} earned={earned} reduced={reduced} />
+            {flash != null && (
+              <motion.span
+                key={points}
+                className="absolute -right-1 top-1 text-lg font-black text-sports"
+                initial={reduced ? { opacity: 1 } : { opacity: 0, y: 0 }}
+                animate={reduced ? { opacity: 1 } : { opacity: [0, 1, 1, 0], y: -20 }}
+                transition={{ duration: 1.4 }}
+                aria-hidden
               >
-                {choice}
-                {picked && isCorrect && " ✓"}
-                {picked && isPicked && !isCorrect && " ✗"}
-              </button>
-            );
-          })}
-        </div>
-
-        <Ghost quip={quip} reduced={reduced} />
-
-        {picked && (
-          <div className="mt-6 flex items-center gap-4">
-            <button
-              onClick={next}
-              className="microlabel rounded-full border border-ink px-6 py-3 transition hover:bg-ink hover:text-bg"
-            >
-              next →
-            </button>
-            {practiceMode && (
-              <button
-                onClick={() => (isSaved(q) ? removeQ(q.prompt) : saveQ(q))}
-                className={`microlabel rounded-full border px-4 py-2 transition ${
-                  isSaved(q)
-                    ? "border-history text-history"
-                    : "border-line text-muted hover:border-history hover:text-history"
-                }`}
-              >
-                {isSaved(q) ? "★ saved" : "☆ save"}
-              </button>
-            )}
-            {q.source_url && (
-              <a
-                href={q.source_url}
-                target="_blank"
-                rel="noreferrer"
-                className="microlabel underline"
-              >
-                source
-              </a>
+                +{flash}
+              </motion.span>
             )}
           </div>
-        )}
+          <div className="text-center">
+            <p className="microlabel text-muted">score</p>
+            <p className="display tabular text-4xl text-sports">{points}</p>
+          </div>
+          <WedgeLegend earned={earned} active={q.category} />
+        </aside>
+
+        {/* Question card — the wider main column on desktop. */}
+        <div className={`${styles.card} rounded-2xl border border-line bg-surface p-5 sm:p-7`}>
+          <div className="flex items-center justify-between">
+            <span className="microlabel" style={{ color: CATEGORY_HEX[q.category] }}>
+              {CATEGORY_LABEL[q.category]} wedge
+            </span>
+            {!picked && (
+              <span
+                className="microlabel tabular-nums"
+                style={{ color: lowTime ? CATEGORY_HEX.music : undefined }}
+              >
+                {secondsLeft}s{lowTime ? "" : " · faster = more"}
+              </span>
+            )}
+          </div>
+          {/* Countdown bar */}
+          <div className="mt-2 h-1 w-full overflow-hidden rounded-full bg-line">
+            <div
+              className="h-full rounded-full transition-[width] duration-1000 ease-linear"
+              style={{
+                width: picked ? "100%" : `${timeRatio * 100}%`,
+                background: CATEGORY_HEX[q.category],
+              }}
+            />
+          </div>
+
+          <p className="display mt-4 text-2xl leading-tight sm:text-3xl">{q.prompt}</p>
+
+          <div className="mt-5 grid gap-3 sm:grid-cols-2">
+            {order.map((choice) => {
+              const isCorrect = choice === q.correct;
+              const isPicked = choice === picked;
+              const cls = picked
+                ? isCorrect
+                  ? "border-sports bg-sports/15 text-sports"
+                  : isPicked
+                    ? "border-music bg-music/15 text-music"
+                    : "border-line text-muted"
+                : "border-line hover:border-ink";
+              return (
+                <button
+                  key={choice}
+                  onClick={() => resolve(choice)}
+                  disabled={Boolean(picked)}
+                  className={`rounded-xl border p-4 text-left font-bold transition ${cls}`}
+                >
+                  {choice}
+                  {picked && isCorrect && " ✓"}
+                  {picked && isPicked && !isCorrect && " ✗"}
+                </button>
+              );
+            })}
+          </div>
+
+          <Ghost quip={quip} reduced={reduced} />
+
+          {picked && (
+            <div className="mt-5 flex items-center gap-4">
+              <button
+                onClick={next}
+                className="microlabel rounded-full border border-ink px-6 py-3 transition hover:bg-ink hover:text-bg"
+              >
+                next →
+              </button>
+              {practiceMode && (
+                <button
+                  onClick={() => (isSaved(q) ? removeQ(q.prompt) : saveQ(q))}
+                  className={`microlabel rounded-full border px-4 py-2 transition ${
+                    isSaved(q)
+                      ? "border-history text-history"
+                      : "border-line text-muted hover:border-history hover:text-history"
+                  }`}
+                >
+                  {isSaved(q) ? "★ saved" : "☆ save"}
+                </button>
+              )}
+              {q.source_url && (
+                <a
+                  href={q.source_url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="microlabel underline"
+                >
+                  source
+                </a>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
-      <div className="w-full">
-        <PracticeBar
-          practiceMode={practiceMode}
-          onToggle={togglePractice}
-          saved={saved}
-          onRemove={removeQ}
-        />
-      </div>
+      <PracticeBar
+        practiceMode={practiceMode}
+        onToggle={togglePractice}
+        saved={saved}
+        onRemove={removeQ}
+      />
     </div>
   );
 }

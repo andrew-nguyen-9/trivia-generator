@@ -1,0 +1,57 @@
+/* PARLOR v3 §3.3 — Fractures layout.
+ *
+ * Layout ONLY (grid + legend). Colors, type and surfaces stay in the global
+ * design system (Tailwind + tokens) so this module never forks the palette —
+ * same discipline as ClockGame.module.css.
+ *
+ * The one-screen mandate (1280×800 and 1920×1080, no scroll-to-play) is met by
+ * laying the active question + timer + choices beside the six-wedge ring,
+ * score and per-category legend on desktop. Mobile keeps the single-column
+ * flow with the ring on top (DOM order); desktop swaps the ring to the right
+ * via `order` so the wider question column leads. */
+
+.play {
+  display: grid;
+  gap: 1.25rem;
+}
+
+@media (min-width: 1024px) {
+  .play {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.6fr);
+    gap: 2rem;
+    align-items: start;
+  }
+  /* DOM order is aside-then-card (ring leads on mobile); on desktop put the
+     question card in the left/wide column and the ring aside on the right. */
+  .card {
+    order: 1;
+  }
+  .aside {
+    order: 2;
+    position: sticky;
+    top: 1.5rem;
+  }
+}
+
+/* The ring column: ring, score, and the six-wedge legend, centered. */
+.aside {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Six category chips, two columns — the per-wedge lockout legend. */
+.legend {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.4rem;
+  width: 100%;
+}
+
+/* The filled-ring emoji on the end screen (the §3.3 social artifact). */
+.ringShare {
+  font-size: 2rem;
+  letter-spacing: 0.25em;
+  line-height: 1.2;
+}

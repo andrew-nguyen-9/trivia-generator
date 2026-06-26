@@ -13,6 +13,10 @@ models:
         tests:
           - not_null
           - accepted_values:
+              # Allow-list of every ingest's source literal. Keep in sync with
+              # pipeline/*_ingest.py — selftest's "bronze sources all in dbt
+              # accepted_values" guard fails loudly if an ingest writes a source
+              # missing here (the §3.11 drift that gated publish).
               values: [wikipedia, wikipedia_pkg, wikidata, dbpedia, deezer, sleeper, espn, tmdb, restcountries, opentdb, jservice, quizapi, curated, manual]
       - name: category
         tests:

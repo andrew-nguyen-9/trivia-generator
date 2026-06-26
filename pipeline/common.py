@@ -410,6 +410,47 @@ def dump_raw(name: str, rows: list[dict]) -> Path:
     return path
 
 
+# ── per-source health floor (§3.17, debt #3) ────────────────────────────────
+# A *total* question floor (question_forge --min-questions) is an OR over
+# sources — one healthy ingest clears it alone, so a single source can die and
+# the bank rots silently. The floor below is an AND over every live
+# (source, category) bucket instead, so the next starvation pages someone.
+HEALTH_FLOOR = 10  # min facts a live (source, category) bucket must hold.
+
+# The hand-`curated` baseline is exempt: its tiny per-category buckets are
+# deliberate offline fallback, not live-ingest output, so they aren't "decay".
+_HEALTH_EXEMPT_SOURCES = frozenset({"curated"})
+
+
+def bronze_bucket_counts(exclude: frozenset[str] = _HEALTH_EXEMPT_SOURCES) -> dict[tuple[str, str], int]:
+    """Facts per (source, category) across the bronze layer, for the health gate."""
+    counts: dict[tuple[str, str], int] = {}
+    for path in RAW_DIR.glob("*.jsonl"):
+        for line in path.read_text().splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            row = json.loads(line)
+            src = row.get("source")
+            if not src or src in exclude:
+                continue
+            key = (str(src), row.get("category"))
+            counts[key] = counts.get(key, 0) + 1
+    return counts
+
+
+def starved_buckets(counts: dict, floor: int = HEALTH_FLOOR) -> list:
+    """Bucket keys whose fact count is below `floor` — a starved source/category
+    the nightly should fail on rather than let rot. Pure (takes the counts dict,
+    not the disk) so the gate is testable without a bronze fixture.
+
+    # ponytail: flags present-but-thin buckets; a source that stops writing
+    # entirely keeps its old committed bronze facts, so a true zero is caught by
+    # the DB-side total floor, not here (the offline gate only sees the repo).
+    """
+    return sorted(k for k, n in counts.items() if n < floor)
+
+
 # ── database (Neon / any Postgres) ──────────────────────────────────────────
 # Writes go to a plain Postgres database via psycopg2 — Neon is the default host
 # (serverless, scale-to-zero, generous free tier). The connection string lives in

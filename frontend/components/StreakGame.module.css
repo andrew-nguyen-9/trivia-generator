@@ -1,0 +1,33 @@
+/* THE STREAK — component-scoped chrome owned by §3.4.
+   The flame/bloom/darkness decoration lives in globals.css (shared, low-z,
+   never tints text); this file only adds the accelerating timer RING that
+   wraps the candle so the countdown and the flame are one focal element
+   (one fewer row → the two cards + flame fit one desktop screen, no scroll).
+
+   The ring is pure progress, not animation: --p (0..1) is set inline every
+   countdown frame, so prefers-reduced-motion needs no special case — there is
+   no perpetual motion here to freeze, and the candle's flame is already frozen
+   by globals.css. The numeric "Ns" readout stays beside it for non-visual read. */
+
+.ringWrap {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 7rem;
+  height: 7rem;
+}
+
+/* A thin arc that depletes clockwise as --p shrinks. conic-gradient paints the
+   filled wedge; the mask carves it down to a ring so the candle shows through. */
+.ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(
+    from -90deg,
+    var(--ring, #f5c542) calc(var(--p, 1) * 360deg),
+    rgba(255, 255, 255, 0.06) 0
+  );
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 4px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 4px));
+}

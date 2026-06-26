@@ -1,0 +1,69 @@
+/* THE CLIMB OF THE INITIATE — §3.8 component chrome.
+
+   Canonical LinkedIn-Queens deduction: cells cycle empty → ✕ (your elimination
+   note) → ♛ sigil, conflicting sigils glow red the instant they are placed, and
+   the Lock is gated until the board is complete AND conflict-free — so a grid
+   rung is solved by reasoning, not by blind lock-and-collapse.
+
+   Layout is sized to one desktop screen (verified 1280×800 / 1920×1080): the
+   cell is clamp()-driven so even the 6×6 Sunday board fits with no scroll. The
+   conflict pulse is the only motion and it honours prefers-reduced-motion. */
+
+.board {
+  display: grid;
+  gap: 3px;
+  width: max-content;
+  margin: 0 auto;
+}
+
+.cell {
+  width: clamp(1.9rem, 8.5vmin, 2.85rem);
+  height: clamp(1.9rem, 8.5vmin, 2.85rem);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(0, 0, 0, 0.28);
+  border-radius: 6px;
+  font-size: clamp(0.95rem, 4.3vmin, 1.45rem);
+  line-height: 1;
+  cursor: pointer;
+  transition: filter 0.12s ease, box-shadow 0.12s ease;
+  user-select: none;
+}
+.cell:disabled {
+  cursor: default;
+}
+.cell:not(:disabled):hover {
+  filter: brightness(1.12);
+}
+.cell:focus-visible {
+  outline: 2px solid #f3ead8;
+  outline-offset: 1px;
+}
+
+/* the player's elimination note — quiet, clearly not a sigil */
+.mark {
+  color: #8a7f6e;
+  font-size: 0.78em;
+  opacity: 0.85;
+}
+
+/* a sigil breaking a constraint (col / region / adjacency) */
+.conflict {
+  box-shadow: 0 0 0 2px #b22b2b, 0 0 10px rgba(178, 43, 43, 0.55);
+  animation: ladderPulse 1.1s ease-in-out infinite;
+}
+@keyframes ladderPulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 2px #b22b2b, 0 0 6px rgba(178, 43, 43, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 2px #d23b3b, 0 0 14px rgba(210, 59, 59, 0.65);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .conflict {
+    animation: none;
+  }
+}

@@ -42,6 +42,8 @@ from common import (
     upsert_daily_set,
     upsert_questions,
 )
+from distractor_quality import closest
+from quality_score import quality_score
 
 MIN_HL_GAP_RATIO = 0.25  # higher/lower pairs must differ by ≥25% — never a coin flip
 MIN_SEANCE_CLUES = 3     # minimum facts per subject to forge a séance question
@@ -193,7 +195,11 @@ def forge_multiple_choice(facts: list[dict], rng: random.Random) -> list[dict]:
             continue
         for f in rows:
             answer = f["meta"]["answer"]
-            distractors = rng.sample([a for a in answers if a != answer], 3)
+            # §3.12: sample distractors *close* to the answer (same era/magnitude/
+            # shape), not just any sibling, so the right option doesn't stand out.
+            distractors = closest(answer, [a for a in answers if a != answer], 3, rng)
+            if distractors is None:
+                continue
             prompt = f["fact_text"].replace(answer, "_____")
             if "_____" not in prompt:
                 continue
@@ -280,27 +286,14 @@ def _clue_distractors(
     deduped and excluding anything that collapses onto the answer. Same-category
     keeps them similar in kind (a constellation sits next to constellations, not a
     rapper) — the old board built choices from every category, so the right answer
-    stuck out. Returns None when the category can't field 3 distinct alternatives;
-    the board then falls back to its client-side picker."""
-    seen = {subject.strip().lower()}
-    candidates: list[str] = []
-    for s in pool.get(category, []):
-        k = s.strip().lower()
-        if k in seen:
-            continue
-        seen.add(k)
-        candidates.append(s)
-    if len(candidates) < 3:
+    stuck out. §3.12 tightens it further via `closest`: a year draws nearby years,
+    a number draws the same order of magnitude, a name draws like-shaped names —
+    so no option is the trivially separable odd-one-out. Returns None when the
+    category can't field 3 distinct alternatives; the board then falls back to its
+    client-side picker."""
+    distractors = closest(subject, pool.get(category, []), 3, rng)
+    if distractors is None:
         return None
-    # Tighten similarity: prefer same-category subjects of a like *shape* —
-    # close in word count and length — so a one-word name draws other one-word
-    # names, not "Arkansas Highway 183". Sample from the closest slice (not the
-    # single nearest) to keep variety. Pure entity-type matching would need
-    # typed facts; this shape heuristic gets most of the way for free.
-    words, length = len(subject.split()), len(subject)
-    candidates.sort(key=lambda s: (abs(len(s.split()) - words), abs(len(s) - length)))
-    near = candidates[: max(3, min(len(candidates), 12))]
-    distractors = rng.sample(near, 3)
     choices = [*distractors, subject]
     rng.shuffle(choices)
     return choices
@@ -687,6 +680,11 @@ def mask_subject(text: str, subject: str, fact: dict) -> str | None:
 
 
 # ── daily board (deterministic, shared) ─────────────────────────────────────
+def _clue_quality(q: dict) -> float:
+    """§3.18 score forge_all stashed in meta; 0.5 if absent (hand-built rows)."""
+    return (q.get("meta") or {}).get("quality", 0.5)
+
+
 def build_daily_board(questions: list[dict], for_date: date) -> dict | None:
     rng = random.Random(for_date.toordinal())  # same board for everyone, every day
     clues = [q for q in questions if q["qtype"] == "clue"]
@@ -703,7 +701,12 @@ def build_daily_board(questions: list[dict], for_date: date) -> dict | None:
         col = []
         for d in range(1, 6):
             tier = [q for q in rows if q["difficulty"] == d] or rows
-            col.append(rng.choice(tier)["content_hash"])
+            # §3.18: prefer good clues over thin/ambiguous ones, but keep daily
+            # rotation — sort by quality desc, then pick within the top slice so
+            # the board varies day to day without ever scraping the barrel.
+            tier = sorted(tier, key=_clue_quality, reverse=True)
+            top = tier[: max(3, len(tier) // 4)]
+            col.append(rng.choice(top)["content_hash"])
         cols.append({"category": c, "cells": col})
     dd_col, dd_row = rng.randrange(5), rng.randrange(5)
     return {"set_date": for_date.isoformat(), "mode": "board",
@@ -726,9 +729,20 @@ def load_facts_from_db(conn) -> list[dict]:
     return fetch_all(conn, "select * from facts", limit=20000)
 
 
+def _strip_leaky_music_art(facts: list[dict]) -> None:
+    """Album covers embed the artist/album name as text; in a music clue
+    (answer = the masked subject) that hands the answer over in the image.
+    Strip cover art from music facts — keep /images/artist/ portraits (faces,
+    no title text, a fair visual clue)."""
+    for f in facts:
+        if f.get("category") == "music" and "/images/cover/" in (f.get("image_url") or ""):
+            f["image_url"] = None
+
+
 def forge_all(facts: list[dict], seed: int = 0) -> list[dict]:
     rng = random.Random(seed)
     assign_difficulty(facts)
+    _strip_leaky_music_art(facts)  # §3.13: album covers leak the answer in clue mode
     clues = forge_clues(facts, rng)
     questions = (
         forge_year_guess(facts)
@@ -742,6 +756,11 @@ def forge_all(facts: list[dict], seed: int = 0) -> list[dict]:
         + forge_ladder(facts, rng)
         + forge_thread(clues, rng)  # chains masked clues by theme (THE THREAD)
     )
+    # §3.18: tag each question with a quality/ambiguity score the board sorts on.
+    # Lives in meta (forge-only, not a DB column) — board selection happens here
+    # at forge time, so the score never needs to round-trip through Postgres.
+    for q in questions:
+        q.setdefault("meta", {})["quality"] = quality_score(q)
     return questions
 
 
