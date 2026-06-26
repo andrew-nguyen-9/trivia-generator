@@ -8,8 +8,10 @@ import {
   flameBrightness,
   buildStreakDeck,
 } from "@/lib/streak";
+import { buildShare, type Tier } from "@/lib/share";
 import { usePractice } from "@/lib/usePractice";
 import PracticeBar from "@/components/PracticeBar";
+import styles from "./StreakGame.module.css";
 import { sfx } from "@/lib/sound";
 import { haptic } from "@/lib/haptics";
 import { useProfile, type Achievement } from "@/lib/profile";
@@ -161,15 +163,21 @@ export default function StreakGame({ pool }: { pool: Question[] }) {
     setPhase("guessing");
   }
 
+  // The run as a share card via the canonical seam (lib/share.ts): one 🟩 per
+  // correct call, a trailing ⬛ where the candle guttered, wrapped 10 wide.
+  function streakCard() {
+    const date = new Date().toISOString().slice(0, 10);
+    const tiers: Tier[] = [...(Array(streak).fill("hit") as Tier[]), "miss"];
+    return buildShare({ room: "/streak", date, tiers, score: streak, columns: 10 });
+  }
+
   async function share() {
-    const flames = "🔥".repeat(Math.min(streak, 10)) || "🕯️";
-    const line = `THE STREAK — the Witch's candle\nstreak ${streak} ${flames}\nbest ${best}\nparlor`;
     try {
-      await navigator.clipboard.writeText(line);
+      await navigator.clipboard.writeText(streakCard().text);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      /* clipboard unavailable — the line is on screen anyway */
+      /* clipboard unavailable — the grid is on screen anyway */
     }
   }
 
@@ -250,35 +258,36 @@ export default function StreakGame({ pool }: { pool: Question[] }) {
             <h1 className="display text-4xl sm:text-5xl">Ignite</h1>
             <p className="microlabel mt-1 text-history">The Witch of the Order</p>
           </div>
-          <div className="flex items-center gap-4">
-            {!lost && <Candle brightness={brightness} />}
-            <div className="text-right">
-              <div className="microlabel">streak · best {best}</div>
-              <div className="tabular text-3xl font-black text-screen">{streak}</div>
+          {!lost && (
+            <div className="flex items-center gap-4">
+              {/* candle wrapped in the accelerating countdown ring (the timer) */}
+              <div className={styles.ringWrap}>
+                {!revealing && (
+                  <div
+                    className={styles.ring}
+                    style={{
+                      ["--p" as string]: timerPct,
+                      ["--ring" as string]: timerPct < 0.3 ? "#b83468" : "#f5c542",
+                    }}
+                    aria-hidden
+                  />
+                )}
+                <Candle brightness={brightness} />
+              </div>
+              <div className="text-right">
+                <div className="microlabel">streak · best {best}</div>
+                <div className="tabular text-3xl font-black text-screen">{streak}</div>
+                {!revealing && (
+                  <div className="microlabel tabular mt-1 text-history">
+                    {timeLeft.toFixed(1)}s
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
-        {/* accelerating ring/bar timer — only while guessing */}
-        {!revealing && (
-          <div className="mt-4">
-            <div className="microlabel flex justify-between">
-              <span>candle burning</span>
-              <span className="tabular">{timeLeft.toFixed(1)}s</span>
-            </div>
-            <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-line">
-              <div
-                className="h-full rounded-full"
-                style={{
-                  width: `${timerPct * 100}%`,
-                  background: timerPct < 0.3 ? "#b83468" : "#f5c542",
-                }}
-              />
-            </div>
-          </div>
-        )}
-
-        <p className="microlabel mt-6">{q.prompt}</p>
+        <p className="microlabel mt-5">{q.prompt}</p>
 
         <div className="mt-3 grid gap-4 sm:grid-cols-2">
           <div className="rounded-2xl border border-line bg-surface p-6">
@@ -302,7 +311,7 @@ export default function StreakGame({ pool }: { pool: Question[] }) {
         </div>
 
         {!revealing ? (
-          <div className="mt-8 flex justify-center gap-4">
+          <div className="mt-6 flex justify-center gap-4">
             <button
               onClick={() => guess("higher")}
               className="microlabel rounded-full border border-sports px-8 py-4 text-sports transition hover:bg-sports hover:text-bg"
@@ -320,7 +329,7 @@ export default function StreakGame({ pool }: { pool: Question[] }) {
           <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mt-8 text-center"
+            className="mt-6 text-center"
           >
             {lost ? (
               <div className="mx-auto max-w-md rounded-2xl border border-screen/40 bg-bg/90 p-6 backdrop-blur">
@@ -330,6 +339,9 @@ export default function StreakGame({ pool }: { pool: Question[] }) {
                 <p className="mt-2 text-muted">
                   {timeLeft <= 0 ? "Time ran out." : "Wrong call."} The Witch waits.
                 </p>
+                <pre className="mt-3 whitespace-pre text-center text-sm leading-tight tracking-widest">
+                  {streakCard().grid}
+                </pre>
                 <div className="mt-3 flex flex-wrap justify-center gap-3">
                   <button
                     onClick={share}
