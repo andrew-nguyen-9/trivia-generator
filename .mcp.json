@@ -1,0 +1,19 @@
+{
+  "mcpServers": {
+    "dbt": {
+      "command": "uvx",
+      "args": ["dbt-mcp"],
+      "env": {
+        "DBT_PROJECT_DIR": "/Users/andrew/Documents/GitHub/trivia-generator/transform",
+        "DBT_PROFILES_DIR": "/Users/andrew/Documents/GitHub/trivia-generator/transform",
+        "DBT_PATH": "/Users/andrew/.local/bin/dbt",
+        "DBT_MCP_ENABLE_DBT_CLI": "true",
+        "DBT_MCP_ENABLE_DBT_CODEGEN": "true",
+        "DBT_MCP_ENABLE_SEMANTIC_LAYER": "false",
+        "DBT_MCP_ENABLE_DISCOVERY": "false",
+        "DBT_MCP_ENABLE_ADMIN_API": "false",
+        "DBT_MCP_ENABLE_SQL": "false"
+      }
+    }
+  }
+}
