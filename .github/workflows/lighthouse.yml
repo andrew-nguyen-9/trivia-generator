@@ -1,0 +1,73 @@
+# lighthouse — performance/quality budget gate on PRs (pairs with §3.24 preview QA).
+#
+# Builds the Next.js app and serves it locally (`next start`), then runs Lighthouse
+# CI against a few representative routes. The app is fully playable with ZERO env
+# vars (seed-bank fallback), so CI needs no DATABASE_URL and no Vercel preview/SSO
+# bypass — the gate is self-contained and deterministic.
+#
+# Budget: a11y / best-practices / SEO are near-deterministic and hard-fail the PR.
+# Performance score is noisier, so it runs median-of-3 with a slightly looser floor.
+# A PR that regresses below any threshold fails this check.
+name: lighthouse
+
+on:
+  pull_request:
+    # only when the served app can actually change
+    paths:
+      - "frontend/**"
+      - ".github/workflows/lighthouse.yml"
+
+# one run per PR; a new push cancels the in-flight audit
+concurrency:
+  group: lighthouse-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  budget:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run build
+
+      # LHCI config lives inline so this gate stays a single owned file (no shared
+      # lighthouserc.json another phase could touch). chromeFlags run headless in CI.
+      - name: Write Lighthouse CI config
+        run: |
+          cat > lighthouserc.json <<'JSON'
+          {
+            "ci": {
+              "collect": {
+                "startServerCommand": "npm run start",
+                "url": [
+                  "http://localhost:3000/",
+                  "http://localhost:3000/board",
+                  "http://localhost:3000/daily"
+                ],
+                "numberOfRuns": 3,
+                "settings": { "chromeFlags": "--no-sandbox --headless=new" }
+              },
+              "assert": {
+                "aggregationMethod": "median",
+                "assertions": {
+                  "categories:performance": ["error", { "minScore": 0.8 }],
+                  "categories:accessibility": ["error", { "minScore": 0.9 }],
+                  "categories:best-practices": ["error", { "minScore": 0.9 }],
+                  "categories:seo": ["error", { "minScore": 0.9 }]
+                }
+              },
+              "upload": { "target": "temporary-public-storage" }
+            }
+          }
+          JSON
+
+      - name: Run Lighthouse CI
+        run: npx --yes @lhci/cli@0.14.x autorun --config=./lighthouserc.json

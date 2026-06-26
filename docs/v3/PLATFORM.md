@@ -76,7 +76,14 @@ follow-up. `vercel:runtime-cache`. **END STATE:** a repeat same-day read is cach
 
 ## §3.26 — Lighthouse CI gate
 A `.github/workflows/lighthouse.yml` budget gate on PRs (pairs with 3.24's preview).
-**END STATE:** a PR that regresses the budget fails CI.
+**END STATE:** a PR that regresses the budget fails CI. **Shipped.**
+
+Runs on PRs touching `frontend/**`. Builds the app and serves it locally with
+`next start` (the seed-bank fallback means CI needs no `DATABASE_URL` and no
+Vercel-preview SSO bypass — self-contained, deterministic). `@lhci/cli autorun`
+audits `/`, `/board`, `/daily` median-of-3 and **errors** (fails the check) below:
+performance 0.8, accessibility / best-practices / SEO 0.9. The LHCI config is
+inlined in the workflow (single owned file, no shared `lighthouserc.json`).
 
 ---
 
