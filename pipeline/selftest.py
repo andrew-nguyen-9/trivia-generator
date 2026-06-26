@@ -184,6 +184,15 @@ def main() -> None:
             check("MC prompt blanks the answer", "_____" in q["prompt"] and q["correct"] not in q["prompt"])
             break
 
+    # §3.15 wikidata source: row→facts contract + forge-roundtrip, run offline so
+    # the keyless WDQS ingest is covered by the same pre-ingestion gate.
+    try:
+        from wikidata_ingest import _selfcheck as _wd_selfcheck
+        _wd_selfcheck()
+        check("wikidata_ingest row→facts + forge roundtrip", True)
+    except Exception as e:
+        check("wikidata_ingest row→facts + forge roundtrip", False, repr(e))
+
     for q in qs:
         if q["qtype"] == "higher_lower":
             gap_ok = q["value_a"] != q["value_b"]
