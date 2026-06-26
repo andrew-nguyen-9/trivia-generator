@@ -6,8 +6,8 @@
 // day's data has no themed twist the standard CATEGORY_LABEL is used as a
 // fallback (handled by themedLabel below).
 
-import { mulberry32 } from "@/lib/rng";
-import type { Category } from "@/lib/types";
+import { motifOfDay } from "./dailyMotif";
+import type { Category } from "./types";
 
 export interface BoardTheme {
   /** keyword — also the tag the forge attaches to clue questions' meta */
@@ -129,10 +129,17 @@ export const BOARD_HOST = {
   title: "Keeper of the Board",
 };
 
-/** Deterministic theme of the day — same dayIndex ⇒ same theme for everyone. */
+/** Look up a board skin by key (the tag motifs reference to stay in sync). */
+export function themeByKey(key: string): BoardTheme | undefined {
+  return THEMES.find((t) => t.key === key);
+}
+
+/** Deterministic theme of the day — same dayIndex ⇒ same theme for everyone.
+ *  Now derived from the day's cross-room MOTIF (lib/dailyMotif), so THE BOARD's
+ *  reskin stays in step with the subject every other room pulls. Falls back to
+ *  the first skin only if a motif ever names a key that isn't in THEMES. */
 export function pickTheme(dayIndex: number): BoardTheme {
-  const rand = mulberry32(0x5eed ^ dayIndex);
-  return THEMES[Math.floor(rand() * THEMES.length)];
+  return themeByKey(motifOfDay(dayIndex).boardThemeKey) ?? THEMES[0];
 }
 
 /** Themed label for a category, falling back to the standard label. */
