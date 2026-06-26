@@ -1,0 +1,48 @@
+/* PARLOR v3 §3.2 — Chronos layout.
+ *
+ * Only LAYOUT lives here (grid + clock sizing). Colors, type and surfaces stay
+ * in the global design system (Tailwind + tokens) so this module never forks the
+ * palette. Desktop changes are gated behind `min-width` queries — mobile keeps
+ * its existing single-column responsive flow untouched.
+ *
+ * The one-screen mandate (1280×800 and 1920×1080, no scroll-to-play) is met by
+ * laying prompt+clues beside the dial+slider+feedback on desktop, and capping the
+ * grandfather clock's width so its tall SVG (~1.35:1) stays inside the fold. */
+
+.play {
+  display: grid;
+  gap: 1.5rem;
+}
+
+@media (min-width: 1024px) {
+  .play {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
+    gap: 2rem;
+    align-items: start;
+  }
+}
+
+/* The dial column centers the clock, readout, slider and per-round feedback. */
+.dialCol {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Mobile: roomy. Desktop: capped so the ~1.35:1 SVG clears one screen. */
+.clock {
+  width: min(72vw, 300px);
+}
+
+@media (min-width: 1024px) {
+  .clock {
+    width: 208px; /* ~281px tall — leaves room for slider + lock button in-fold */
+  }
+}
+
+/* The 5-square proximity line on the result screen. */
+.proximity {
+  font-size: 2.25rem;
+  letter-spacing: 0.15em;
+  line-height: 1;
+}
