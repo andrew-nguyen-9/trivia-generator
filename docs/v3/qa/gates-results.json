@@ -1,0 +1,295 @@
+{
+  "mobileSweep": [
+    {
+      "route": "/",
+      "status": 200,
+      "title": "PARLOR — a secret order of the curious",
+      "overflowPx": 0,
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "route": "/board",
+      "status": 200,
+      "title": "Codex — the daily board · PARLOR",
+      "overflowPx": 0,
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "route": "/clock",
+      "status": 200,
+      "title": "Chronos — when did it happen? · PARLOR",
+      "overflowPx": 0,
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "route": "/wedges",
+      "status": 200,
+      "title": "Fractures — fill the ring · PARLOR",
+      "overflowPx": 0,
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "route": "/streak",
+      "status": 200,
+      "title": "Ignite — higher or lower · PARLOR",
+      "overflowPx": 0,
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "route": "/map",
+      "status": 200,
+      "title": "Atlas Obscura — drop the pin · PARLOR",
+      "overflowPx": 0,
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "route": "/thread",
+      "status": 200,
+      "title": "Thread of Fate — follow the chain · PARLOR",
+      "overflowPx": 0,
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "route": "/seance",
+      "status": 200,
+      "title": "The Séance — who or what am I? · PARLOR",
+      "overflowPx": 0,
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "route": "/ladder",
+      "status": 200,
+      "title": "Climb of the Initiate — closest match · PARLOR",
+      "overflowPx": 0,
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "route": "/mystery",
+      "status": 200,
+      "title": "Sanctum Mysterii — the nightly murder · PARLOR",
+      "overflowPx": 0,
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "route": "/gauntlet",
+      "status": 200,
+      "title": "The Gauntlet — one run a day · PARLOR",
+      "overflowPx": 0,
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "route": "/cold-case",
+      "status": 200,
+      "title": "The Cold Case — the week-long mystery · PARLOR",
+      "overflowPx": 0,
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "route": "/overture",
+      "status": 200,
+      "title": "The Overture — name the intro · PARLOR",
+      "overflowPx": 0,
+      "consoleErrors": [],
+      "pageErrors": []
+    }
+  ],
+  "multiEngine": [
+    {
+      "engine": "chromium",
+      "version": "149.0.7827.55",
+      "routes": [
+        {
+          "route": "/",
+          "status": 200,
+          "title": "PARLOR — a secret order of the curious",
+          "h1": "Parlor",
+          "pageErrors": 0,
+          "consoleErrors": 0
+        },
+        {
+          "route": "/board",
+          "status": 200,
+          "title": "Codex — the daily board · PARLOR",
+          "h1": "Codex — the daily board",
+          "pageErrors": 0,
+          "consoleErrors": 0
+        },
+        {
+          "route": "/clock",
+          "status": 200,
+          "title": "Chronos — when did it happen? · PARLOR",
+          "h1": "Chronos",
+          "pageErrors": 0,
+          "consoleErrors": 0
+        },
+        {
+          "route": "/map",
+          "status": 200,
+          "title": "Atlas Obscura — drop the pin · PARLOR",
+          "h1": "Atlas Obscura",
+          "pageErrors": 0,
+          "consoleErrors": 0
+        },
+        {
+          "route": "/wedges",
+          "status": 200,
+          "title": "Fractures — fill the ring · PARLOR",
+          "h1": "Fractures",
+          "pageErrors": 0,
+          "consoleErrors": 0
+        }
+      ]
+    },
+    {
+      "engine": "firefox",
+      "version": "151.0",
+      "routes": [
+        {
+          "route": "/",
+          "status": 304,
+          "title": "PARLOR — a secret order of the curious",
+          "h1": "Parlor",
+          "pageErrors": 0,
+          "consoleErrors": 0
+        },
+        {
+          "route": "/board",
+          "status": 200,
+          "title": "Codex — the daily board · PARLOR",
+          "h1": "Codex — the daily board",
+          "pageErrors": 0,
+          "consoleErrors": 0
+        },
+        {
+          "route": "/clock",
+          "status": 200,
+          "title": "Chronos — when did it happen? · PARLOR",
+          "h1": "Chronos",
+          "pageErrors": 0,
+          "consoleErrors": 0
+        },
+        {
+          "route": "/map",
+          "status": 200,
+          "title": "Atlas Obscura — drop the pin · PARLOR",
+          "h1": "Atlas Obscura",
+          "pageErrors": 0,
+          "consoleErrors": 0
+        },
+        {
+          "route": "/wedges",
+          "status": 200,
+          "title": "Fractures — fill the ring · PARLOR",
+          "h1": "Fractures",
+          "pageErrors": 0,
+          "consoleErrors": 0
+        }
+      ]
+    },
+    {
+      "engine": "webkit",
+      "version": "26.5",
+      "routes": [
+        {
+          "route": "/",
+          "status": 200,
+          "title": "PARLOR — a secret order of the curious",
+          "h1": "Parlor",
+          "pageErrors": 0,
+          "consoleErrors": 0
+        },
+        {
+          "route": "/board",
+          "status": 200,
+          "title": "Codex — the daily board · PARLOR",
+          "h1": "Codex — the daily board",
+          "pageErrors": 0,
+          "consoleErrors": 0
+        },
+        {
+          "route": "/clock",
+          "status": 200,
+          "title": "Chronos — when did it happen? · PARLOR",
+          "h1": "Chronos",
+          "pageErrors": 0,
+          "consoleErrors": 0
+        },
+        {
+          "route": "/map",
+          "status": 200,
+          "title": "Atlas Obscura — drop the pin · PARLOR",
+          "h1": "Atlas Obscura",
+          "pageErrors": 0,
+          "consoleErrors": 0
+        },
+        {
+          "route": "/wedges",
+          "status": 200,
+          "title": "Fractures — fill the ring · PARLOR",
+          "h1": "Fractures",
+          "pageErrors": 0,
+          "consoleErrors": 0
+        }
+      ]
+    }
+  ],
+  "axe": [
+    {
+      "route": "/",
+      "error": null,
+      "violations": []
+    },
+    {
+      "route": "/board",
+      "error": null,
+      "violations": [
+        {
+          "id": "aria-required-children",
+          "impact": "critical",
+          "nodes": 1,
+          "help": "Certain ARIA roles must contain particular children"
+        },
+        {
+          "id": "aria-required-parent",
+          "impact": "critical",
+          "nodes": 25,
+          "help": "Certain ARIA roles must be contained by particular parents"
+        }
+      ]
+    },
+    {
+      "route": "/clock",
+      "error": null,
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 1,
+          "help": "Elements must meet minimum color contrast ratio thresholds"
+        }
+      ]
+    },
+    {
+      "route": "/map",
+      "error": null,
+      "violations": []
+    },
+    {
+      "route": "/wedges",
+      "error": null,
+      "violations": []
+    }
+  ]
+}
