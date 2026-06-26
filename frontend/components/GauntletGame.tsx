@@ -5,6 +5,8 @@ import { motion } from "framer-motion";
 import WorldMap from "@/components/WorldMap";
 import { haversineKm, type LatLng } from "@/lib/geo";
 import { CATEGORY_HEX, CATEGORY_LABEL, type Question } from "@/lib/types";
+import { buildShare, emojiGrid, type Tier } from "@/lib/share";
+import styles from "./GauntletGame.module.css";
 
 // THE GAUNTLET — an Indiana-Jones treasure run across the rooms. The clock runs
 // from the first trial to the last; your TIME is your score (lower is better).
@@ -32,8 +34,13 @@ type Phase = "brief" | "running" | "reveal" | "done";
 
 interface Saved {
   totalMs: number;
-  marks: string[]; // per-trial: "⛏️" clean · "💡" hinted · "🪤" trapped
+  tiers: Tier[]; // per-trial outcome, canonical for the share grid
+  date: string; // day-seed (YYYY-MM-DD) so the shared card is stable on reload
 }
+
+// the live path shows thematic glyphs; the SHARE artifact is the canonical
+// line of squares (lib/share.ts). hit = clean clear, near = hinted, miss = trapped.
+const GLYPH: Record<Tier, string> = { hit: "⛏️", near: "💡", miss: "🪤", blank: "·" };
 
 const fmt = (ms: number) => {
   const s = Math.floor(ms / 1000);
@@ -51,7 +58,7 @@ export default function GauntletGame({
   const [phase, setPhase] = useState<Phase>("brief");
   const [i, setI] = useState(0);
   const [penaltyMs, setPenaltyMs] = useState(0);
-  const [marks, setMarks] = useState<string[]>([]);
+  const [results, setResults] = useState<Tier[]>([]);
   const [saved, setSaved] = useState<Saved | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -123,14 +130,15 @@ export default function GauntletGame({
     const trapped = !clean;
     if (trapped) setPenaltyMs((p) => p + TRAP_PENALTY);
     setLastTrap(trapped);
-    setMarks((m) => [...m, hintUsed ? "💡" : trapped ? "🪤" : "⛏️"]);
+    const tier: Tier = hintUsed ? "near" : trapped ? "miss" : "hit";
+    setResults((m) => [...m, tier]);
     setPhase("reveal");
   }
 
   function next() {
     if (i + 1 >= rounds.length) {
       const totalMs = Date.now() - startRef.current + penaltyMs;
-      const result: Saved = { totalMs, marks };
+      const result: Saved = { totalMs, tiers: results, date: new Date().toISOString().slice(0, 10) };
       localStorage.setItem(storageKey, JSON.stringify(result));
       setSaved(result);
       setPhase("done");
@@ -141,14 +149,18 @@ export default function GauntletGame({
     setPhase("running");
   }
 
+  // Share through the canonical seam (lib/share.ts): five trials → one row of
+  // squares + the OG link. Gauntlet's headline is the escape TIME (lower is
+  // better), so we keep buildShare's grid/url and lead with the clock.
   async function share(r: Saved) {
-    const line = `PARLOR GAUNTLET #${gauntletNumber} — escaped in ${fmt(r.totalMs)}\n${r.marks.join("")}`;
+    const card = buildShare({ room: "/gauntlet", date: r.date, tiers: r.tiers, columns: 5 });
+    const text = `${card.title} #${gauntletNumber}\nescaped in ${fmt(r.totalMs)} · ${r.date}\n${card.grid}\n${card.url}`;
     try {
-      await navigator.clipboard.writeText(line);
+      await navigator.clipboard.writeText(text);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      /* clipboard unavailable — the text is on screen anyway */
+      /* clipboard unavailable — the grid is on screen anyway */
     }
   }
 
@@ -188,9 +200,14 @@ export default function GauntletGame({
       <div className="flex items-baseline justify-between">
         <div>
           <h1 className="display text-3xl sm:text-4xl">The Gauntlet</h1>
-          <p className="microlabel mt-1">
+          {/* gate plate — re-keyed per trial so it pulses on each stage change */}
+          <span
+            key={i}
+            className={`${styles.plate} mt-2`}
+            style={{ ["--accent" as string]: hex }}
+          >
             {trial.obstacle} {trial.name} · trial {i + 1}/5
-          </p>
+          </span>
         </div>
         <div className="text-right">
           <div className="microlabel">time</div>
@@ -198,15 +215,16 @@ export default function GauntletGame({
         </div>
       </div>
 
-      <div className="mt-2 flex gap-1 text-lg">
+      <div className="mt-3 flex gap-1 text-lg">
         {rounds.map((r, k) => (
-          <span key={k} className={k < marks.length ? "" : k === i ? "opacity-100" : "opacity-30"}>
-            {k < marks.length ? marks[k] : (TRIAL[r.qtype]?.obstacle ?? "·")}
+          <span key={k} className={k < results.length ? "" : k === i ? "opacity-100" : "opacity-30"}>
+            {k < results.length ? GLYPH[results[k]] : (TRIAL[r.qtype]?.obstacle ?? "·")}
           </span>
         ))}
       </div>
 
-      <div className="mt-5 rounded-2xl border border-line bg-surface p-6">
+      {/* re-keyed per trial: remount fires the stage slide-in (clearer transition) */}
+      <div key={i} className={`${styles.stage} mt-5 rounded-2xl border border-line bg-surface p-6`}>
         <span className="microlabel" style={{ color: hex }}>
           {CATEGORY_LABEL[q.category]} · {trial.name}
         </span>
@@ -324,13 +342,18 @@ export default function GauntletGame({
                 the map names the {truth.lat >= 0 ? "northern" : "southern"} & {truth.lng >= 0 ? "eastern" : "western"} reaches
               </p>
             )}
-            <WorldMap
-              guess={pin}
-              truth={phase === "reveal" ? truth : null}
-              onPick={setPin}
-              disabled={phase === "reveal"}
-              accent={hex}
-            />
+            {/* cap the map width: it's 2:1, so on a wide desktop column an
+                uncapped map runs ~480px tall and pushes the flag button off
+                screen. 640px → ~320px tall keeps the whole gate on one screen. */}
+            <div className="mx-auto max-w-[640px]">
+              <WorldMap
+                guess={pin}
+                truth={phase === "reveal" ? truth : null}
+                onPick={setPin}
+                disabled={phase === "reveal"}
+                accent={hex}
+              />
+            </div>
             {phase === "running" && (
               <div className="mt-3 flex justify-center">
                 <button
@@ -359,9 +382,11 @@ export default function GauntletGame({
           <motion.div
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mt-6 flex items-center justify-center gap-5"
+            className="mt-6 flex flex-col items-center gap-4 sm:flex-row sm:justify-center"
           >
-            <span className="text-xl">{lastTrap ? "🪤 trap sprung" : "⛏️ cleared"}</span>
+            <span className={`${styles.banner} ${lastTrap ? styles.trapped : styles.cleared}`}>
+              {lastTrap ? "🪤 trap sprung · +20s" : "⛏️ gate cleared"}
+            </span>
             <button
               onClick={next}
               className="microlabel rounded-full border border-ink px-6 py-3 transition hover:bg-ink hover:text-bg"
@@ -392,7 +417,7 @@ function Results({
       <div className="mt-2 text-4xl">𖣘</div>
       <p className="display tabular text-7xl text-wildcard">{fmt(saved.totalMs)}</p>
       <p className="mt-1 text-muted">out of the temple</p>
-      <p className="mt-4 text-3xl tracking-widest">{saved.marks.join("")}</p>
+      <p className="mt-4 text-3xl tracking-widest">{emojiGrid(saved.tiers, 5)}</p>
       <button
         onClick={() => onShare(saved)}
         className="microlabel mt-8 rounded-full border border-wildcard px-8 py-3 text-wildcard transition hover:bg-wildcard hover:text-bg"
