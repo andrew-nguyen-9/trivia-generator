@@ -5,6 +5,7 @@ import {
   encodeTiers,
   decodeTiers,
   ogImageUrl,
+  roomArt,
   type GameResult,
 } from "./share";
 
@@ -59,5 +60,19 @@ describe("buildShare", () => {
     expect(card.url).toBe("https://example.test/gauntlet");
     expect(card.text).toContain("3/5 · 2026-06-26");
     expect(card.text).toContain("🟩🟨⬛⬜🟩");
+  });
+});
+
+describe("roomArt", () => {
+  it("returns the per-room persona + suit for a known room", () => {
+    expect(roomArt("/clock")).toEqual({ persona: "The Clockkeeper", suit: "♣" });
+  });
+
+  it("normalises a path missing its leading slash", () => {
+    expect(roomArt("clock")).toEqual(roomArt("/clock"));
+  });
+
+  it("falls back to the generic Order frame for an unknown room", () => {
+    expect(roomArt("/nowhere")).toEqual({ persona: "The Secret Order", suit: "♠" });
   });
 });

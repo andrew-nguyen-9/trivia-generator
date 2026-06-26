@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 import { roomByPath } from "@/lib/rooms";
-import { decodeTiers, type Tier } from "@/lib/share";
+import { decodeTiers, roomArt, type Tier } from "@/lib/share";
 import { CATEGORY_HEX } from "@/lib/types";
 
 // PARLOR v3 §3.0 — parameterized share-card endpoint. Games never edit this
@@ -31,6 +31,7 @@ export async function GET(
   const meta = roomByPath(`/${room}`);
   const accent = meta ? CATEGORY_HEX[meta.accent] : "#c9a24a";
   const name = meta?.name ?? "PARLOR";
+  const art = roomArt(room); // §3.14 — per-room persona + suit emblem
 
   const tiers = decodeTiers(url.searchParams.get("g") ?? "");
   const date = url.searchParams.get("d") ?? "";
@@ -57,11 +58,29 @@ export async function GET(
           color: "#f0e6cf",
           padding: "72px",
           fontFamily: "Georgia, serif",
+          position: "relative",
         }}
       >
+        {/* §3.14 — per-room emblem: a giant faint suit bleeds off the corner,
+            tinted with the room accent, so each card reads as its own room. */}
+        <div
+          style={{
+            display: "flex",
+            position: "absolute",
+            top: -120,
+            right: -40,
+            fontSize: 480,
+            lineHeight: 1,
+            color: accent,
+            opacity: 0.12,
+          }}
+        >
+          {art.suit}
+        </div>
+
         <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
           <div style={{ fontSize: 28, letterSpacing: 6, color: accent, textTransform: "uppercase" }}>
-            The Secret Order
+            {art.persona}
           </div>
           <div style={{ fontSize: 84, fontWeight: 700, textTransform: "uppercase", letterSpacing: 2 }}>
             {name}
@@ -92,8 +111,8 @@ export async function GET(
 
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
           <div style={{ fontSize: 30, color: accent, letterSpacing: 4 }}>parlor.an9.dev</div>
-          <div style={{ fontSize: 26, color: "#9a7a78", letterSpacing: 3 }}>
-            ♠ ♦ ♣ ♥
+          <div style={{ display: "flex", fontSize: 30, color: accent, letterSpacing: 6 }}>
+            {art.suit}
           </div>
         </div>
       </div>

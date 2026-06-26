@@ -80,6 +80,41 @@ export function ogImageUrl(result: GameResult, siteUrl: string = SITE_URL): stri
   return `${siteUrl}/api/og/${encodeURIComponent(room)}?${q.toString()}`;
 }
 
+// ── §3.14 — per-room share-card art ──────────────────────────────────────
+// Each room gets a persona eyebrow + a card-suit emblem. The OG endpoint
+// (app/api/og/[room]) and the in-app ShareCardGallery both read this so the
+// motif has ONE source. Suits only (♠♦♣♥) — they render in next/og without a
+// font dependency, same as the endpoint's footer. Unknown rooms fall back to
+// the generic Order frame, so this is safe for any future room.
+export interface RoomArt {
+  persona: string; // mystery-voice eyebrow, e.g. "The Clockkeeper"
+  suit: string; // emblem glyph, one of ♠ ♦ ♣ ♥
+}
+
+const ROOM_ART: Record<string, RoomArt> = {
+  "/mystery": { persona: "Sanctum Mysterii", suit: "♠" },
+  "/board": { persona: "The Daily Board", suit: "♦" },
+  "/clock": { persona: "The Clockkeeper", suit: "♣" },
+  "/wedges": { persona: "The Shattered Mirror", suit: "♠" },
+  "/streak": { persona: "The Open Flame", suit: "♥" },
+  "/map": { persona: "The Cartographer", suit: "♦" },
+  "/gauntlet": { persona: "The Gauntlet", suit: "♠" },
+  "/thread": { persona: "The Weaver", suit: "♣" },
+  "/seance": { persona: "The Medium", suit: "♥" },
+  "/ladder": { persona: "The Initiate's Climb", suit: "♦" },
+  "/overture": { persona: "The Overture", suit: "♥" },
+  "/cold-case": { persona: "The Cold Case", suit: "♣" },
+};
+
+const DEFAULT_ART: RoomArt = { persona: "The Secret Order", suit: "♠" };
+
+/** Per-room card art (persona eyebrow + suit emblem). Accepts a path with or
+ *  without leading slash; unknown rooms get the generic Order frame. */
+export function roomArt(path: string): RoomArt {
+  const key = path.startsWith("/") ? path : `/${path}`;
+  return ROOM_ART[key] ?? DEFAULT_ART;
+}
+
 /** Build the full shareable card for a finished run. */
 export function buildShare(result: GameResult, siteUrl: string = SITE_URL): ShareCard {
   const title = `PARLOR · ${roomName(result.room)}`;
