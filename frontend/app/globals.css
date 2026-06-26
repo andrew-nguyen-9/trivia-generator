@@ -1,3 +1,11 @@
+/* ════════════════════════════════════════════════════════════════════════
+   globals.css — FROZEN after PARLOR v3 §3.0.
+   This file holds ONLY: Tailwind layers, semantic theme tokens, the shared
+   desktop-density tokens below, and genuinely global element/utility styles.
+   Per-component styling goes in a colocated `*.module.css` (see
+   frontend/STYLING.md). Later v3 segments MUST NOT edit this file — adding a
+   token here is a §3.0 follow-up, not in-segment work.
+   ════════════════════════════════════════════════════════════════════════ */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -45,6 +53,38 @@
   --body-grad:
     radial-gradient(120% 80% at 50% -10%, rgba(201, 162, 74, 0.22) 0%, rgba(110, 31, 43, 0.06) 34%, transparent 62%),
     radial-gradient(80% 60% at 50% 110%, rgba(110, 31, 43, 0.05) 0%, transparent 60%);
+}
+
+/* ── Shared desktop-density tokens (§3.0). PARLOR is mobile-first; these give
+   every room one consistent desktop rhythm — page gutter, content width, grid
+   gap, and a denser card minimum — without each component re-inventing them.
+   Components reference these in their `*.module.css` (e.g. var(--d-gutter)).
+   Mobile defaults here; the `lg` breakpoint widens the canvas and tightens
+   density for pointer-sized screens. ── */
+:root {
+  --d-gutter: 1.25rem; /* page side padding */
+  --d-maxw: 64rem; /* room content max width */
+  --d-col-gap: 1rem; /* grid/flex gap between cards */
+  --d-card-min: 15rem; /* min track for auto-fill card grids */
+  --d-stack: 1.25rem; /* vertical rhythm between stacked blocks */
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --d-gutter: 2.5rem;
+    --d-maxw: 80rem;
+    --d-col-gap: 1.5rem;
+    --d-card-min: 17rem;
+    --d-stack: 1.75rem;
+  }
+}
+
+/* Drop-in desktop-density grid: auto-fills cards at --d-card-min, shared gap.
+   Use in any room via `<div class="density-grid">` instead of bespoke columns. */
+.density-grid {
+  display: grid;
+  gap: var(--d-col-gap);
+  grid-template-columns: repeat(auto-fill, minmax(var(--d-card-min), 1fr));
 }
 
 body {
