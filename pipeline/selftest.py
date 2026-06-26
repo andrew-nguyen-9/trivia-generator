@@ -304,6 +304,36 @@ def main() -> None:
     b1, b2 = build_daily_board(qs, d), build_daily_board(qs, d)
     check("daily board is deterministic", b1 == b2)
 
+    # ── §3.18 quality scoring ─────────────────────────────────────────────────
+    # Every forged question carries a 0..1 quality score the board sorts on.
+    scores = [(q.get("meta") or {}).get("quality") for q in qs]
+    check("every question carries a quality score in [0,1]",
+          all(s is not None and 0.0 <= s <= 1.0 for s in scores))
+
+    # The board must bias toward good clues: over a pool where each (category,
+    # difficulty) tier holds sharp and thin clues in equal number, the clues the
+    # board picks should average higher quality than the pool. Fails loudly if
+    # the ranking step is dropped and the board reverts to a blind random pick.
+    from quality_score import quality_score as _qs
+
+    def _clue(cat: str, diff: int, i: int, sharp: bool) -> dict:
+        text = (f"In 196{i % 10}, this {cat} pioneer led a celebrated campaign abroad."
+                if sharp else "a thing.")
+        return {"content_hash": f"{cat}-{diff}-{i}-{int(sharp)}", "qtype": "clue",
+                "category": cat, "difficulty": diff, "prompt": text,
+                "meta": {"quality": _qs({"prompt": text})}}
+
+    pool = [_clue(c, dd, i, i % 2 == 0)
+            for c in ("alpha", "beta", "gamma", "delta", "epsilon")
+            for dd in range(1, 6) for i in range(8)]
+    bb = build_daily_board(pool, date(2026, 6, 12))
+    ph = {q["content_hash"]: q for q in pool}
+    chosen = [ph[h] for col in bb["payload"]["columns"] for h in col["cells"]]
+    board_avg = sum(_qs(q) for q in chosen) / len(chosen)
+    pool_avg = sum(_qs(q) for q in pool) / len(pool)
+    check("board biases toward higher-quality clues", board_avg > pool_avg,
+          f"board {board_avg:.3f} vs pool {pool_avg:.3f}")
+
     # bronze compaction (DB-less serving depends on this not bloating the repo)
     import tempfile
 
