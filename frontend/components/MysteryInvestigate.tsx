@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { Fragment, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { sfxCorrect, sfxGlassClink, sfxPianoChord, sfxWrong } from "@/lib/sound";
 import { haptic } from "@/lib/haptics";
@@ -8,8 +8,9 @@ import { useProfile, type Achievement } from "@/lib/profile";
 import { deductionMatrix, HOURS, ROOMS, pretty, type MysteryCase } from "@/lib/mystery";
 import { score, type MysteryAttempt, type MysteryScoreResult } from "@/lib/mysteryScore";
 import MysteryAccusationForm from "./MysteryAccusationForm";
-import { nextTag, type SuspectTag } from "./MysteryStatusPill";
+import MysteryStatusPill, { nextTag, type SuspectTag } from "./MysteryStatusPill";
 import AchievementToast from "./AchievementToast";
+import styles from "./Mystery.module.css";
 
 export interface StoredMysteryAttempt {
   attempt: MysteryAttempt;
@@ -17,15 +18,9 @@ export interface StoredMysteryAttempt {
   at: number;
 }
 
-const TAG_STYLE: Record<"potential" | "prime" | "cleared", string> = {
-  potential: "border-gold/55 text-gold",
-  prime: "border-ember bg-ember/15 text-ink",
-  cleared: "border-line text-muted bg-surface/70 opacity-60",
-};
-const TAG_LABEL = { potential: "PERSON OF INTEREST", prime: "ACCUSE", cleared: "CLEARED" } as const;
-
-// Stable colour per room so the alibi grid is scannable — same room, same tint.
-// The player reads the fatal-hour column and spots which tint appears alone.
+// Stable tint per room so the alibi grid is scannable — same room, same colour.
+// Deliberately UNLABELLED: the tint is a grouping aid, not a solution legend.
+// What it MEANS (corroboration = innocence) must be earned by spending clue 5/6.
 const ROOM_TINT = [
   "bg-[#3a2a1a] text-amber-100",
   "bg-[#1f2e2a] text-emerald-100",
@@ -38,6 +33,11 @@ const ROOM_TINT = [
 const shortRoom = (r: string) => r.replace(/^the /, "");
 const displayRoom = (r: string) => r.replace(/^the /, "The ");
 
+type Step = 1 | 2 | 3;
+const STEP_LABEL: Record<Step, string> = { 1: "Evidence", 2: "Alibis", 3: "Accusation" };
+const STEP_ROMAN: Record<Step, string> = { 1: "I", 2: "II", 3: "III" };
+const CLUE_COST = 80; // mirrors lib/mysteryScore CLUE_PENALTY for the reveal label
+
 export default function MysteryInvestigate({
   mystery,
   onSolved,
@@ -46,6 +46,7 @@ export default function MysteryInvestigate({
   onSolved: (stored: StoredMysteryAttempt) => void;
 }) {
   const { record } = useProfile();
+  const [step, setStep] = useState<Step>(1);
   const [cluesRevealed, setCluesRevealed] = useState(1);
   const [tags, setTags] = useState<Record<string, SuspectTag>>({});
   const [whereGuess, setWhereGuess] = useState<string | null>(null);
@@ -59,15 +60,11 @@ export default function MysteryInvestigate({
     [mystery.suspects, tags],
   );
 
-  // The elimination grid as of the clues revealed. Once a single hour survives,
-  // its column lights up on the alibi board — that's the cue to hunt the loner.
+  // The running room×hour elimination, derived purely from the clues revealed.
+  // No gold "here's the answer" telegraph any more — the player reads the one
+  // surviving cell themselves. That is the weaker-hint / harder-logic mandate.
   const matrix = useMemo(() => deductionMatrix(mystery, cluesRevealed), [mystery, cluesRevealed]);
-  const survivingRooms = ROOMS.map((_, i) => i).filter((i) => !matrix[i].every((c) => c === "ruled-out"));
-  const survivingHours = HOURS.map((_, h) => h).filter((h) => !matrix.every((row) => row[h] === "ruled-out"));
-  const lockedHour = survivingHours.length === 1 ? survivingHours[0] : null;
-  const lockedRoom = survivingRooms.length === 1 ? survivingRooms[0] : null;
 
-  // room → tint index, by ROOMS order (stable for the day)
   const tintFor = (room: string) => ROOM_TINT[ROOMS.indexOf(room as (typeof ROOMS)[number]) % ROOM_TINT.length];
 
   function cycleTag(id: string) {
@@ -102,238 +99,261 @@ export default function MysteryInvestigate({
   }
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-4 pb-16">
-      {/* ── Case header · the all-seeing eye ─────────────────────────────── */}
-      <header className="pt-6 text-center">
-        <div className="mb-2 text-3xl text-gold/80" aria-hidden>𓂀</div>
-        <p className="microlabel text-brass">case #{mystery.caseNumber}</p>
-        <h2 className="display gilt mt-1 text-3xl sm:text-4xl">{mystery.title}</h2>
-        <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-ink/85">{mystery.opening}</p>
-      </header>
-
-      {/* ── 1 · The Suspects ─────────────────────────────────────────────── */}
-      <Section step={1} title="The Suspects" hint="Tap a card to mark it. Tap the name to read the dossier.">
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-          {mystery.suspects.map((s) => {
-            const tag = tags[s.id];
-            const open = expanded === s.id;
+    <div className={`${styles.shell} px-4 pb-6`}>
+      {/* ── Case bar: identity + step pips (pips double as nav) ──────────────── */}
+      <header className={styles.caseBar}>
+        <div className="min-w-0">
+          <p className="microlabel text-brass">
+            <span aria-hidden className="mr-2 text-gold/70">𓂀</span>case #{mystery.caseNumber}
+          </p>
+          <h2 className="display gilt mt-0.5 truncate text-2xl sm:text-3xl">{mystery.title}</h2>
+        </div>
+        <ol className={styles.pips} aria-label="investigation steps">
+          {([1, 2, 3] as Step[]).map((n) => {
+            const active = step === n;
             return (
-              <div
-                key={s.id}
-                className={`rounded-xl border p-3 transition ${tag ? TAG_STYLE[tag] : "border-line bg-surface/50"}`}
-              >
-                <button onClick={() => cycleTag(s.id)} className="flex w-full items-center gap-2 text-left">
-                  <span className="text-2xl">{s.emoji}</span>
-                  <span className="min-w-0">
-                    <span className="block truncate text-sm text-ink">{pretty(s.id)}</span>
-                    <span className="block truncate text-[11px] text-muted">{s.title}</span>
+              <li key={n}>
+                <button
+                  onClick={() => setStep(n)}
+                  aria-current={active ? "step" : undefined}
+                  className={`${styles.pip} ${active ? `${styles.pipActive} border-gold` : "border-line"}`}
+                >
+                  <span className={`display text-base ${active ? "gilt" : "text-muted"}`}>{STEP_ROMAN[n]}</span>
+                  <span className={`microlabel text-[9px] ${active ? "text-gold" : "text-muted"}`}>
+                    {STEP_LABEL[n]}
                   </span>
                 </button>
-                <div className="mt-2 flex items-center justify-between gap-2">
-                  <span className="microlabel text-[9px] text-muted">{tag ? TAG_LABEL[tag] : "tap to mark"}</span>
-                  <button
-                    onClick={() => setExpanded(open ? null : s.id)}
-                    className="text-[11px] text-muted underline-offset-2 hover:text-gold hover:underline"
-                  >
-                    {open ? "hide" : "dossier"}
-                  </button>
-                </div>
-                <AnimatePresence>
-                  {open && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      className="overflow-hidden"
-                    >
-                      <p className="mt-2 text-[11px] italic leading-snug text-ink/70">{s.trait}</p>
-                      <p className="mt-1 text-[11px] text-ink/60">Always carries {s.quirk}.</p>
-                      <p className="mt-1 text-[11px] text-ember/80">To the victim: {relationshipToVictim(s.id)}.</p>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
+              </li>
             );
           })}
-        </div>
-      </Section>
+        </ol>
+      </header>
 
-      {/* ── 2 · The Evidence Ledger + WHERE/WHEN elimination ─────────────── */}
-      <Section
-        step={2}
-        title="The Evidence Ledger"
-        hint={`${cluesRevealed}/${mystery.clues.length} revealed · each new clue costs points`}
-      >
-        <div className="space-y-3">
-          <AnimatePresence initial={false}>
-            {mystery.clues.slice(0, cluesRevealed).map((clue) => (
-              <motion.div
-                key={clue.stage}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="rounded-xl border border-line bg-bg/40 p-4"
-              >
-                <p className="microlabel text-ember">{clue.kind}</p>
-                <p className="display mt-1 text-base">{clue.title}</p>
-                <p className="mt-1 text-sm leading-relaxed text-ink/85">{clue.text}</p>
-              </motion.div>
-            ))}
-          </AnimatePresence>
-          {cluesRevealed < mystery.clues.length && (
-            <button
-              onClick={revealNext}
-              className="microlabel rounded-full border border-line px-5 py-2 text-muted transition hover:border-gold hover:text-gold"
-            >
-              ✦ reveal next clue (−points)
-            </button>
-          )}
-        </div>
-
-        {/* room × hour elimination — the WHERE/WHEN board */}
-        <div className="mt-5">
-          <p className="microlabel mb-2 text-muted">where &amp; when — rule it out</p>
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse text-center text-[11px]">
-              <thead>
-                <tr>
-                  <th className="p-1" />
-                  {HOURS.map((h, hi) => (
-                    <th
-                      key={h}
-                      className={`p-1 font-normal ${lockedHour === hi ? "text-gold" : "text-muted"}`}
+      {/* ── Active step ─────────────────────────────────────────────────────── */}
+      <div className={styles.body}>
+        {step === 1 && (
+          <StepPanel title="The Evidence Ledger" hint="Reveal only what you must — every clue spent costs points.">
+            <div className={styles.evidence}>
+              {/* Clue ledger */}
+              <div>
+                <p className="mb-3 text-sm leading-relaxed text-ink/80">{mystery.opening}</p>
+                <div className={styles.ledger}>
+                  <AnimatePresence initial={false}>
+                    {mystery.clues.slice(0, cluesRevealed).map((clue) => (
+                      <motion.div
+                        key={clue.stage}
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="rounded-xl border border-line bg-bg/40 p-3"
+                      >
+                        <p className="microlabel text-ember">{clue.kind}</p>
+                        <p className="display mt-0.5 text-base">{clue.title}</p>
+                        <p className="mt-1 text-sm leading-relaxed text-ink/85">{clue.text}</p>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                </div>
+                <div className="mt-3 flex items-center gap-3">
+                  {cluesRevealed < mystery.clues.length ? (
+                    <button
+                      onClick={revealNext}
+                      className="microlabel rounded-full border border-line px-4 py-2 text-muted transition hover:border-gold hover:text-gold"
                     >
-                      {h.replace(":00", "")}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {ROOMS.map((room, ri) => (
-                  <tr key={room}>
-                    <td className={`whitespace-nowrap py-1 pr-2 text-right ${lockedRoom === ri ? "text-gold" : "text-muted"}`}>
-                      {shortRoom(room)}
-                    </td>
-                    {HOURS.map((_, hi) => {
-                      const cell = matrix[ri][hi];
-                      return (
-                        <td key={hi} className="p-0.5">
-                          <span
-                            className={`flex h-5 w-full items-center justify-center rounded ${
-                              cell === "ruled-out"
-                                ? "bg-bg/30 text-muted/30"
-                                : cell === "confirmed"
-                                  ? "bg-ember/25 text-ember"
-                                  : "border border-line/60 text-muted"
-                            }`}
-                          >
-                            {cell === "ruled-out" ? "·" : cell === "confirmed" ? "✦" : ""}
-                          </span>
-                        </td>
-                      );
-                    })}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </Section>
+                      ✦ reveal next clue (−{CLUE_COST})
+                    </button>
+                  ) : (
+                    <span className="microlabel text-muted">every clue is on the table</span>
+                  )}
+                  <span className="microlabel text-muted">{cluesRevealed}/{mystery.clues.length} revealed</span>
+                </div>
+              </div>
 
-      {/* ── 3 · The Alibi Board — the WHO puzzle ─────────────────────────── */}
-      <Section
-        step={3}
-        title="The Alibi Board"
-        hint={
-          lockedHour !== null
-            ? `At ${HOURS[lockedHour]} the innocent pair up — find the guest who stands alone.`
-            : "Each guest's claimed room, hour by hour. Pin down the fatal hour first."
-        }
-      >
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-center text-[11px]">
-            <thead>
-              <tr>
-                <th className="p-1 text-left" />
-                {HOURS.map((h, hi) => (
-                  <th
-                    key={h}
-                    className={`p-1 font-normal ${lockedHour === hi ? "text-gold underline decoration-ember" : "text-muted"}`}
-                  >
-                    {h.replace(":00", "")}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {mystery.suspects.map((s) => (
-                <tr key={s.id}>
-                  <td className="whitespace-nowrap py-1 pr-2 text-left text-ink">
-                    <span className="mr-1">{s.emoji}</span>
-                    <span className="hidden sm:inline">{pretty(s.id)}</span>
-                  </td>
-                  {HOURS.map((_, hi) => {
-                    const room = mystery.dossiers[s.id].claimed[hi];
-                    const isFatal = lockedHour === hi;
+              {/* WHERE/WHEN elimination grid */}
+              <div>
+                <p className="microlabel mb-2 text-muted">where &amp; when — what survives</p>
+                <table className={`${styles.grid} text-[11px]`}>
+                  <thead>
+                    <tr>
+                      <th />
+                      {HOURS.map((h) => (
+                        <th key={h} className="font-normal text-muted">{h.replace(":00", "")}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {ROOMS.map((room, ri) => (
+                      <tr key={room}>
+                        <td className={`${styles.rowHead} pr-2 text-right text-muted`}>{shortRoom(room)}</td>
+                        {HOURS.map((_, hi) => {
+                          const cell = matrix[ri][hi];
+                          return (
+                            <td key={hi}>
+                              <span
+                                className={`${styles.cell} ${
+                                  cell === "ruled-out"
+                                    ? "bg-bg/30 text-muted/25"
+                                    : cell === "confirmed"
+                                      ? "border border-ember/50 text-ember/80"
+                                      : "border border-line/50 text-muted"
+                                }`}
+                              >
+                                {cell === "ruled-out" ? "·" : cell === "confirmed" ? "✦" : ""}
+                              </span>
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <p className="mt-2 text-[11px] leading-snug text-muted">
+                  Each cleared clue strikes rooms and hours from the board. When one cell stands
+                  alone, that is where and when it happened.
+                </p>
+              </div>
+            </div>
+          </StepPanel>
+        )}
+
+        {step === 2 && (
+          <StepPanel
+            title="The Alibi Board"
+            hint="Tap a name for the dossier · tap the seal to mark a suspect."
+          >
+            <div className={styles.boardWrap}>
+              <table className={`${styles.grid} text-[11px]`}>
+                <thead>
+                  <tr>
+                    <th className={styles.rowHead} />
+                    {HOURS.map((h) => (
+                      <th key={h} className="font-normal text-muted">{h.replace(":00", "")}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {mystery.suspects.map((s) => {
+                    const open = expanded === s.id;
                     return (
-                      <td key={hi} className="p-0.5">
-                        <span
-                          className={`block truncate rounded px-1 py-1 ${tintFor(room)} ${
-                            isFatal ? "ring-1 ring-gold" : "opacity-70"
-                          }`}
-                          title={displayRoom(room)}
-                        >
-                          {shortRoom(room)}
-                        </span>
-                      </td>
+                      <Fragment key={s.id}>
+                        <tr>
+                          <td className={styles.rowHead}>
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => setExpanded(open ? null : s.id)}
+                                className="flex min-w-0 items-center gap-1.5 text-left"
+                                aria-expanded={open}
+                              >
+                                <span className="text-lg">{s.emoji}</span>
+                                <span className="truncate text-sm text-ink">{pretty(s.id)}</span>
+                              </button>
+                              <MysteryStatusPill tag={tags[s.id]} onCycle={() => cycleTag(s.id)} />
+                            </div>
+                          </td>
+                          {HOURS.map((_, hi) => {
+                            const room = mystery.dossiers[s.id].claimed[hi];
+                            return (
+                              <td key={hi}>
+                                <span
+                                  className={`${styles.cell} truncate px-1 ${tintFor(room)} opacity-80`}
+                                  title={displayRoom(room)}
+                                >
+                                  {shortRoom(room)}
+                                </span>
+                              </td>
+                            );
+                          })}
+                        </tr>
+                        <AnimatePresence initial={false}>
+                          {open && (
+                            <tr>
+                              <td colSpan={HOURS.length + 1} className="px-0 pb-2">
+                                <motion.div
+                                  initial={{ height: 0, opacity: 0 }}
+                                  animate={{ height: "auto", opacity: 1 }}
+                                  exit={{ height: 0, opacity: 0 }}
+                                  className="overflow-hidden"
+                                >
+                                  <div className="rounded-xl border border-line bg-surface/40 p-3 text-left">
+                                    <p className="text-[11px] text-muted">{s.title}</p>
+                                    <p className="mt-1 text-[12px] italic leading-snug text-ink/75">{s.trait}</p>
+                                    <p className="mt-1 text-[11px] text-ink/60">Always carries {s.quirk}.</p>
+                                    <p className="mt-1 text-[11px] text-ember/80">
+                                      To the victim: {relationshipToVictim(s.id)}.
+                                    </p>
+                                  </div>
+                                </motion.div>
+                              </td>
+                            </tr>
+                          )}
+                        </AnimatePresence>
+                      </Fragment>
                     );
                   })}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <p className="mt-2 text-[11px] text-muted">
-          Same colour = same room. In the fatal-hour column, the guilty are the ones whose colour appears <em>only once</em>.
-        </p>
-      </Section>
+                </tbody>
+              </table>
+              <p className="mt-2 text-[11px] text-muted">Each guest&rsquo;s claimed room, hour by hour.</p>
+            </div>
+          </StepPanel>
+        )}
 
-      {/* ── 4 · The Accusation ───────────────────────────────────────────── */}
-      <Section step={4} title="The Accusation" hint="Name the guilty, the room, and the hour.">
-        <MysteryAccusationForm
-          mystery={mystery}
-          whoGuess={whoGuess}
-          whereGuess={whereGuess}
-          whenGuess={whenGuess}
-          onWhereChange={setWhereGuess}
-          onWhenChange={setWhenGuess}
-          onSubmit={submit}
-        />
-      </Section>
+        {step === 3 && (
+          <StepPanel title="The Accusation" hint="Name the guilty, the room, and the hour.">
+            <MysteryAccusationForm
+              mystery={mystery}
+              whoGuess={whoGuess}
+              whereGuess={whereGuess}
+              whenGuess={whenGuess}
+              onWhereChange={setWhereGuess}
+              onWhenChange={setWhenGuess}
+              onSubmit={submit}
+            />
+          </StepPanel>
+        )}
+      </div>
+
+      {/* ── Step nav ────────────────────────────────────────────────────────── */}
+      <nav className={styles.nav}>
+        <button
+          onClick={() => setStep((s) => (Math.max(1, s - 1) as Step))}
+          disabled={step === 1}
+          className="microlabel rounded-full border border-line px-5 py-2 text-muted transition enabled:hover:border-gold enabled:hover:text-gold disabled:opacity-30"
+        >
+          ← back
+        </button>
+        <span className="microlabel text-muted">{STEP_ROMAN[step]} · {STEP_LABEL[step]}</span>
+        {step < 3 ? (
+          <button
+            onClick={() => setStep((s) => (Math.min(3, s + 1) as Step))}
+            className="microlabel rounded-full border border-gold px-5 py-2 text-gold transition hover:bg-gold hover:text-bg"
+          >
+            next →
+          </button>
+        ) : (
+          <span className="w-[5.5rem]" aria-hidden />
+        )}
+      </nav>
 
       <AchievementToast queue={toasts} />
     </div>
   );
 }
 
-function Section({
-  step,
+function StepPanel({
   title,
   hint,
   children,
 }: {
-  step: number;
   title: string;
   hint: string;
   children: React.ReactNode;
 }) {
   return (
-    <section className="mt-10">
-      <div className="mb-3 flex items-baseline gap-3">
-        <span className="display gilt text-xl tabular-nums">{step}</span>
+    <section className="flex min-h-0 flex-1 flex-col">
+      <div className="mb-3">
         <h3 className="display text-lg text-ink">{title}</h3>
+        <p className="microlabel mt-0.5 text-muted">{hint}</p>
       </div>
-      <p className="microlabel mb-3 text-muted">{hint}</p>
-      {children}
+      <div className="min-h-0 flex-1">{children}</div>
     </section>
   );
 }

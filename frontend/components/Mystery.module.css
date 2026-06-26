@@ -1,0 +1,142 @@
+/* PARLOR v3 §3.9 — Sanctum Mysterii layout.
+ *
+ * LAYOUT ONLY. Colors, type and surfaces stay in the global design system
+ * (Tailwind tokens + .display/.microlabel/.gilt-frame) so this module never
+ * forks the palette. The job here is the one-screen mandate: the investigation
+ * is a three-step wizard (Evidence → Alibis → Accusation) and only the ACTIVE
+ * step is on screen, sized to clear 1280×800 and 1920×1080 without scroll-to-play.
+ *
+ * Each step body is allowed to scroll INTERNALLY as a safety valve (tall clue
+ * ledgers, the 7-row alibi board) while the case bar and step nav stay pinned,
+ * so the player never loses the controls below the fold. */
+
+.shell {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  width: 100%;
+  max-width: 64rem;
+  margin: 0 auto;
+  /* leave room for RoomShell chrome; the step body flexes inside this. */
+  min-height: min(82vh, 760px);
+}
+
+/* ── case bar: compact identity + step pips, single row on desktop ───────── */
+.caseBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  border-bottom: 1px solid var(--line, rgba(255, 255, 255, 0.08));
+  padding-bottom: 0.85rem;
+}
+
+.pips {
+  display: flex;
+  align-items: stretch;
+  gap: 0.4rem;
+}
+
+.pip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  min-width: 4.5rem;
+  padding: 0.35rem 0.6rem;
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.1));
+  border-radius: 0.6rem;
+  background: transparent;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, opacity 0.2s;
+  opacity: 0.55;
+}
+.pip:hover { opacity: 0.85; }
+.pipActive {
+  opacity: 1;
+}
+
+/* ── step body: flexes to fill, scrolls internally only if it must ───────── */
+.body {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Evidence step: ledger beside the elimination grid on desktop. */
+.evidence {
+  display: grid;
+  gap: 1.25rem;
+  align-content: start;
+}
+@media (min-width: 1024px) {
+  .evidence {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    gap: 2rem;
+  }
+}
+
+/* The clue ledger can outgrow the fold once all 7 are revealed — cap + scroll
+ * so the elimination grid and nav stay put. */
+.ledger {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  max-height: min(44vh, 360px);
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+
+/* Elimination + alibi grids share the same fixed-column table mechanics so the
+ * room/hour cells stay even and scannable. */
+.grid {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  text-align: center;
+}
+.grid th,
+.grid td {
+  padding: 0.15rem;
+}
+.grid .rowHead {
+  width: 9.5rem;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Cell chip — square-ish, even, used by both grids. */
+.cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 1.5rem;
+  border-radius: 0.3rem;
+  font-size: 0.7rem;
+  line-height: 1;
+}
+
+/* Alibi step: the unified suspect table can exceed the fold (7 rows + open
+ * dossiers) — wrap it so it scrolls inside the step, nav stays pinned. */
+.boardWrap {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+}
+@media (min-width: 640px) {
+  .boardWrap { overflow-x: visible; }
+}
+
+/* ── step nav: pinned footer ─────────────────────────────────────────────── */
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-top: 1px solid var(--line, rgba(255, 255, 255, 0.08));
+  padding-top: 0.85rem;
+}

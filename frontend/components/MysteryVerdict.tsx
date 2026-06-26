@@ -3,11 +3,8 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { HOURS, pretty, type MysteryCase } from "@/lib/mystery";
-import {
-  shareText,
-  type MysteryAttempt,
-  type MysteryScoreResult,
-} from "@/lib/mysteryScore";
+import type { MysteryAttempt, MysteryScoreResult } from "@/lib/mysteryScore";
+import { buildShare, type GameResult, type Tier } from "@/lib/share";
 
 function verdictSummary(
   mystery: MysteryCase,
@@ -69,15 +66,36 @@ export default function MysteryVerdict({
 }) {
   const [copied, setCopied] = useState(false);
 
-  async function share() {
-    const text = shareText(mystery, attempt, result);
+  // The §3.9 social artifact: solved/failed + how many deductions were spent.
+  // One tier per clue — a clue left unread is a 🟩 (efficient), a clue spent is a
+  // 🟨 (a deduction used). The grid, OG card and link all route through the §3.0
+  // share seam (lib/share.ts); only the verdict headline is composed on top.
+  // ponytail: client Date() here, not a prop — page.tsx isn't ours to edit.
+  const tiers: Tier[] = mystery.clues.map((_, i) => (i < attempt.cluesRevealed ? "near" : "hit"));
+  const card = buildShare({
+    room: "/mystery",
+    date: new Date().toISOString().slice(0, 10),
+    tiers,
+    score: result.total,
+    columns: mystery.clues.length,
+  } satisfies GameResult);
+  const headline = result.won
+    ? `🔓 PARLOR · CASE #${mystery.caseNumber} — CASE CLOSED`
+    : `❄️ PARLOR · CASE #${mystery.caseNumber} — COLD CASE`;
+  const verdictText = `${headline}\nDeductions used: ${attempt.cluesRevealed}/${mystery.clues.length}\n${card.grid}\n${card.url}`;
+
+  function share() {
     try {
-      await navigator.clipboard.writeText(text);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      if (typeof navigator !== "undefined" && navigator.share) {
+        void navigator.share({ text: verdictText, url: card.url }).catch(() => {});
+      } else {
+        void navigator.clipboard?.writeText(verdictText);
+      }
     } catch {
-      /* clipboard unavailable */
+      /* clipboard/share unavailable — silently no-op */
     }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   }
 
   return (
