@@ -144,9 +144,11 @@ jobs:
         run: |
           python - <<'EOF'
           import sys, duckdb
+          # native fetchall(), not .df(): DuckDB's .df() pulls pandas+numpy, which the
+          # pipeline requirements don't ship — it raised ModuleNotFoundError every run.
           con = duckdb.connect("../data/parlor.duckdb")
-          rows = con.sql("select * from mart_category_stats").df()
-          print(rows.to_string(index=False))
+          rows = con.sql("select * from mart_category_stats").fetchall()
+          print("\n".join(str(r) for r in rows))
           n = len(rows)
           if n < 3:
               sys.exit(f"health gate: only {n} categories in the bank (floor 3) — a source has likely stopped flowing")
