@@ -1,142 +1,159 @@
-/* PARLOR v3 §3.9 — Sanctum Mysterii layout.
+/* PARLOR v3 §3.9 — Sanctum Mysterii layout (single-tab redesign, E2b).
  *
  * LAYOUT ONLY. Colors, type and surfaces stay in the global design system
- * (Tailwind tokens + .display/.microlabel/.gilt-frame) so this module never
- * forks the palette. The job here is the one-screen mandate: the investigation
- * is a three-step wizard (Evidence → Alibis → Accusation) and only the ACTIVE
- * step is on screen, sized to clear 1280×800 and 1920×1080 without scroll-to-play.
+ * (Tailwind tokens + .display/.microlabel/.gilt-frame + F1 gold) so this module
+ * never forks the palette.
  *
- * Each step body is allowed to scroll INTERNALLY as a safety valve (tall clue
- * ledgers, the 7-row alibi board) while the case bar and step nav stay pinned,
- * so the player never loses the controls below the fold. */
+ * ONE tab now: a left CLUE PANEL beside the BOARD, each its own scroll region.
+ * Hovering a region scrolls that region (native overflow scoping — no JS scroll
+ * hijack). The shell stretches to use the full screen width; nothing truncates,
+ * cells wrap instead of collapsing to an ellipsis at any width. */
 
 .shell {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1rem;
   width: 100%;
-  max-width: 64rem;
+  max-width: 96rem;
   margin: 0 auto;
-  /* leave room for RoomShell chrome; the step body flexes inside this. */
-  min-height: min(82vh, 760px);
 }
 
-/* ── case bar: compact identity + step pips, single row on desktop ───────── */
+/* ── case bar: identity + live deduction status ──────────────────────────── */
 .caseBar {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 0.75rem 1.5rem;
+  gap: 0.5rem 1.5rem;
   border-bottom: 1px solid var(--line, rgba(255, 255, 255, 0.08));
-  padding-bottom: 0.85rem;
+  padding-bottom: 0.75rem;
 }
 
-.pips {
-  display: flex;
-  align-items: stretch;
-  gap: 0.4rem;
-}
-
-.pip {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.15rem;
-  min-width: 4.5rem;
-  padding: 0.35rem 0.6rem;
-  border: 1px solid var(--line, rgba(255, 255, 255, 0.1));
-  border-radius: 0.6rem;
-  background: transparent;
-  cursor: pointer;
-  transition: border-color 0.2s, background 0.2s, opacity 0.2s;
-  opacity: 0.55;
-}
-.pip:hover { opacity: 0.85; }
-.pipActive {
-  opacity: 1;
-}
-
-/* ── step body: flexes to fill, scrolls internally only if it must ───────── */
-.body {
-  flex: 1 1 auto;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Evidence step: ledger beside the elimination grid on desktop. */
-.evidence {
+/* ── workspace: clue panel | board, independent scroll columns ───────────── */
+.workspace {
   display: grid;
-  gap: 1.25rem;
-  align-content: start;
+  grid-template-columns: 1fr;
+  gap: 1rem;
 }
-@media (min-width: 1024px) {
-  .evidence {
-    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
-    gap: 2rem;
+@media (min-width: 900px) {
+  .workspace {
+    grid-template-columns: minmax(15rem, 21rem) minmax(0, 1fr);
+    gap: 1.5rem;
+    align-items: start;
   }
 }
 
-/* The clue ledger can outgrow the fold once all 7 are revealed — cap + scroll
- * so the elimination grid and nav stay put. */
-.ledger {
+/* Desktop ONLY: each panel owns its scroll so hover-to-scroll works without JS
+ * (bounded height keeps both columns visible at once). Mobile flows as one
+ * natural page scroll — no nested scroll boxes, no trapped content. */
+.scrollPane {
+  min-height: 0;
+}
+@media (min-width: 900px) {
+  .scrollPane {
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    max-height: min(74vh, 760px);
+    padding-right: 0.35rem;
+  }
+}
+
+.cluePanel {
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
-  max-height: min(44vh, 360px);
-  overflow-y: auto;
-  padding-right: 0.25rem;
 }
 
-/* Elimination + alibi grids share the same fixed-column table mechanics so the
- * room/hour cells stay even and scannable. */
+.board {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* ── grids: fixed-layout tables, cells WRAP (never ellipsis) ─────────────── */
+/* Narrow screens swipe the board horizontally rather than crushing cells to an
+ * unreadable per-character wrap; min-width keeps every name legible. On desktop
+ * the table fills its column (width:100% > min-width) so there's no scroll. */
+/* Mobile only — desktop keeps overflow visible so the hover dossier (absolutely
+ * positioned below a row) isn't clipped by a scroll container. */
+@media (max-width: 899px) {
+  .tableScroll {
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 0.25rem;
+  }
+}
 .grid {
   width: 100%;
-  border-collapse: collapse;
+  min-width: 30rem;
+  border-collapse: separate;
+  border-spacing: 0.28rem;
   table-layout: fixed;
   text-align: center;
 }
-.grid th,
-.grid td {
-  padding: 0.15rem;
+.grid th {
+  font-weight: 400;
+  padding: 0.1rem;
+  vertical-align: bottom;
 }
-.grid .rowHead {
-  width: 9.5rem;
+.rowHead {
+  width: 26%;
+  min-width: 6.5rem;
   text-align: left;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  vertical-align: middle;
 }
 
-/* Cell chip — square-ish, even, used by both grids. */
+/* Alibi cell — vibrant tinted chip, wrapping room name, brighter text. */
 .cell {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 1.5rem;
-  border-radius: 0.3rem;
-  font-size: 0.7rem;
-  line-height: 1;
+  text-align: center;
+  min-height: 2.1rem;
+  padding: 0.25rem 0.3rem;
+  border-radius: 0.4rem;
+  font-size: 0.72rem;
+  line-height: 1.15;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
-/* Alibi step: the unified suspect table can exceed the fold (7 rows + open
- * dossiers) — wrap it so it scrolls inside the step, nav stays pinned. */
-.boardWrap {
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow: auto;
-}
-@media (min-width: 640px) {
-  .boardWrap { overflow-x: visible; }
-}
-
-/* ── step nav: pinned footer ─────────────────────────────────────────────── */
-.nav {
+/* Where/when deduction cell — square mark target. */
+.markCell {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  border-top: 1px solid var(--line, rgba(255, 255, 255, 0.08));
-  padding-top: 0.85rem;
+  justify-content: center;
+  width: 100%;
+  min-height: 2.1rem;
+  border-radius: 0.4rem;
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.12));
+  background: rgba(255, 255, 255, 0.02);
+  cursor: pointer;
+  font-size: 0.95rem;
+  line-height: 1;
+  transition: border-color 0.15s, background 0.15s, transform 0.08s;
+}
+.markCell:hover {
+  border-color: var(--gold, #d8b15a);
+}
+.markCell:active {
+  transform: scale(0.94);
+}
+
+/* tooltip anchor for hover dossiers */
+.suspectAnchor {
+  position: relative;
+}
+.tooltip {
+  position: absolute;
+  left: 0;
+  top: calc(100% + 0.35rem);
+  z-index: 60;
+  width: max(16rem, 100%);
+  max-width: 22rem;
+  pointer-events: none;
 }

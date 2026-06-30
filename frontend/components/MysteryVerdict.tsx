@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { HOURS, pretty, type MysteryCase } from "@/lib/mystery";
-import type { MysteryAttempt, MysteryScoreResult } from "@/lib/mysteryScore";
+import { shareText, type MysteryAttempt, type MysteryScoreResult } from "@/lib/mysteryScore";
 import { buildShare, type GameResult, type Tier } from "@/lib/share";
 
 function verdictSummary(
@@ -79,17 +79,15 @@ export default function MysteryVerdict({
     score: result.total,
     columns: mystery.clues.length,
   } satisfies GameResult);
-  const headline = result.won
-    ? `🔓 PARLOR · CASE #${mystery.caseNumber} — CASE CLOSED`
-    : `❄️ PARLOR · CASE #${mystery.caseNumber} — COLD CASE`;
-  const verdictText = `${headline}\nDeductions used: ${attempt.cluesRevealed}/${mystery.clues.length}\n${card.grid}\n${card.url}`;
+  // §5.15 — plaintext score + time (E2a's shareText) plus the run link. Always
+  // copy to clipboard; offer the native share sheet on top where available.
+  const verdictText = `${shareText(mystery, attempt, result)}\n${card.url}`;
 
   function share() {
     try {
+      void navigator.clipboard?.writeText(verdictText);
       if (typeof navigator !== "undefined" && navigator.share) {
         void navigator.share({ text: verdictText, url: card.url }).catch(() => {});
-      } else {
-        void navigator.clipboard?.writeText(verdictText);
       }
     } catch {
       /* clipboard/share unavailable — silently no-op */
