@@ -47,8 +47,16 @@ from distractor_quality import closest
 from quality_score import quality_score
 
 MIN_HL_GAP_RATIO = 0.25  # higher/lower pairs must differ by ≥25% — never a coin flip
+MIN_HL_DATE_GAP = 5      # date higher/lower pairs must differ by ≥5 years
 MIN_SEANCE_CLUES = 3     # minimum facts per subject to forge a séance question
 LADDER_CANDIDATES = 6    # candidate pool size per ladder question
+
+# §9 higher/lower selection: down-weight units that playtested too hard instead
+# of dropping them outright — subsample the pool before pairing.
+HL_UNIT_WEIGHT: dict[str, float] = {"fantasy adds (24h)": 0.4}
+# music_ingest.py no longer mints "Deezer albums" facts, but committed bronze
+# still has old ones (bronze is never hand-edited) — exclude at forge time too.
+HL_DROPPED_UNITS = {"Deezer albums"}
 
 # THE BOARD (2.3) daily themes. The forge tags each clue with a theme keyword so
 # the board can group/select by theme; the frontend picks the day's theme
@@ -147,14 +155,31 @@ def forge_year_guess(facts: list[dict]) -> list[dict]:
     return out
 
 
+_BPM_SUBJECT = re.compile(r"^(.+) has a tempo of \d+ BPM\.?$")
+
+
+def _hl_subject(f: dict, unit: str) -> str:
+    """BPM facts name the artist in fact_text ('"Track" by Artist has a tempo
+    of …') even on bronze rows ingested before the subject field carried it
+    (ponytail: forge-time fallback beats hand-editing committed bronze)."""
+    if unit == "BPM":
+        m = _BPM_SUBJECT.match(f.get("fact_text", ""))
+        if m:
+            return m.group(1)
+    return f["subject"]
+
+
 def forge_higher_lower(facts: list[dict], rng: random.Random) -> list[dict]:
     by_unit: dict[str, list[dict]] = {}
     for f in facts:
-        if f.get("numeric_value") and f.get("numeric_unit"):
+        if f.get("numeric_value") and f.get("numeric_unit") and f["numeric_unit"] not in HL_DROPPED_UNITS:
             by_unit.setdefault(f["numeric_unit"], []).append(f)
 
     out = []
     for unit, rows in by_unit.items():
+        weight = HL_UNIT_WEIGHT.get(unit, 1.0)
+        if weight < 1.0:  # too-hard category — sample down, don't drop (ponytail: tune the knob, not the recipe)
+            rows = rng.sample(rows, max(2, round(len(rows) * weight)))
         rng.shuffle(rows)
         for a, b in zip(rows[::2], rows[1::2]):
             lo, hi = sorted((a["numeric_value"], b["numeric_value"]))
@@ -170,9 +195,48 @@ def forge_higher_lower(facts: list[dict], rng: random.Random) -> list[dict]:
                     "correct": "higher" if b["numeric_value"] > a["numeric_value"] else "lower",
                     "value_a": a["numeric_value"],
                     "value_b": b["numeric_value"],
+                    "subject_a": _hl_subject(a, unit),
+                    "subject_b": _hl_subject(b, unit),
+                    "unit": unit,
+                    "image_url": b.get("image_url") or a.get("image_url"),
+                    "source_url": a.get("source_url"),
+                }
+            )
+    out.extend(_higher_lower_dates(facts, rng))
+    return out
+
+
+def _higher_lower_dates(facts: list[dict], rng: random.Random) -> list[dict]:
+    """§9 date dimension for THE STREAK: pairs facts that carry a year (the
+    comparable number behind F2's normalize_date grammar) so "which happened
+    more recently?" becomes a higher/lower round. Wikipedia/wikidata ingests
+    are the dominant year-bearing source, so this also satisfies the
+    "more Wikipedia-inspired" ask for free."""
+    by_cat: dict[str, list[dict]] = {}
+    for f in facts:
+        if f.get("year") and not (f.get("meta") or {}).get("melody"):
+            by_cat.setdefault(f["category"], []).append(f)
+
+    out = []
+    for rows in by_cat.values():
+        rng.shuffle(rows)
+        for a, b in zip(rows[::2], rows[1::2]):
+            lo, hi = sorted((a["year"], b["year"]))
+            if hi - lo < MIN_HL_DATE_GAP:
+                continue  # too close — quality gate
+            out.append(
+                {
+                    "content_hash": content_hash("higher_lower_date", a["content_hash"], b["content_hash"]),
+                    "qtype": "higher_lower",
+                    "category": a["category"],
+                    "difficulty": max(a.get("_difficulty", 3), b.get("_difficulty", 3)),
+                    "prompt": "Which happened more recently?",
+                    "correct": "higher" if b["year"] > a["year"] else "lower",
+                    "value_a": a["year"],
+                    "value_b": b["year"],
                     "subject_a": a["subject"],
                     "subject_b": b["subject"],
-                    "unit": unit,
+                    "unit": "year",
                     "image_url": b.get("image_url") or a.get("image_url"),
                     "source_url": a.get("source_url"),
                 }

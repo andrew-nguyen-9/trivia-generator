@@ -7,7 +7,7 @@ artist_enricher falls back to, promoted here to primary source.
 Facts produced per chart artist:
 - fan count            → higher_lower fuel ("Deezer fans")
 - earliest album year  → year_guess fuel
-- album count          → multiple_choice fuel
+- label/genre/featured-artist/BPM → music depth (§3.13)
 
 API efficiency (Phase 6): the chart endpoint already returns nb_fan, picture_xl,
 and link for each artist — we no longer re-fetch /artist/{id} for chart mode.
@@ -74,15 +74,9 @@ def facts_for_artist(artist: dict) -> list[dict]:
                     meta={},  # album_id/album not read by forge
                 )
             )
-        out.append(
-            make_fact(
-                source="deezer", category="music", subject=name,
-                fact_text=f"{name} has {len(dated)} albums on Deezer.",
-                numeric_value=float(len(dated)), numeric_unit="Deezer albums",
-                image_url=pic, source_url=link, popularity=pop,
-                meta={},
-            )
-        )
+        # ponytail: "Deezer albums" count dropped as a question source (too
+        # trivia-useless / unguessable) — was the only consumer of len(dated)
+        # beyond picking `first` above.
         # ── music depth (§3.13): label / genre / featured-artist / BPM ─────────
         # One /album/{id} call (label + genres + tracklist) + one /track/{id} (bpm).
         try:
@@ -127,7 +121,7 @@ def facts_for_artist(artist: dict) -> list[dict]:
                 bpm = tr.get("bpm") or 0
                 if bpm and bpm > 0:
                     out.append(make_fact(
-                        source="deezer", category="music", subject=tracks[0]["title"],
+                        source="deezer", category="music", subject=f"“{tracks[0]['title']}” — {name}",
                         fact_text=f"“{tracks[0]['title']}” by {name} has a tempo of {round(bpm)} BPM.",
                         numeric_value=float(bpm), numeric_unit="BPM",
                         image_url=pic, source_url=alink, popularity=pop, meta={},

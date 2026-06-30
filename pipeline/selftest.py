@@ -71,12 +71,13 @@ def synthetic_facts() -> list[dict]:
             popularity=9.0 * i, source_url="https://example.com",
             meta={"region": f"Region {i % 3}"},
         ))
-        # Music album year for seance grouping
+        # Music album year for seance grouping + higher_lower's date dimension (§9).
+        # numeric_unit is NOT "Deezer albums" — that source is dropped (§9 brief).
         facts.append(make_fact(
             source="deezer", category="music", subject=f"Artist {i}",
             fact_text=f'Artist {i} released the album "Album {i}" in {1990 + i * 3}.',
             year=1990 + i * 3,
-            numeric_value=float(i + 1), numeric_unit="Deezer albums",
+            numeric_value=float(i + 1), numeric_unit="monthly listeners",
             popularity=10.0 * i, source_url="https://example.com",
             image_url="https://cdn-images.dzcdn.net/images/cover/abc/1000x1000-000.jpg",
         ))
@@ -100,10 +101,19 @@ def synthetic_facts() -> list[dict]:
             meta={"answer_field": "featured_artist", "answer": f"Guest {i}"},
         ))
         facts.append(make_fact(
-            source="deezer", category="music", subject=f"Track {i}",
+            source="deezer", category="music", subject=f'"Track {i}" — Artist {i}',
             fact_text=f'"Track {i}" by Artist {i} has a tempo of {80 + i * 50} BPM.',
             numeric_value=float(80 + i * 50), numeric_unit="BPM",
             popularity=10.0 * i, source_url="https://example.com",
+        ))
+        # §9: fantasy adds — wide-spread values so the gap-ratio gate always
+        # passes, isolating the down-weight (HL_UNIT_WEIGHT) as the only thing
+        # that can shrink the pair count below the un-weighted max of 10 (20 rows).
+        facts.append(make_fact(
+            source="sleeper", category="sports", subject=f"Fantasy Player {i}",
+            fact_text=f"Fantasy Player {i} was added in {(i + 1) * 100_000:,} fantasy leagues in the last 24 hours.",
+            numeric_value=float((i + 1) * 100_000), numeric_unit="fantasy adds (24h)",
+            popularity=8.0 * i, source_url="https://example.com",
         ))
 
     # THE THREAD (2.8): a set of geography subjects that (a) share a board theme
@@ -165,6 +175,16 @@ def main() -> None:
     check("forge produces music featured-artist MC", any(c.startswith("Guest ") for c in mc_corrects))
     check("forge produces music BPM higher_lower",
           any(q["qtype"] == "higher_lower" and q.get("unit") == "BPM" for q in qs))
+    check("BPM higher_lower names the artist",
+          any(q["qtype"] == "higher_lower" and q.get("unit") == "BPM"
+              and "Artist" in (q.get("subject_a", "") + q.get("subject_b", "")) for q in qs))
+    check("forge produces date higher_lower (§9)",
+          any(q["qtype"] == "higher_lower" and q.get("unit") == "year" for q in qs))
+    check("no Deezer-album-count question source",
+          all(q.get("unit") != "Deezer albums" for q in qs))
+    fantasy_hl = [q for q in qs if q["qtype"] == "higher_lower" and q.get("unit") == "fantasy adds (24h)"]
+    check("fantasy higher_lower is down-weighted in selection",
+          len(fantasy_hl) <= 1, f"{len(fantasy_hl)} pairs (8 candidate rows, unweighted max would be 4)")
     music_qs = [q for q in qs if q.get("category") == "music"]
     check("forge strips album-cover art from music questions (leak)",
           all("/images/cover/" not in (q.get("image_url") or "") for q in music_qs))
