@@ -443,9 +443,19 @@ export default function BoardGame({
                         tabIndex={isCursor ? 0 : -1}
                         onFocus={() => setCursor([c, r])}
                         onClick={() => openCell(c, r)}
-                        aria-label={`${themedLabel(theme, col.category, CATEGORY_LABEL[col.category])}, $${(r + 1) * 200}${st ? ` — answered ${st === "right" ? "correctly" : "incorrectly"}` : ""}`}
+                        aria-label={`${themedLabel(theme, col.category, CATEGORY_LABEL[col.category])}, $${(r + 1) * 200}${isDD(c, r) ? ", daily double" : ""}${st ? ` — answered ${st === "right" ? "correctly" : "incorrectly"}` : ""}`}
                         className={`${styles.tile} flip-face tabular absolute inset-0 flex items-center justify-center rounded-lg border border-line bg-surface text-base font-black text-history transition hover:border-history hover:bg-history/10 sm:text-xl`}
                       >
+                        {/* ponytail: 6.4 wants the DD visibly marked on the board
+                            (not hidden like classic Jeopardy) — a corner star. */}
+                        {isDD(c, r) && !st && (
+                          <span
+                            aria-hidden
+                            className="absolute right-1 top-0.5 text-[0.6rem] leading-none text-gold sm:text-xs"
+                          >
+                            ★
+                          </span>
+                        )}
                         ${(r + 1) * 200}
                       </button>
                       {/* back — the result, revealed by the card flip */}
@@ -475,8 +485,11 @@ export default function BoardGame({
                 exit={{ opacity: 0 }}
               >
                 {wagerStep ? (
-                  /* Daily-double wager step — bet before the clue is shown */
-                  <div className="flex h-full flex-col items-center justify-center p-6 text-center">
+                  /* Daily-double wager step — bet before the clue is shown.
+                     flex-1 (not h-full): the overlay's height is now content-driven
+                     with a min-height floor, not a fixed box — flex-grow fills
+                     whatever space exists without depending on % resolution. */
+                  <div className="flex flex-1 flex-col items-center justify-center p-6 text-center">
                     <span className="microlabel animate-pulse text-history">★ daily double</span>
                     <p className="display mt-2 text-2xl text-history">Place your wager</p>
                     <p className="microlabel mt-1 text-muted">

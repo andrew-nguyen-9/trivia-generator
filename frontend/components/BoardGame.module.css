@@ -1,8 +1,8 @@
 /* BoardGame §3.1 — one-screen board.
-   The clue opens in-place: this overlay is sized to the board (absolutely
-   covers .boardWrap), so the score header stays visible and the page never
-   scrolls. If a clue's content is taller than the board it scrolls inside the
-   overlay, never the document. */
+   The clue opens in-place, covering .boardWrap. It grows downward to fit its
+   content (long prompt / image clue) instead of scrolling internally — only
+   top/left/right are pinned, height is auto with a min-height floor so small
+   clues still cover the full board. */
 
 .boardWrap {
   position: relative;
@@ -10,20 +10,23 @@
 
 .clueOverlay {
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  min-height: 100%;
   z-index: 30;
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
   border-radius: 0.75rem;
-  /* the board shows through faintly so the clue still reads as "on the board" */
-  background: color-mix(in srgb, var(--bg, #0b0b0f) 88%, transparent);
+  /* the board shows through faintly so the clue still reads as "on the board" —
+     rgb(var(--c-bg)) is the theme token (dark/light), NOT a fixed fallback. */
+  background: color-mix(in srgb, rgb(var(--c-bg)) 88%, transparent);
   backdrop-filter: blur(6px);
 }
 
 /* Keyboard roving-focus ring on a value tile — clearer than the default outline
    against the engraved tiles, and reduced-motion-safe (no animation). */
 .tile:focus-visible {
-  outline: 2px solid var(--gold, #d4af37);
+  outline: 2px solid rgb(var(--c-gold));
   outline-offset: 2px;
 }
