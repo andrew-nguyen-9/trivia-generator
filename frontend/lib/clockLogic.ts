@@ -42,30 +42,37 @@ export function buildPuzzle(target: number, ceiling: number, seed: number): Cloc
     max: halfHi,
   });
 
-  // 2) Parity of the year — narrows by deduction, not by giving a digit.
-  if (target % 2 === 0) {
-    clues.push({ text: "The year is even.", min: FLOOR, max: ceiling });
-  } else {
-    clues.push({ text: "The year is odd.", min: FLOOR, max: ceiling });
-  }
-
-  // 3) One half of the band excluded — picks a near-decade boundary.
+  // 3) One half of the band excluded — picks a near-decade boundary. Computed
+  //    before the parity clue (same rand() draw order as before) so we know
+  //    whether a leap-year tell is coming.
   const mid = halfLo + 20 + Math.floor(rand() * 10); // 20..29 into the band
-  if (target < mid) {
-    clues.push({ text: `It is earlier than ${mid}.`, min: FLOOR, max: mid - 1 });
-  } else {
-    clues.push({ text: `It is no earlier than ${mid}.`, min: mid, max: ceiling });
+  const midClue: YearClue =
+    target < mid
+      ? { text: `It is earlier than ${mid}.`, min: FLOOR, max: mid - 1 }
+      : { text: `It is no earlier than ${mid}.`, min: mid, max: ceiling };
+
+  // 4) Optional divisibility tell (~half the time) — decided before parity so
+  //    a "divisible by 4" clue (which implies even) can replace the plain
+  //    parity clue below instead of repeating it.
+  const div = rand() < 0.5 ? (target % 4 === 0 ? 4 : target % 3 === 0 ? 3 : 0) : 0;
+
+  // 2) Parity of the year — narrows by deduction, not by giving a digit.
+  //    Skipped when the leap-year clue (4) already implies it — ÷4 ⇒ even —
+  //    to avoid a near-duplicate clue.
+  if (div !== 4) {
+    clues.push(
+      target % 2 === 0
+        ? { text: "The year is even.", min: FLOOR, max: ceiling }
+        : { text: "The year is odd.", min: FLOOR, max: ceiling },
+    );
   }
 
-  // 4) Optional fourth clue (~half the time) — a divisibility tell that the
-  //    player can reason against the already-narrowed window.
-  if (rand() < 0.5) {
-    const div = target % 4 === 0 ? 4 : target % 3 === 0 ? 3 : 0;
-    if (div === 4) {
-      clues.push({ text: "The year is a leap year (divisible by 4).", min: FLOOR, max: ceiling });
-    } else if (div === 3) {
-      clues.push({ text: "The year is divisible by 3.", min: FLOOR, max: ceiling });
-    }
+  clues.push(midClue);
+
+  if (div === 4) {
+    clues.push({ text: "The year is a leap year (divisible by 4).", min: FLOOR, max: ceiling });
+  } else if (div === 3) {
+    clues.push({ text: "The year is divisible by 3.", min: FLOOR, max: ceiling });
   }
 
   // Intersect every clue → the deducible window. Parity/divisibility clues span
