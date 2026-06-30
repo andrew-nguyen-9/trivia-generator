@@ -6,6 +6,14 @@ import { GAME_ROOMS, SYSTEM_ROOMS, PARENT_SITE } from "@/lib/rooms";
 const SYSTEM_LINKS = SYSTEM_ROOMS.filter((r) => r.path !== "/");
 
 export default function SiteFooter() {
+  const roomLinks = GAME_ROOMS.map((room) => (
+    <li key={room.path}>
+      <Link href={room.path} className="text-sm text-muted transition hover:text-ink">
+        {room.name}
+      </Link>
+    </li>
+  ));
+
   return (
     <footer className="relative z-10 mt-24 border-t border-line bg-surface/40 px-4 py-12 sm:px-8">
       {/* engraved divider flourish */}
@@ -42,20 +50,18 @@ export default function SiteFooter() {
           </a>
         </div>
 
-        {/* The rooms */}
+        {/* The rooms — compact 2-col grid on desktop, native dropdown on mobile */}
         <nav aria-label="Rooms">
-          <p className="microlabel mb-3 text-brass">the rooms</p>
-          <ul className="space-y-1.5">
-            {GAME_ROOMS.map((room) => (
-              <li key={room.path}>
-                <Link
-                  href={room.path}
-                  className="text-sm text-muted transition hover:text-ink"
-                >
-                  {room.name}
-                </Link>
-              </li>
-            ))}
+          <p className="microlabel mb-3 hidden text-brass sm:block">the rooms</p>
+          <details className="group sm:hidden">
+            <summary className="microlabel flex cursor-pointer list-none items-center gap-2 text-brass [&::-webkit-details-marker]:hidden">
+              the rooms
+              <span aria-hidden className="transition group-open:rotate-180">▾</span>
+            </summary>
+            <ul className="mt-3 space-y-1.5">{roomLinks}</ul>
+          </details>
+          <ul className="hidden sm:grid sm:grid-cols-2 sm:gap-x-6 sm:gap-y-1.5">
+            {roomLinks}
           </ul>
         </nav>
 

@@ -350,10 +350,6 @@ body {
   align-items: center;
   justify-content: center;
   min-height: 30rem;
-  /* width of one fan step — cards spread across nearly the whole container.
-     Clamp keeps edge cards on-screen at every breakpoint. */
-  --fan-x: clamp(20px, 6.5vw, 84px);
-  /* keep the orbit/fan spread from forcing horizontal scroll on phones */
   overflow: hidden;
   touch-action: pan-y;
 }
@@ -390,16 +386,6 @@ body {
 @media (min-width: 640px) {
   .deck-arrow-prev { left: 0.5rem; }
   .deck-arrow-next { right: 0.5rem; }
-}
-
-/* coverflow flow container — fills the stage, cards positioned by transform */
-.deck-cover {
-  position: absolute;
-  inset: 0;
-  cursor: grab;
-}
-.deck-cover:active {
-  cursor: grabbing;
 }
 
 /* spread: every card laid out at once as a responsive grid of fronts */

@@ -176,7 +176,7 @@ export default function Home() {
         </div>
         <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {GAMES.map((game) => (
-            <li key={game.href}>
+            <li key={game.href} className={game.href === "/mystery" ? "lg:col-span-3" : undefined}>
               <Link
                 href={game.href}
                 className="gilt-frame group flex h-full gap-4 rounded-xl bg-surface/40 p-5 transition hover:border-gold/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
