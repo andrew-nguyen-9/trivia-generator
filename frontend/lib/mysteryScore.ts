@@ -6,6 +6,10 @@ export interface MysteryAttempt {
   whoGuess: string[];
   whereGuess: string | null;
   whenGuess: number | null;
+  // The motive/weapon axes (5.9). Optional for back-compat: when omitted they
+  // don't gate the win; E2b supplies them so all five axes must be correct.
+  motiveGuess?: string | null;
+  weaponGuess?: string | null;
   cluesRevealed: number;
   elapsedSeconds: number;
   tableTags: Record<string, SuspectTag>;
@@ -53,7 +57,10 @@ export function score(c: MysteryCase, a: MysteryAttempt): MysteryScoreResult {
   const whoCorrect =
     whoGuessSet.size === culpritSet.size &&
     [...whoGuessSet].every((id) => culpritSet.has(id));
-  const won = whoCorrect && a.whereGuess === c.scene && a.whenGuess === c.hourIndex;
+  const motiveOk = a.motiveGuess === undefined || a.motiveGuess === c.motive;
+  const weaponOk = a.weaponGuess === undefined || a.weaponGuess === c.weapon;
+  const won =
+    whoCorrect && a.whereGuess === c.scene && a.whenGuess === c.hourIndex && motiveOk && weaponOk;
 
   return { total, won, breakdown: { base, cluePenalty, timePenalty, autoMarkPenalty, tableBonus } };
 }

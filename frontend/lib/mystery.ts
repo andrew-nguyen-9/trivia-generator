@@ -77,6 +77,23 @@ const MOTIVES = [
   "Inheritance",
   "Silencing a Witness",
 ] as const;
+const WEAPONS = [
+  "the Brass Candlestick",
+  "the Silver Letter Opener",
+  "a Vial of Belladonna",
+  "the Iron Fireplace Poker",
+  "a Length of Silk Cord",
+  "the Antique Revolver",
+] as const;
+
+// How many candidate motives/weapons a single case puts in play (true + decoys).
+// >2 so that no single clue can eliminate the field down to one (5.7).
+const SUSPECT_POOL = 4;
+
+// Correct grid eliminations (room×hour cells crossed out that truly aren't the
+// scene/hour) needed to earn each successive free clue. Deterministic, multiple
+// checkpoints (5.11–5.12). 6×5 grid ⇒ 29 cells are legitimately ruled-out-able.
+export const CHECKPOINTS = [6, 14, 22] as const;
 
 export interface Relationship { from: string; to: string; kind: string }
 export interface Dossier {
@@ -93,6 +110,8 @@ export interface Clue {
   text: string;
   eliminatesRooms: number[]; // indices into ROOMS this clue rules out entirely
   eliminatesHours: number[]; // indices into HOURS this clue rules out entirely
+  eliminatesMotives: number[]; // indices into MysteryCase.motivePool ruled out
+  eliminatesWeapons: number[]; // indices into MysteryCase.weaponPool ruled out
 }
 
 export type Mark = "confirmed" | "ruled-out" | "unknown";
@@ -105,10 +124,14 @@ export interface MysteryCase {
   victim: Character;
   suspects: Character[]; // the 7 living suspects
   dossiers: Record<string, Dossier>;
-  clues: Clue[]; // 7 staged clues
-  // solution
+  clues: Clue[]; // staged clues
+  // candidate fields the player narrows by deduction (true value lives among them)
+  motivePool: string[]; // SUSPECT_POOL candidates incl. the true motive
+  weaponPool: string[]; // SUSPECT_POOL candidates incl. the true weapon
+  // solution — the five axes: WHO + WHERE + WHEN + MOTIVE + WEAPON
   culprits: string[]; // ids, length 1..3 (first is the ringleader)
   motive: string;
+  weapon: string;
   scene: string; // room of the murder
   hourIndex: number; // HOURS index of the murder
 }
@@ -166,7 +189,22 @@ export function generateCase(date: string): MysteryCase {
   const scene = pick(ROOMS, rnd);
   const sceneIdx = ROOMS.indexOf(scene as (typeof ROOMS)[number]);
   const hourIndex = 1 + Math.floor(rnd() * (HOURS.length - 2)); // crime at 7,8, or 9 PM
+
+  // MOTIVE + WEAPON: each is one true value hidden among SUSPECT_POOL-1 decoys.
+  // The pools are shuffled so the true value's index isn't predictable, and the
+  // elimination clues below cross out the decoys until exactly one survives.
   const motive = pick(MOTIVES, rnd);
+  const motivePool = shuffle(
+    [motive, ...shuffle(MOTIVES.filter((m) => m !== motive), rnd).slice(0, SUSPECT_POOL - 1)],
+    rnd,
+  );
+  const weapon = pick(WEAPONS, rnd);
+  const weaponPool = shuffle(
+    [weapon, ...shuffle(WEAPONS.filter((w) => w !== weapon), rnd).slice(0, SUSPECT_POOL - 1)],
+    rnd,
+  );
+  const motiveDecoys = motivePool.map((_, i) => i).filter((i) => motivePool[i] !== motive);
+  const weaponDecoys = weaponPool.map((_, i) => i).filter((i) => weaponPool[i] !== weapon);
 
   // ── WHO, by corroboration (the day's logic) ─────────────────────────────────
   // At the murder hour the killer was alone. We build the alibi grid so that the
@@ -227,7 +265,10 @@ export function generateCase(date: string): MysteryCase {
   // ── WHERE/WHEN elimination clues ────────────────────────────────────────────
   // Partition the non-scene rooms and non-murder hours so that, once all four
   // elimination clues are revealed, exactly the true scene and true hour have
-  // not been ruled out — deterministic, not generate-and-check.
+  // not been ruled out — deterministic, not generate-and-check. The clues speak
+  // about the CRIME ("the murder was not here/then"), never about who occupied a
+  // room, so an innocent's truthful alibi can never contradict one (5.8): only
+  // the killer's claimed alibi diverges from the truth.
   const nonSceneRooms = shuffle(ROOMS.map((_, i) => i).filter((i) => i !== sceneIdx), rnd);
   const roomsRound1 = nonSceneRooms.slice(0, 2);
   const roomsRound2 = nonSceneRooms.slice(2);
@@ -236,10 +277,16 @@ export function generateCase(date: string): MysteryCase {
   const hoursRound1 = nonMurderHours.slice(0, 2);
   const hoursRound2 = nonMurderHours.slice(2);
 
+  // motive/weapon decoys split across two clues each ([2] then [1]): no single
+  // clue narrows an axis to one (5.7), two together do.
+  const motiveElimA = motiveDecoys.slice(0, 2);
+  const motiveElimB = motiveDecoys.slice(2);
+  const weaponElimA = weaponDecoys.slice(0, 2);
+  const weaponElimB = weaponDecoys.slice(2);
+
   // ── prose (templated, no LLM) ───────────────────────────────────────────────
-  // Deliberately never names `scene` or `HOURS[hourIndex]` — the old opening
-  // stated both directly, which leaked the WHERE/WHEN answer before the
-  // investigation even began.
+  // Deliberately never names `scene`, `HOURS[hourIndex]`, `motive`, or `weapon`
+  // — all five axes must be earned by deduction, not handed over in the opening.
   const caseNumber = caseNumberFor(date);
   const niceDate = new Date(date + "T00:00:00Z").toLocaleDateString("en-US", {
     month: "long", day: "numeric", year: "numeric", timeZone: "UTC",
@@ -249,56 +296,53 @@ export function generateCase(date: string): MysteryCase {
     `Candlelight gutters somewhere in the house. ${victim.title}, ${victim.emoji} ${pretty(victim.id)}, ` +
     `was found dead this evening — ${victim.trait.toLowerCase()} ` +
     `Seven guests remain in the mansion, each with a story, and at least one with a lie. ` +
-    `The Order convenes. The reckoning is ${motive.toLowerCase()}.`;
+    `The Order convenes. Where, when, why, by what hand — and whose.`;
+
+  const none: number[] = [];
+  const clue = (
+    stage: number, kind: string, title: string, text: string,
+    e: { rooms?: number[]; hours?: number[]; motives?: number[]; weapons?: number[] } = {},
+  ): Clue => ({
+    stage, kind, title, text,
+    eliminatesRooms: e.rooms ?? none, eliminatesHours: e.hours ?? none,
+    eliminatesMotives: e.motives ?? none, eliminatesWeapons: e.weapons ?? none,
+  });
+  const mNames = (idx: number[]) => fmtList(idx.map((i) => motivePool[i]));
+  const wNames = (idx: number[]) => fmtList(idx.map((i) => weaponPool[i]));
 
   const clues: Clue[] = [
-    {
-      stage: 1, kind: "Witness Statement",
-      title: "What the clock did not see",
-      text: `Two members of staff swear nothing happened at ${fmtList(hoursRound1.map((i) => HOURS[i]))} — whatever befell ${pretty(victim.id)}, it was not then.`,
-      eliminatesRooms: [], eliminatesHours: hoursRound1,
-    },
-    {
-      stage: 2, kind: "Witness Statement",
-      title: "Rooms cleared",
-      text: `The household confirms ${fmtList(roomsRound1.map((i) => ROOMS[i]))} stood empty the entire evening. Cross those off the list.`,
-      eliminatesRooms: roomsRound1, eliminatesHours: [],
-    },
-    {
-      stage: 3, kind: "Witness Statement",
-      title: "The narrowing hour",
-      text: `A second sweep of the house clears ${fmtList(hoursRound2.map((i) => HOURS[i]))} as well. Only one hour now remains unaccounted for.`,
-      eliminatesRooms: [], eliminatesHours: hoursRound2,
-    },
-    {
-      stage: 4, kind: "Witness Statement",
-      title: "The last room standing",
-      text: `The staff account for ${fmtList(roomsRound2.map((i) => ROOMS[i]))} too — each was occupied by guests who never left each other's sight. Only one room is left unexplained.`,
-      eliminatesRooms: roomsRound2, eliminatesHours: [],
-    },
-    {
-      stage: 5, kind: "Physical Evidence",
-      title: "The lonely hour",
-      text: `Forensics are blunt: at the moment of the murder, the killer stood alone. Whoever cannot be placed in a room with another guest at the fatal hour kept their own deadly company.`,
-      eliminatesRooms: [], eliminatesHours: [],
-    },
-    {
-      stage: 6, kind: "Timeline Discovery",
-      title: "Two to a room",
-      text: `Every guest names a room for every hour. Study the fatal hour: the innocent corroborate one another — never fewer than two to a room. A guest who shares their room with no one has no one to vouch for them.`,
-      eliminatesRooms: [], eliminatesHours: [],
-    },
-    {
-      stage: 7, kind: "Secret Relationship",
-      title: "The motive",
-      text: culprits.length > 1
-        ? `The Order uncovers a pact: more than one hand was bound to the deed. The victim had exposed a secret, and the reckoning is ${motive.toLowerCase()}.`
-        : `At last the thread is pulled: the victim had exposed a secret, and one guest alone stood to gain. The reckoning is ${motive.toLowerCase()}.`,
-      eliminatesRooms: [], eliminatesHours: [],
-    },
+    clue(1, "Witness Statement", "What the clock did not see",
+      `Two members of staff swear nothing was amiss at ${fmtList(hoursRound1.map((i) => HOURS[i]))} — whatever befell ${pretty(victim.id)}, it was not then.`,
+      { hours: hoursRound1 }),
+    clue(2, "Physical Evidence", "Rooms ruled out",
+      `Forensics find no sign of the struggle in ${fmtList(roomsRound1.map((i) => ROOMS[i]))}: undisturbed dust, nothing out of place. The murder did not happen there.`,
+      { rooms: roomsRound1 }),
+    clue(3, "Coroner's Note", "The narrowing hour",
+      `The coroner fixes the cooling of the body and clears ${fmtList(hoursRound2.map((i) => HOURS[i]))} as well. Only one hour now fits.`,
+      { hours: hoursRound2 }),
+    clue(4, "Physical Evidence", "The last room standing",
+      `The blood pattern is inconsistent with ${fmtList(roomsRound2.map((i) => ROOMS[i]))} too. Only one room could be the scene.`,
+      { rooms: roomsRound2 }),
+    clue(5, "Secret Relationship", "The ledger's testimony",
+      `The Order combs the victim's affairs and discards ${mNames(motiveElimA)} — nothing in the ledgers supports those as the reckoning.`,
+      { motives: motiveElimA }),
+    clue(6, "Forensic Report", "The shape of the wound",
+      `The wounds are plainly inconsistent with ${wNames(weaponElimA)}. Set those aside.`,
+      { weapons: weaponElimA }),
+    clue(7, "Secret Relationship", "The motive narrows",
+      `A recovered letter rules out ${mNames(motiveElimB)} as well. The reason for the deed is now plain.`,
+      { motives: motiveElimB }),
+    clue(8, "Forensic Report", "The murder weapon",
+      `A final trace of residue rules out ${wNames(weaponElimB)}. One implement remains.`,
+      { weapons: weaponElimB }),
+    clue(9, "Timeline Discovery", "Alone at the fatal hour",
+      `Every guest names a room for every hour. At the fatal hour the innocent corroborate one another — never fewer than two to a room. The guest who shares their room with no one was alone with the deed.`),
   ];
 
-  return { date, caseNumber, title, opening, victim, suspects, dossiers, clues, culprits, motive, scene, hourIndex };
+  return {
+    date, caseNumber, title, opening, victim, suspects, dossiers, clues,
+    motivePool, weaponPool, culprits, motive, weapon, scene, hourIndex,
+  };
 }
 
 export function pretty(id: string): string {
@@ -348,24 +392,90 @@ export function deduceCulprits(c: MysteryCase): string[] {
   return c.suspects.filter((s) => tally.get(c.dossiers[s.id].claimed[h]) === 1).map((s) => s.id);
 }
 
-/** Checks all three legs of the puzzle are uniquely solvable: WHO, WHERE, WHEN. */
+/** The motive the revealed clues leave standing, or null if not yet narrowed to one. */
+export function deduceMotive(c: MysteryCase, cluesRevealed = c.clues.length): string | null {
+  return soleSurvivor(c.motivePool, c.clues.slice(0, cluesRevealed).flatMap((cl) => cl.eliminatesMotives));
+}
+
+/** The weapon the revealed clues leave standing, or null if not yet narrowed to one. */
+export function deduceWeapon(c: MysteryCase, cluesRevealed = c.clues.length): string | null {
+  return soleSurvivor(c.weaponPool, c.clues.slice(0, cluesRevealed).flatMap((cl) => cl.eliminatesWeapons));
+}
+
+function soleSurvivor(pool: string[], eliminated: number[]): string | null {
+  const gone = new Set(eliminated);
+  const left = pool.filter((_, i) => !gone.has(i));
+  return left.length === 1 ? left[0] : null;
+}
+
+/** True once the first `cluesRevealed` clues pin down WHERE, WHEN, MOTIVE and WEAPON. */
+function axesSolved(c: MysteryCase, cluesRevealed: number): boolean {
+  const m = deductionMatrix(c, cluesRevealed);
+  let confirmed = 0;
+  for (const row of m) for (const cell of row) if (cell === "confirmed") confirmed++;
+  return confirmed === 1 && deduceMotive(c, cluesRevealed) !== null && deduceWeapon(c, cluesRevealed) !== null;
+}
+
+/**
+ * Fewest staged clues needed before the solution is uniquely pinned down. The
+ * puzzle is only fair if this is > 1 — no single clue may hand over an answer
+ * (5.7). WHO is always readable from the alibi grid, so this gates on the
+ * clue-derived axes (WHERE/WHEN/MOTIVE/WEAPON).
+ */
+export function minCluesToSolve(c: MysteryCase): number {
+  for (let k = 1; k <= c.clues.length; k++) if (axesSolved(c, k)) return k;
+  return c.clues.length;
+}
+
+/** Checks all five legs are uniquely solvable: WHO, WHERE, WHEN, MOTIVE, WEAPON. */
 export function verifySolvable(c: MysteryCase): boolean {
   const deduced = new Set(deduceCulprits(c));
   if (deduced.size !== c.culprits.length) return false;
   if (!c.culprits.every((id) => deduced.has(id))) return false;
 
-  const matrix = deductionMatrix(c, c.clues.length);
-  let confirmedCount = 0;
-  for (const row of matrix) for (const cell of row) if (cell === "confirmed") confirmedCount++;
-  if (confirmedCount !== 1) return false;
+  if (!axesSolved(c, c.clues.length)) return false;
+  if (deduceMotive(c) !== c.motive || deduceWeapon(c) !== c.weapon) return false;
+  if (minCluesToSolve(c) <= 1) return false;
 
   const sceneIdx = ROOMS.indexOf(c.scene as (typeof ROOMS)[number]);
-  return matrix[sceneIdx][c.hourIndex] === "confirmed";
+  return deductionMatrix(c, c.clues.length)[sceneIdx][c.hourIndex] === "confirmed";
+}
+
+// ── checkpoints: correct grid eliminations earn free clues (5.11–5.12) ────────
+/**
+ * How many room×hour cells the player has correctly crossed out — a cell counts
+ * when it's marked "ruled-out" AND it genuinely isn't the solution cell. The one
+ * true scene/hour cell never counts (crossing it out is an error, not progress).
+ * Pure: same case + same marks ⇒ same count.
+ */
+export function correctEliminations(c: MysteryCase, marks: Mark[][]): number {
+  const sceneIdx = ROOMS.indexOf(c.scene as (typeof ROOMS)[number]);
+  let n = 0;
+  for (let r = 0; r < ROOMS.length; r++)
+    for (let h = 0; h < HOURS.length; h++) {
+      const isSolutionCell = r === sceneIdx && h === c.hourIndex;
+      if (!isSolutionCell && marks[r]?.[h] === "ruled-out") n++;
+    }
+  return n;
+}
+
+/** Free clues earned so far: one per CHECKPOINTS threshold the correct-count has crossed. */
+export function freeCluesEarned(c: MysteryCase, marks: Mark[][]): number {
+  const n = correctEliminations(c, marks);
+  return CHECKPOINTS.filter((t) => n >= t).length;
+}
+
+/** Correct-eliminations still needed for the next free clue, or null if all earned. */
+export function nextCheckpoint(c: MysteryCase, marks: Mark[][]): number | null {
+  const n = correctEliminations(c, marks);
+  const next = CHECKPOINTS.find((t) => n < t);
+  return next === undefined ? null : next - n;
 }
 
 /** Stable hash of the solution, for the optional daily_cases table. */
 export function solutionHash(c: MysteryCase): string {
-  const payload = [...c.culprits].sort().join(",") + "|" + c.motive + "|" + c.scene + "|" + c.hourIndex;
+  const payload =
+    [...c.culprits].sort().join(",") + "|" + c.motive + "|" + c.weapon + "|" + c.scene + "|" + c.hourIndex;
   let h = 5381;
   for (let i = 0; i < payload.length; i++) h = (Math.imul(h, 33) ^ payload.charCodeAt(i)) >>> 0;
   return h.toString(16);
