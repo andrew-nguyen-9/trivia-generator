@@ -27,6 +27,10 @@ export interface CalendarSystem {
   glyph: string;
   /** a one-line read-out of how this system frames a year */
   blurb: string;
+  /** plain-language conversion method — how to derive the Gregorian year from
+   *  this system's reading (free, always-on; distinct from the paid per-round
+   *  reveal hint in ClockGame). */
+  method: string;
 }
 
 /** pure conversions keyed by CalendarSystem.key (not on the serialized object). */
@@ -126,6 +130,7 @@ export const CALENDARS: CalendarSystem[] = [
     accent: "#c8852a",
     glyph: "☉",
     blurb: "The civil reckoning, anno Domini.",
+    method: "Read directly — this is the Gregorian year.",
   },
   {
     key: "mayan",
@@ -133,6 +138,8 @@ export const CALENDARS: CalendarSystem[] = [
     accent: "#2d9155",
     glyph: "𝋠",
     blurb: "Baktun.katun.tun since the Third Creation.",
+    method:
+      "baktun.katun.tun counts 144,000 / 7,200 / 360-day cycles since 11 Aug 3114 BCE.",
   },
   {
     key: "french-republican",
@@ -140,6 +147,7 @@ export const CALENDARS: CalendarSystem[] = [
     accent: "#2b6ab5",
     glyph: "⚜",
     blurb: "Years of the Republic, since 1792.",
+    method: "An I began 22 Sep 1792 — add 1791 to the Republican year number.",
   },
   {
     key: "holocene",
@@ -147,6 +155,7 @@ export const CALENDARS: CalendarSystem[] = [
     accent: "#7040a8",
     glyph: "🜨",
     blurb: "The Human Era — ten millennia added.",
+    method: "Subtract 10,000 from the Holocene year.",
   },
   {
     key: "regnal",
@@ -154,6 +163,7 @@ export const CALENDARS: CalendarSystem[] = [
     accent: "#b83468",
     glyph: "⌛",
     blurb: "The age named by its century.",
+    method: "Century n spans (n−1)×100+1 through n×100.",
   },
 ];
 

@@ -330,6 +330,9 @@ export default function ClockGame({
             {calendar.name}
           </div>
           <div className="text-xs text-muted">{calendar.blurb}</div>
+          {calendar.key !== "gregorian" && (
+            <div className="text-xs text-muted">how to read it: {calendar.method}</div>
+          )}
         </div>
       </div>
 
@@ -412,20 +415,37 @@ export default function ClockGame({
             {streak > 0 && `🔥 streak ×${streak}`}
           </div>
 
+          {/* The calendar-of-the-day reading is the PRIMARY answer surface on
+              twist days (§wishlist 7) — the Gregorian year is the secondary,
+              smaller readout below it. On plain Gregorian days they're the
+              same number, so only the primary line renders. */}
           <div className="mt-1 text-center">
-            <div className="microlabel">{locked ? "the truth" : "your guess"}</div>
+            <div className="microlabel">
+              {locked ? "the truth" : "your guess"}
+              {calendar.key !== "gregorian" && ` · ${calendar.name}`}
+            </div>
             <motion.div
-              key={locked ? "truth" : guess}
+              key={guess}
               initial={reduced || !locked ? {} : { scale: 1.2 }}
               animate={{ scale: 1 }}
               className="display tabular text-[clamp(2.5rem,9vw,5rem)]"
-              style={{ color: locked ? CATEGORY_HEX[q.category] : undefined }}
+              style={{
+                color: locked
+                  ? CATEGORY_HEX[q.category]
+                  : calendar.key !== "gregorian"
+                    ? dialHex
+                    : undefined,
+              }}
             >
-              {locked ? truth : guess}
+              {calendar.key !== "gregorian"
+                ? labelFor(calendar.key, locked ? truth : guess)
+                : locked
+                  ? truth
+                  : guess}
             </motion.div>
             {calendar.key !== "gregorian" && (
-              <div className="microlabel" style={{ color: dialHex }}>
-                {calendar.name}: {labelFor(calendar.key, locked ? truth : guess)}
+              <div className="microlabel text-muted">
+                Gregorian: {locked ? truth : guess}
               </div>
             )}
           </div>
