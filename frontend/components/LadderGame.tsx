@@ -50,6 +50,9 @@ export default function LadderGame({
 }) {
   const reduce = useReducedMotion();
 
+  // ── Dark state: archive-play of a date that was never generated (DB
+  // connected, no row). Zero-env-var play always gets a puzzle — see
+  // `getLadderPuzzle` in lib/queries.ts. ──
   if (!puzzle) {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 text-center">

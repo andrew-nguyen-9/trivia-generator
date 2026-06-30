@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { generateSeance, type SeancePuzzle } from "@/lib/seance";
+import type { SeancePuzzle } from "@/lib/seance";
 import { recordBanishing, loadGrimoire, spiritsBanished } from "@/lib/grimoire";
 import { buildShare, type GameResult, type Tier } from "@/lib/share";
 import { sfxGlassClink, sfxWrong, sfxPianoChord, sfxDoorLatch } from "@/lib/sound";
@@ -26,21 +26,6 @@ function fmt(s: number): string {
   return `${m}:${r.toString().padStart(2, "0")}`;
 }
 
-// ponytail: dev/preview seam the §3.7 doc calls for. Live Séance data is dark
-// until 3.11's transform fix lands, so `?sample=1` (today) or
-// `?sample=YYYY-MM-DD` generates a puzzle client-side via the pure generator —
-// OPT-IN only. The default no-puzzle dark state is untouched, so the
-// "no seed fallback by design" invariant holds. Remove the seam if it ever
-// risks shipping as a real fallback.
-function sampleFromQuery(): SeancePuzzle | null {
-  if (typeof window === "undefined") return null;
-  const q = new URLSearchParams(window.location.search).get("sample");
-  if (!q) return null;
-  const date = /^\d{4}-\d{2}-\d{2}$/.test(q) ? q : new Date().toISOString().slice(0, 10);
-  const dayIndex = Math.floor(Date.parse(date + "T00:00:00Z") / 86_400_000);
-  return generateSeance(dayIndex, date);
-}
-
 export default function SeanceGame({
   puzzle,
   requestedDate,
@@ -49,16 +34,11 @@ export default function SeanceGame({
   requestedDate?: string | null;
 }) {
   const reduce = useReducedMotion();
-  const [sample, setSample] = useState<SeancePuzzle | null>(null);
+  const active = puzzle;
 
-  // client-only: pull a sample puzzle if the dev seam asked for one.
-  useEffect(() => {
-    if (!puzzle) setSample(sampleFromQuery());
-  }, [puzzle]);
-
-  const active = puzzle ?? sample;
-
-  // ── Dark state: no archived puzzle. NO offline fallback (by design). ──
+  // ── Dark state: archive-play of a date that was never generated (DB
+  // connected, no row). Zero-env-var play always gets a puzzle — see
+  // `getSeancePuzzle` in lib/queries.ts. ──
   if (!active) {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 text-center">

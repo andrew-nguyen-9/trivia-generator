@@ -6,10 +6,18 @@ import { unstable_cache } from "next/cache";
 import seed from "../public/seed-questions.json";
 import { getDb } from "./db";
 import type { Question, QType } from "./types";
-import type { SeancePuzzle } from "./seance";
-import type { LadderPuzzle } from "./ladder";
+import { generateSeance, type SeancePuzzle } from "./seance";
+import { generateLadder, type LadderPuzzle } from "./ladder";
 
 const SEED_BANK = (seed as { questions: Question[] }).questions;
+
+// Epoch-day index from a YYYY-MM-DD string, UTC-anchored so SSR stays
+// deterministic regardless of server timezone. Same pure computation the
+// nightly archiver (`daySeed` over a UTC-midnight Date) and the puzzle
+// generators rely on — used below to generate offline puzzles on the fly.
+function dayIndexOf(day: string): number {
+  return Math.floor(Date.parse(day + "T00:00:00Z") / 86_400_000);
+}
 
 export async function getQuestionsByType(qtype: QType): Promise<Question[]> {
   const sql = getDb();
@@ -32,9 +40,10 @@ export async function getQuestionsByType(qtype: QType): Promise<Question[]> {
 
 /**
  * THE SÉANCE — fetch one day's pre-generated puzzle from the archive.
- * Unlike every other room, there is NO seed-bank fallback: the puzzle is
- * generated server-side and archived to Neon, so without a row (or without a
- * DB) the room is dark. `date` (YYYY-MM-DD) enables archive-play of past days;
+ * DB-connected: reads the row Neon archived (so an un-archived date stays
+ * dark — archive-play of a real night that never happened should say so).
+ * DB-less (zero env vars): `generateSeance` is pure, so we run it inline —
+ * same puzzle the nightly archiver would have written. `date` (YYYY-MM-DD)
  * defaults to today (UTC).
  */
 // ponytail: per-day cache wrapper. The puzzle is deterministic per date, so the
@@ -57,9 +66,9 @@ const cachedSeance = unstable_cache(
 );
 
 export async function getSeancePuzzle(date?: string): Promise<SeancePuzzle | null> {
-  const sql = getDb();
-  if (!sql) return null; // db-less ⇒ dark, nothing to cache
   const day = date ?? new Date().toISOString().slice(0, 10);
+  const sql = getDb();
+  if (!sql) return generateSeance(dayIndexOf(day), day); // offline ⇒ generate, never dark
   try {
     return await cachedSeance(day);
   } catch {
@@ -69,8 +78,9 @@ export async function getSeancePuzzle(date?: string): Promise<SeancePuzzle | nul
 
 /**
  * CLIMB OF THE INITIATE — fetch one day's pre-generated ladder. Same archive
- * contract as the Séance: read-only, NO seed fallback (absent row / no DB ⇒ the
- * room is dark). `date` (YYYY-MM-DD) enables archive-play; defaults to today.
+ * contract as the Séance: DB-connected reads the archived row (absent row ⇒
+ * dark, archive-play of a day that wasn't generated); DB-less runs the pure
+ * `generateLadder` inline. `date` (YYYY-MM-DD) defaults to today.
  */
 // ponytail: same per-day cache wrapper as the Séance (see cachedSeance above).
 const cachedLadder = unstable_cache(
@@ -85,9 +95,9 @@ const cachedLadder = unstable_cache(
 );
 
 export async function getLadderPuzzle(date?: string): Promise<LadderPuzzle | null> {
-  const sql = getDb();
-  if (!sql) return null; // db-less ⇒ dark, nothing to cache
   const day = date ?? new Date().toISOString().slice(0, 10);
+  const sql = getDb();
+  if (!sql) return generateLadder(dayIndexOf(day), day); // offline ⇒ generate, never dark
   try {
     return await cachedLadder(day);
   } catch {

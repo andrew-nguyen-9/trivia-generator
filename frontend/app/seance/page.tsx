@@ -7,7 +7,9 @@ export const metadata = roomMetadata("/seance");
 
 // `?date=YYYY-MM-DD` enables archive-play of a past night (reads that row from
 // the Neon archive). The default (today) is the live séance. searchParams makes
-// the route dynamic, which is correct: there is no static seed fallback here.
+// the route dynamic, which is correct: no DB ⇒ getSeancePuzzle generates
+// tonight's séance inline (see lib/queries.ts), so this room is always
+// playable offline.
 export default async function SeancePage({
   searchParams,
 }: {

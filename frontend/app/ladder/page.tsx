@@ -6,7 +6,8 @@ import { getLadderPuzzle } from "@/lib/queries";
 export const metadata = roomMetadata("/ladder");
 
 // `?date=YYYY-MM-DD` plays an archived past ascent. Default (today) is the live
-// climb. Dynamic by design — no static seed fallback for this room.
+// climb. Dynamic by design — no DB ⇒ getLadderPuzzle generates today's climb
+// inline (see lib/queries.ts), so this room is always playable offline.
 export default async function LadderPage({
   searchParams,
 }: {
