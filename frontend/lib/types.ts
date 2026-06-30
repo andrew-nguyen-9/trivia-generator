@@ -40,11 +40,12 @@ export interface ConnectionGroup {
 }
 
 /** One link in a THE THREAD chain. answer[n] ends with the letter answer[n+1]
- *  starts with; `link` explains why this answer ties to the master theme. */
+ *  starts with; `link` describes the letter pass to the next answer — it must
+ *  NEVER name the master theme (that's revealed only by solving the chain). */
 export interface ThreadLink {
   prompt: string;
   answer: string;
-  link: string; // why this answer is tied to the theme / passes to the next
+  link: string; // describes the last-letter→first-letter pass, never the theme
 }
 
 export interface Question {

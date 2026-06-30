@@ -56,6 +56,14 @@ function fallbackThread(clues: Question[]): Question | null {
   };
 }
 
+/** The letter that actually passes the thread forward — last A-Z char, mirrors
+ *  pipeline's _chain_key (forge_thread). More useful than a first-letter hint:
+ *  it's the one piece every player needs to keep weaving. */
+function passingLetter(answer: string): string {
+  const letters = answer.replace(/[^a-zA-Z]/g, "");
+  return (letters || answer).slice(-1).toUpperCase();
+}
+
 /** Forgiving match: trimmed equality, substring either way, or first-word hit. */
 function isMatch(guess: string, answer: string): boolean {
   const g = guess.trim().toLowerCase();
@@ -134,7 +142,9 @@ export default function ThreadGame({
   }
 
   // The hint costs: it spends the clean-solve tier (hit → near) and shows the
-  // answer's first letter so a stuck player can still weave the link forward.
+  // answer's PASSING letter (its final A-Z char — the one the chain actually
+  // needs to keep weaving) rather than its first, which is the more useful
+  // half of the puzzle once a player is stuck.
   function hint() {
     if (nodes[active]?.state !== "pending" || hintUsed) return;
     sfx.tick();
@@ -253,7 +263,7 @@ export default function ThreadGame({
                     </p>
                     {hintUsed && (
                       <p className={`${styles.hintChip} microlabel mt-2`} style={{ color: THREAD_HEX }}>
-                        hint · starts with “{n.link.answer[0].toUpperCase()}”
+                        hint · passes the thread on “{passingLetter(n.link.answer)}…”
                       </p>
                     )}
                     <div className="mt-3 flex gap-2">

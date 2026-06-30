@@ -388,9 +388,12 @@ def main() -> None:
             check("thread chain is last-letter→first-letter adjacent", adj_ok)
             theme = q.get("theme") or ""
             check("thread has a master theme", bool(theme) and q["correct"] == theme)
-            # no link prompt may leak the theme name
+            # no link prompt OR connecting "link" text may leak the theme name
+            # (E8: the link text used to literally say "Ties to <theme>.")
             check("thread links don't leak the theme",
-                  all(theme.lower() not in lk["prompt"].lower() for lk in chain))
+                  all(theme.lower() not in lk["prompt"].lower()
+                      and theme.lower() not in lk["link"].lower()
+                      for lk in chain))
             choices = q.get("theme_choices") or []
             check("thread final choices include the theme",
                   theme in choices and len(choices) >= 2)

@@ -547,35 +547,78 @@ def forge_ladder(facts: list[dict], rng: random.Random) -> list[dict]:
 MIN_THREAD_LINKS = 5     # shortest publishable chain for THE THREAD
 MAX_THREAD_LINKS = 7
 
-# Display names for the master theme a thread weaves toward (mirrors
-# BOARD_THEME_KEYWORDS keys; 'library' is the always-true fallback and is NOT a
-# recognizable master theme, so it's never used as a thread theme).
-THREAD_THEME_NAMES: dict[str, str] = {
-    "egypt": "Egypt",
-    "noir": "Film Noir",
-    "voyage": "The Voyage",
-    "cosmos": "The Cosmos",
-    "carnival": "The Carnival",
-    "deep-sea": "The Deep Sea",
-}
-
 
 def _chain_key(answer: str) -> str:
     """Normalize an answer to its bare letters (for last-char→first-char joins)."""
     return re.sub(r"[^a-z]", "", answer.lower())
 
 
-def forge_thread(clues: list[dict], rng: random.Random) -> list[dict]:
-    """THE THREAD: greedy walk over masked CLUE questions sharing a board theme,
-    chaining answer[n]'s last letter → answer[n+1]'s first letter. Every link ties
-    (even tangentially) to one recognizable master theme; the final question asks
-    for that theme. Offline-safe: derived from the same masked clues the board uses.
+def _walk_chain(start: dict, items: list[dict], min_len: int, max_len: int) -> list[dict]:
+    """Last-letter→first-letter chain from `start`, longest reachable up to
+    max_len, backtracking off dead ends (a same-starting-letter sibling picked
+    greedily can strand a different, still-reachable, sibling — plain greedy
+    missed real chains once pools got bigger/noisier; this explores every
+    candidate at each step instead of just the first match)."""
+    used = {_chain_key(start["correct"])}
+    walk = [start]
 
-    # ponytail: a plain greedy walk from one seed — not a max-length Hamiltonian
-    #   path over the theme graph. Good enough for a daily 5–7 link chain; if a
-    #   theme can't reach MIN_THREAD_LINKS it's skipped rather than padded.
+    def extend() -> bool:
+        if len(walk) >= max_len:
+            return True
+        last = _chain_key(walk[-1]["correct"])[-1]
+        candidates = [
+            q for q in items
+            if _chain_key(q["correct"])[0] == last and _chain_key(q["correct"]) not in used
+        ]
+        for q in candidates:
+            key = _chain_key(q["correct"])
+            walk.append(q)
+            used.add(key)
+            if extend():
+                return True
+            walk.pop()
+            used.discard(key)
+        return len(walk) >= min_len
+
+    return walk if extend() else []
+
+
+# Humanized plural labels for answer_type() codes — grammar/formatting only,
+# NOT a curated narrative-theme catalog. Which of these ever becomes a playable
+# thread (and how many), and which night, is entirely driven by what answer
+# types the data produces — see forge_thread.
+_TYPE_THEME_LABELS: dict[str, str] = {
+    "university": "Universities",
+    "mountain": "Mountains",
+    "river": "Rivers",
+    "geo-feature": "Landmarks",
+    "city": "Cities",
+    "country": "Countries",
+    "place": "Places",
+    "athlete": "Athletes",
+    "sports-team": "Teams",
+    "artist": "Artists",
+    "title": "Titles",
+    "subject": "Figures",
+}
+
+
+def forge_thread(clues: list[dict], rng: random.Random) -> list[dict]:
+    """THE THREAD: greedy walk over masked CLUE questions sharing an answer TYPE
+    (river, athlete, artist, … — see answer_type()), chaining answer[n]'s last
+    letter → answer[n+1]'s first letter. The master theme is the chain's shared
+    type ("Rivers", "Athletes", …): procedural, since which types are even
+    playable (and how many) depends entirely on tonight's data, not a fixed
+    catalog of curated story themes. The type is derived from the MASKED
+    subject, which by construction never appears in clue prompt text — so
+    naming a thread after it can't leak it early.
+
+    # ponytail: backtracking DFS per candidate start, not a global max-length
+    #   Hamiltonian path over the whole type pool. Good enough for a daily 5–7
+    #   link chain; if a type can't reach MIN_THREAD_LINKS it's skipped rather
+    #   than padded.
     """
-    by_theme: dict[str, list[dict]] = {}
+    by_type: dict[str, list[dict]] = {}
     for q in clues:
         # Notability gate: chains must read as recognizable, so the broad
         # random-article Wikipedia sweep (obscure SSSIs, minor houses) is barred
@@ -585,16 +628,14 @@ def forge_thread(clues: list[dict], rng: random.Random) -> list[dict]:
         #   pulls notable articles, swap this for a per-fact notability flag.
         if q.get("source") == "wikipedia":
             continue
-        for t in (q.get("meta") or {}).get("board_themes", []):
-            if t not in THREAD_THEME_NAMES:  # skip 'library' — not a master theme
-                continue
-            # never let an answer give away the theme (e.g. "Egypt" in the Egypt thread)
-            if THREAD_THEME_NAMES[t].lower() in q["correct"].lower():
-                continue
-            by_theme.setdefault(t, []).append(q)
+        atype = answer_type(q["correct"], q["category"], source=q.get("source"))
+        if not atype:
+            continue
+        by_type.setdefault(atype, []).append(q)
 
     out = []
-    for theme, pool in by_theme.items():
+    for atype, pool in by_type.items():
+        theme_name = _TYPE_THEME_LABELS.get(atype, atype.replace("-", " ").title())
         # dedupe by answer spelling so a chain never repeats a word
         seen: set[str] = set()
         items: list[dict] = []
@@ -610,49 +651,37 @@ def forge_thread(clues: list[dict], rng: random.Random) -> list[dict]:
 
         chain: list[dict] = []
         for start in items:
-            walk = [start]
-            used = {_chain_key(start["correct"])}
-            while len(walk) < MAX_THREAD_LINKS:
-                last = _chain_key(walk[-1]["correct"])[-1]
-                nxt = next(
-                    (q for q in items
-                     if _chain_key(q["correct"])[0] == last
-                     and _chain_key(q["correct"]) not in used),
-                    None,
-                )
-                if nxt is None:
-                    break
-                walk.append(nxt)
-                used.add(_chain_key(nxt["correct"]))
-            if len(walk) >= MIN_THREAD_LINKS:
-                chain = walk
+            chain = _walk_chain(start, items, MIN_THREAD_LINKS, MAX_THREAD_LINKS)
+            if chain:
                 break
         if not chain:
             continue
 
-        theme_name = THREAD_THEME_NAMES[theme]
         links = []
         for i, q in enumerate(chain):
             nxt_letter = (
                 _chain_key(chain[i + 1]["correct"])[0].upper()
                 if i + 1 < len(chain) else None
             )
-            link = f"Ties to {theme_name}."
+            # never name the master theme here — only describe the letter pass.
+            # the theme is revealed by SOLVING the chain, not by reading a link.
             if nxt_letter:
-                link += f" Its last letter passes the thread to “{nxt_letter}…”."
+                link = f"A stitch in the same weave. Its last letter passes the thread to “{nxt_letter}…”."
             else:
-                link += " The final stitch — now name the thread."
+                link = "The final stitch — now name the thread."
             links.append({"prompt": q["prompt"], "answer": q["correct"], "link": link})
 
-        # final-guess choices: the real theme + sibling theme names as distractors
-        others = [n for k, n in THREAD_THEME_NAMES.items() if k != theme]
+        # final-guess choices: the real theme + sibling type labels as
+        # distractors (the same vocabulary that names threads at all — not a
+        # separate curated catalog).
+        others = [n for t, n in _TYPE_THEME_LABELS.items() if t != atype and n != theme_name]
         choices = rng.sample(others, min(3, len(others))) + [theme_name]
         rng.shuffle(choices)
 
         src = next((q.get("source_url") for q in chain if q.get("source_url")), None)
         out.append(
             {
-                "content_hash": content_hash("thread", theme, *[q["content_hash"] for q in chain]),
+                "content_hash": content_hash("thread", atype, *[q["content_hash"] for q in chain]),
                 "qtype": "thread",
                 "category": chain[0]["category"],
                 "difficulty": max(q.get("difficulty", 3) for q in chain),
