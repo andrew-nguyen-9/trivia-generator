@@ -179,7 +179,8 @@ def forge_higher_lower(facts: list[dict], rng: random.Random) -> list[dict]:
     for unit, rows in by_unit.items():
         weight = HL_UNIT_WEIGHT.get(unit, 1.0)
         if weight < 1.0:  # too-hard category — sample down, don't drop (ponytail: tune the knob, not the recipe)
-            rows = rng.sample(rows, max(2, round(len(rows) * weight)))
+            # clamp to the population: a lone weighted row must not ask sample() for 2
+            rows = rng.sample(rows, min(len(rows), max(2, round(len(rows) * weight))))
         rng.shuffle(rows)
         for a, b in zip(rows[::2], rows[1::2]):
             lo, hi = sorted((a["numeric_value"], b["numeric_value"]))
@@ -886,9 +887,10 @@ def date_distractors(answer: str, n: int, rng: random.Random) -> list[str]:
     out: list[str] = []
     seen = {norm}
     for d in deltas:
-        cand = norm
-        for y in years:
-            cand = re.sub(rf"\b{y}\b", str(y + d), cand, count=1)
+        # shift every 4-digit year by d in ONE pass over the original — a sequential
+        # per-year re.sub can rewrite a year another year just became (e.g. +5 turns
+        # "1990-1995" into "2000-1995", a reversed range), so map over the source.
+        cand = re.sub(r"\d{4}", lambda m: str(int(m.group()) + d), norm)
         if cand not in seen:
             seen.add(cand)
             out.append(cand)

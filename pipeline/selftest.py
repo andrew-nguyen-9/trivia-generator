@@ -81,6 +81,15 @@ def synthetic_facts() -> list[dict]:
             popularity=10.0 * i, source_url="https://example.com",
             image_url="https://cdn-images.dzcdn.net/images/cover/abc/1000x1000-000.jpg",
         ))
+        # A raw "Deezer albums" count fact — the §9-dropped source. Present ONLY so
+        # the "no Deezer-album-count question source" check below actually exercises
+        # HL_DROPPED_UNITS (the forge must strip it, never mint a higher_lower from it).
+        facts.append(make_fact(
+            source="deezer", category="music", subject=f"Artist {i}",
+            fact_text=f"Artist {i} has {i + 3} albums on Deezer.",
+            numeric_value=float(i + 3), numeric_unit="Deezer albums",
+            popularity=10.0 * i, source_url="https://example.com",
+        ))
         # §3.13 music depth: label / genre / featured-artist MC + BPM higher_lower
         facts.append(make_fact(
             source="deezer", category="music", subject=f"Artist {i}",
