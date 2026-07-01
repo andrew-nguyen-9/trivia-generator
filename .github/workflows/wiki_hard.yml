@@ -34,6 +34,15 @@ jobs:
       issues: write # open the pipeline-failure issue on failure
     steps:
       - uses: actions/checkout@v4
+      # Bootstrap the DB before any write (same as etl_daily, PR #43). schema.sql
+      # is fully idempotent (every object is `if not exists`), so a fresh Neon
+      # self-heals instead of dying with UndefinedTable at forge time. psql ships
+      # on ubuntu-latest. No DATABASE_URL ⇒ DB-less mode, skip.
+      - name: Apply schema (idempotent)
+        if: ${{ env.DATABASE_URL != '' }}
+        run: psql "$DATABASE_URL" -f db/schema.sql
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
