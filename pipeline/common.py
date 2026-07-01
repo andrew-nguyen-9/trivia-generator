@@ -107,6 +107,14 @@ def get_request_id() -> str:
 class _RateLimitedSession:
     """Manages per-domain rate limiting with adaptive backoff."""
     
+    # Per-domain floor overrides. The 1.5s default is ~15x more conservative than
+    # Deezer's documented 50 req/5s (10 req/s); 0.5s here is 2 req/s — still 5x under
+    # limit, and the 8-attempt 429 backoff in get_json() is the safety net if a runner
+    # IP ever does get throttled. Deezer is ~63% of extract wall-clock at 1.5s.
+    _DOMAIN_INTERVALS: dict[str, float] = {
+        "api.deezer.com": 0.5,
+    }
+
     def __init__(self, min_interval_seconds: float = 1.5):
         self.min_interval = min_interval_seconds
         self.domain_last_call: dict[str, float] = {}
@@ -122,10 +130,11 @@ class _RateLimitedSession:
     def _enforce_interval(self, url: str) -> None:
         """Sleep until min_interval has elapsed since last call to this domain."""
         domain = self._extract_domain(url)
+        interval = self._DOMAIN_INTERVALS.get(domain, self.min_interval)
         last = self.domain_last_call.get(domain, 0)
         elapsed = time.time() - last
-        if elapsed < self.min_interval:
-            sleep_time = self.min_interval - elapsed
+        if elapsed < interval:
+            sleep_time = interval - elapsed
             # Preemptive per-domain spacing — NOT a rate-limit error. Logged only
             # under PARLOR_HTTP_DEBUG so normal CI logs aren't a wall of throttle lines.
             if os.getenv("PARLOR_HTTP_DEBUG"):
