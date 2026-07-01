@@ -34,6 +34,15 @@ jobs:
       issues: write # open the pipeline-failure issue on failure
     steps:
       - uses: actions/checkout@v4
+      # Bootstrap the DB before any write (same as etl_daily, PR #43). schema.sql
+      # is fully idempotent (every object is `if not exists`), so a fresh Neon
+      # self-heals instead of dying with UndefinedTable at forge time. psql ships
+      # on ubuntu-latest. No DATABASE_URL ⇒ DB-less mode, skip.
+      - name: Apply schema (idempotent)
+        if: ${{ env.DATABASE_URL != '' }}
+        run: psql "$DATABASE_URL" -f db/schema.sql
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
@@ -48,14 +57,12 @@ jobs:
           COUNT: ${{ github.event.inputs.count || '40' }}
         run: python pipeline/wikipedia_ingest.py --hard "$COUNT" --random 0
       - name: Re-forge questions + daily board
-        # same health floor as etl_daily: never re-export from a collapsed forge
-        run: python pipeline/question_forge.py --min-questions 100
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        # same health floor as etl_daily: never re-export from a collapsed forge.
+        # --from-bronze: forge from the committed bronze (source of truth), not a
+        # partially-populated Neon — same reason as etl_daily's publish job.
+        run: python pipeline/question_forge.py --min-questions 100 --from-bronze
       - name: Refresh committed seed bank
-        run: python pipeline/export_seed.py
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: python pipeline/export_seed.py --from-bronze
       - name: Verify exported seed bank before committing
         # gates the commit, not just reports after the fact — a DB-less export
         # built from a single-source bronze (e.g. wikipedia-only) must never
