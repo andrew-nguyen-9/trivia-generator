@@ -1,0 +1,76 @@
+# puzzles_daily — Séance + Ladder (Climb) archives, split out of etl_daily.
+#
+# These two rooms are deterministic daily logic puzzles (date-seeded via lib/rng
+# `daySeed`) pre-generated and upserted to Neon. They read NOTHING from the
+# question bank — no bronze, no dbt marts, no facts/questions — so they have no
+# business sharing etl_daily's extract→transform→publish DAG, its bank-writer
+# concurrency group, or its failure notifier. Coupling them there meant a numpy
+# bug in the transform step turned the whole run red and made the puzzle rooms
+# look broken when they were fine. Split so puzzle health is independent.
+#
+# Two modes, zero config: with a DATABASE_URL secret it writes the archives;
+# without one the generate step is skipped (rooms stay dark — these two rooms
+# have no offline/seed fallback by design).
+name: puzzles_daily
+
+on:
+  # Deterministic + 14-day lookahead, so once a day is plenty (the old etl_daily
+  # cadence ran this up to 8×/day for no benefit — idempotent upserts of the same
+  # rows). Manual dispatch for backfills.
+  schedule:
+    - cron: "0 5 * * *" # daily, 05:00 UTC
+  workflow_dispatch: {}
+
+# Own group — puzzles write seance_puzzles/ladder_puzzles, never the question
+# bank, so they must NOT serialize behind etl_daily/wiki_hard. Still serialize
+# puzzle runs against each other so two can't upsert the same rows concurrently.
+concurrency:
+  group: puzzle-writer
+  cancel-in-progress: false
+
+jobs:
+  puzzles:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write # open the puzzle-failure issue on failure
+    # `secrets` can't be used in a step `if:` — hoist to job env, gate on env below.
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      # Bootstrap the DB before any write. schema.sql is fully idempotent (every
+      # object is `if not exists`), so a fresh Neon self-heals the puzzle tables
+      # instead of dying with UndefinedTable. psql ships on ubuntu-latest.
+      - name: Apply schema (idempotent)
+        if: ${{ env.DATABASE_URL != '' }}
+        run: psql "$DATABASE_URL" -f db/schema.sql
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+        working-directory: frontend
+      - name: Generate + archive Séance & Ladder puzzles (today + 14 days)
+        if: ${{ env.DATABASE_URL != '' }}
+        working-directory: frontend
+        run: npm run puzzles:generate
+      - name: Open or update the puzzle-failure issue
+        if: failure()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          WORKFLOW: ${{ github.workflow }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          gh label create puzzles-failure --color B60205 \
+            --description "Séance/Ladder puzzle generation failed" --force --repo "$REPO" || true
+          body="\`${WORKFLOW}\` failed. Run: ${RUN_URL}"
+          existing=$(gh issue list --repo "$REPO" --label puzzles-failure \
+            --state open --limit 1 --json number --jq '.[0].number')
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --repo "$REPO" --body "$body"
+          else
+            gh issue create --repo "$REPO" --title "🔮 ${WORKFLOW} puzzle generation failed" \
+              --label puzzles-failure --body "$body"
+          fi
