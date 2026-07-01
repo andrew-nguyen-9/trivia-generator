@@ -182,13 +182,17 @@ jobs:
       - name: Forge questions + daily board
         # --min-questions: health floor (baseline ~335). A starved ingest forges
         # near-empty; fail loudly instead of letting export_seed keep the stale bank.
-        run: python pipeline/question_forge.py --min-questions 100
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        #
+        # --from-bronze: forge from the COMPLETE bronze artifact downloaded above,
+        # NOT from Neon. The DB is bootstrapped fresh each run and only holds what
+        # upserted successfully, so forging from it produced a starved, music-less
+        # bank (0 audio rounds) that selftest then rightly refused to commit. Bronze
+        # is this repo's source of truth ("the repo is the database"); forge from it.
+        run: python pipeline/question_forge.py --min-questions 100 --from-bronze
       - name: Refresh committed seed bank
-        run: python pipeline/export_seed.py
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        # --from-bronze: re-forge the export from the same complete bronze (mirrors
+        # the forge step above); never read a partially-populated Neon.
+        run: python pipeline/export_seed.py --from-bronze
       - name: Verify exported seed bank before committing
         run: python pipeline/selftest.py
       - name: Commit bronze layer + refreshed seed bank
