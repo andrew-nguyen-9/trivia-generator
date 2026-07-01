@@ -1,6 +1,7 @@
-// All data access lives here (house convention). Every helper tries the database
-// (Neon) first and silently falls back to the committed seed bank, so the app
-// works from `git clone` with zero env vars.
+// All data access lives here (house convention). The question bank serves from the
+// committed seed bank (forged from bronze, the repo's source of truth). The puzzle
+// rooms (Séance/Climb) read their nightly-archived Neon tables and fall back to pure
+// on-the-fly generation. Either way the app works from `git clone` with zero env vars.
 
 import { unstable_cache } from "next/cache";
 import seed from "../public/seed-questions.json";
@@ -19,22 +20,13 @@ function dayIndexOf(day: string): number {
   return Math.floor(Date.parse(day + "T00:00:00Z") / 86_400_000);
 }
 
+// Questions serve from the committed seed bank, not Neon. The ETL forges the bank
+// from bronze (this repo's source of truth) and commits seed-questions.json every
+// run — the fresh, tested, canonical set — which redeploys the site. The forge no
+// longer upserts the `questions` table (etl_daily runs `--from-bronze`), so reading
+// Neon here would serve stale rows. Puzzle rooms (Séance/Climb) still read their own
+// nightly-archived Neon tables below; only the question bank is seed-canonical.
 export async function getQuestionsByType(qtype: QType): Promise<Question[]> {
-  const sql = getDb();
-  if (sql) {
-    try {
-      const rows = await sql`
-        select qtype, category, difficulty, prompt, correct, choices, year,
-               value_a, value_b, subject_a, subject_b, unit, lat, lng,
-               image_url, source_url, audio_url, melody, groups, clues, candidates
-        from questions
-        where qtype = ${qtype}
-        limit 500`;
-      if (rows.length > 0) return rows as Question[];
-    } catch {
-      // network/db hiccup → fall through to the bundled seed bank, never throw
-    }
-  }
   return SEED_BANK.filter((q) => q.qtype === qtype);
 }
 
