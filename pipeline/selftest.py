@@ -463,6 +463,17 @@ def main() -> None:
         check("compaction keeps original timestamp for unchanged facts",
               row_a["_ingested_at"] == "t1")
 
+    # ── upsert batch-dedupe (§ CardinalityViolation guard) ───────────────────
+    # A single INSERT ... ON CONFLICT can't touch the same row twice; _upsert must
+    # collapse same-key rows before sending, keeping the last (the DO UPDATE winner).
+    from common import _dedupe_rows
+    deduped = _dedupe_rows(
+        [{"content_hash": "a", "v": 1}, {"content_hash": "a", "v": 2},
+         {"content_hash": "b", "v": 3}], "content_hash")
+    check("upsert dedupes a batch by conflict key — keeps last",
+          [r["content_hash"] for r in deduped] == ["a", "b"]
+          and next(r for r in deduped if r["content_hash"] == "a")["v"] == 2)
+
     # ── bronze→staging source contract (§3.11) ───────────────────────────────
     # The dbt accepted_values test on stg_facts.source is a hand-kept allow-list
     # that gates the whole publish. When a new ingest writes a source the list

@@ -564,6 +564,14 @@ def get_db():
     return conn
 
 
+def _dedupe_rows(rows: list[dict], conflict: str) -> list[dict]:
+    """Collapse rows sharing the conflict key, keeping the last occurrence.
+    `conflict` is the ON CONFLICT target — one column or a comma-separated list."""
+    keys = [c.strip() for c in conflict.split(",")]
+    deduped = {tuple(r.get(k) for k in keys): r for r in rows}
+    return list(deduped.values())
+
+
 def _upsert(conn, table: str, cols: tuple[str, ...], jsonb: set[str],
             rows: list[dict], conflict: str) -> int:
     """Generic INSERT ... ON CONFLICT DO UPDATE keyed on `conflict`.
@@ -574,6 +582,13 @@ def _upsert(conn, table: str, cols: tuple[str, ...], jsonb: set[str],
     if conn is None or not rows:
         return 0
     from psycopg2.extras import Json, execute_values
+
+    # Dedupe the batch by the conflict key first. A single INSERT ... ON CONFLICT
+    # cannot touch the same row twice — Postgres raises CardinalityViolation ("cannot
+    # affect row a second time") if two rows share the conflict key. Ingests can emit
+    # dupes within one batch (e.g. jService returning the same clue twice), so collapse
+    # them here, keeping the last occurrence to match the DO UPDATE overwrite below.
+    rows = _dedupe_rows(rows, conflict)
 
     updates = ", ".join(f"{c} = excluded.{c}" for c in cols if c not in conflict.split(","))
     sql = (
